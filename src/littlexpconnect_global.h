@@ -1,0 +1,12 @@
+#ifndef LITTLEXPCONNECT_GLOBAL_H
+#define LITTLEXPCONNECT_GLOBAL_H
+
+#include <QtCore/qglobal.h>
+
+#if defined(LITTLEXPCONNECT_LIBRARY)
+#  define LXPC_EXPORT Q_DECL_EXPORT
+#else
+#  define LXPC_EXPORT Q_DECL_IMPORT
+#endif
+
+#endif // LITTLEXPCONNECT_GLOBAL_H
