@@ -17,22 +17,56 @@
 
 #include "dataref.h"
 
+#include "atools.h"
+
 #include <QDebug>
 
-DataRef::DataRef(const QString& dataRefName, QVariant::Type typeParam, int dataRefArraySize)
-  : name(dataRefName), type(typeParam), arraySize(dataRefArraySize)
+DataRef::DataRef(DataRefPtrVector& refs, const QString& dataRefName)
+  : name(dataRefName)
 {
-  dataRef = XPLMFindDataRef(dataRefName.toLatin1());
-  dataRefType = XPLMGetDataRefTypes(dataRef);
+  refs.append(this);
+}
+
+DataRef::DataRef(const QString& dataRefName)
+  : name(dataRefName)
+{
+}
+
+DataRef::DataRef()
+{
+
+}
+
+bool DataRef::resolve()
+{
+  dataRef = XPLMFindDataRef(name.toLatin1());
 
   if(dataRef == NULL)
+  {
     qWarning() << "Cannot find dataref" << name;
+    return false;
+  }
+
+  dataRefType = XPLMGetDataRefTypes(dataRef);
+  return true;
+}
+
+bool DataRef::isValid() const
+{
+  return !name.isEmpty() && dataRef != NULL && dataRefType != xplmType_Unknown;
+}
+
+void DataRef::clear()
+{
+  name.clear();
+  dataRef = NULL;
+  dataRefType = xplmType_Unknown;
 }
 
 QVector<int> DataRef::valueIntArr() const
 {
   int size = XPLMGetDatavi(dataRef, nullptr, 0, 0);
-  QVector<int> retval(size);
+  IntVector retval(size);
   XPLMGetDatavi(dataRef, retval.data(), 0, size);
   return retval;
 }
@@ -40,7 +74,7 @@ QVector<int> DataRef::valueIntArr() const
 QVector<float> DataRef::valueFloatArr() const
 {
   int size = XPLMGetDatavf(dataRef, nullptr, 0, 0);
-  QVector<float> retval(size);
+  FloatVector retval(size);
   XPLMGetDatavf(dataRef, retval.data(), 0, size);
   return retval;
 }
@@ -53,14 +87,14 @@ QByteArray DataRef::valueByteArr() const
   return retval;
 }
 
-void DataRef::valueIntArr(QVector<int>& array) const
+void DataRef::valueIntArr(IntVector& array) const
 {
   int size = XPLMGetDatavi(dataRef, nullptr, 0, 0);
   array.resize(size);
   XPLMGetDatavi(dataRef, array.data(), 0, size);
 }
 
-void DataRef::valueFloatArr(QVector<float>& array) const
+void DataRef::valueFloatArr(FloatVector& array) const
 {
   int size = XPLMGetDatavf(dataRef, nullptr, 0, 0);
   array.resize(size);
@@ -77,4 +111,38 @@ void DataRef::valueByteArr(QByteArray& bytes) const
 QString DataRef::valueString() const
 {
   return QString(valueByteArr());
+}
+
+int DataRef::valueIntArrSum() const
+{
+  int sumValue = 0.f;
+  for(int val : valueIntArr())
+    sumValue += val;
+  return sumValue;
+}
+
+float DataRef::valueFloatArrSum() const
+{
+  float sumValue = 0.f;
+  for(float val : valueFloatArr())
+    sumValue += val;
+  return sumValue;
+}
+
+int DataRef::valueIntArrAvg() const
+{
+  int sumValue = 0.f;
+  IntVector arr = valueIntArr();
+  for(float val : arr)
+    sumValue += val;
+  return atools::roundToInt(static_cast<float>(sumValue) / static_cast<float>(arr.size()));
+}
+
+float DataRef::valueFloatArrAvg() const
+{
+  float sumValue = 0.f;
+  FloatVector arr = valueFloatArr();
+  for(float val : arr)
+    sumValue += val;
+  return sumValue / arr.size();
 }

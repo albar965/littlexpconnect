@@ -69,11 +69,12 @@ private:
   void destroyNavServer();
   void createServerThread();
   void deleteServerThread();
+  void initDataRefs();
 
   // Navserver that waits and accepts tcp connections. Starts a NavServerWorker in a thread for each connection.
   atools::fs::ns::NavServer *navServer = nullptr;
 
-  // Runs in background and fetches data from simulator - signals are send to NavServerWorker threads
+  // Runs in background and fetches data from simulator - signals are sent to NavServerWorker threads
   atools::fs::sc::DataReaderThread *dataReader = nullptr;
 
   atools::fs::sc::ConnectHandler *connectHandler = nullptr;

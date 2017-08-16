@@ -25,12 +25,24 @@ extern "C" {
 #include "XPLMDataAccess.h"
 }
 
+class DataRef;
+
 typedef QVector<float> FloatVector;
 typedef QVector<int> IntVector;
+typedef QVector<DataRef *> DataRefPtrVector;
 
 class DataRef
 {
-  DataRef(const QString& dataRefName, QVariant::Type typeParam, int dataRefArraySize = 0);
+public:
+  DataRef(DataRefPtrVector& refs, const QString& dataRefName);
+  DataRef(const QString& dataRefName);
+  DataRef();
+
+  bool setRef(const QString& dataRefName);
+  bool resolve();
+
+  bool isValid() const;
+  void clear();
 
   float valueFloat() const
   {
@@ -49,20 +61,33 @@ class DataRef
 
   QString valueString() const;
 
+  int valueIntArrSum() const;
+  float valueFloatArrSum() const;
+  int valueIntArrAvg() const;
+  float valueFloatArrAvg() const;
+
   IntVector valueIntArr() const;
   FloatVector valueFloatArr() const;
   QByteArray valueByteArr() const;
 
-  void valueIntArr(QVector<int>& array) const;
-  void valueFloatArr(QVector<float>& array) const;
+  void valueIntArr(IntVector& array) const;
+  void valueFloatArr(FloatVector& array) const;
   void valueByteArr(QByteArray& bytes) const;
+
+  XPLMDataTypeID getDataRefType() const
+  {
+    return dataRefType;
+  }
+
+  const QString& getName() const
+  {
+    return name;
+  }
 
 private:
   XPLMDataRef dataRef = NULL;
   XPLMDataTypeID dataRefType = 0;
   QString name;
-  QVariant::Type type;
-  int arraySize = 0;
 };
 
 #endif // LITTLEXPC_DATAREF_H
