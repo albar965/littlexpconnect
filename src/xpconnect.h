@@ -44,20 +44,44 @@ namespace xpc {
 
 class ServerThread;
 
+/*
+ * Handles the data fetching thread, the TCP server and dataref initialization and also contains the
+ * callback which will fetch the data.
+ *
+ * Starts a main server thread with an active event loop that runs the TCP server and also starts the data fetcher thread.
+ * The TCP server again starts a worker thread for each connection.
+ *
+ * The data reader sends signals to all TCP workers if a data package was read.
+ *
+ * Data is taken from datarefs by the periodically called flightLoopCallback.
+ */
 class XpConnect
 {
 public:
   ~XpConnect();
 
+  /* Create and instance but does nothing else. Not thread safe. */
   static XpConnect& instance();
+
+  /* delete instance an all servers and threads */
   void shutdown();
 
+  /* Starts main server thread, all threads and the TCP server */
   void pluginEnable();
+
+  /* Shuts everything down */
   void pluginDisable();
 
+  /* Called by the XPLM API on the main thread context of X-Plane. Copies the data from datarefs quickly to
+   *  a temp SimConnectData object currentData. */
   float flightLoopCallback(float inElapsedSinceLastCall, float inElapsedTimeSinceLastFlightLoop, int inCounter);
+
+  /* Plugin received a message. Called on the main thread context of X-Plane.*/
   void receiveMessage(XPLMPluginID inFromWho, long inMessage, void *inParam);
 
+  /* Callback for the XpConnectHandler which locks the mutex and copies the data from the temp
+   * SimConnectData object currentData. Called on the thread context of the DataReaderThread.
+   *  returns true if something was copied. */
   bool copyData(atools::fs::sc::SimConnectData& data, int radiusKm, atools::fs::sc::Options options);
 
 private:
@@ -65,25 +89,36 @@ private:
 
   XpConnect();
 
+  /* Create and delete DataReaderThread and the TCP server */
   void createNavServer();
-  void destroyNavServer();
+  void deleteNavServer();
+
+  /* Create and delete the main event loop thread running all others */
   void createServerThread();
   void deleteServerThread();
+
+  /* Initilaize the datarefs and print a warning if something is wrong. */
   void initDataRefs();
 
-  // Navserver that waits and accepts tcp connections. Starts a NavServerWorker in a thread for each connection.
+  /* Navserver that waits and accepts tcp connections. Starts a NavServerWorker in a thread for each connection */
   atools::fs::ns::NavServer *navServer = nullptr;
 
-  // Runs in background and fetches data from simulator - signals are sent to NavServerWorker threads
+  /* Runs in background and fetches data from simulator - signals are sent to NavServerWorker threads */
   atools::fs::sc::DataReaderThread *dataReader = nullptr;
 
+  /* Copies data and provides simulator status information */
   atools::fs::sc::ConnectHandler *connectHandler = nullptr;
 
+  /* Main thread with event queue needed by the TCP server */
   ServerThread *serverThread = nullptr;
 
+  /* Temp storage for the data copied from the datarefs to avoid unneded locking. */
   atools::fs::sc::SimConnectData currentData;
 
+  /* Nedded to sync between flightLoopCallback on X-Plane main thread and copyData on DataReaderThread context. */
   QMutex copyDataMutex;
+
+  /* Singleton instance */
   static XpConnect *object;
 };
 

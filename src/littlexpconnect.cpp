@@ -38,12 +38,18 @@ extern "C" {
 
 #include "gui/consoleapplication.h"
 
+/*
+ * This file contains the C functions needed by the XPLM API. All functionality will be delegated to
+ * the singleton XpConnect.
+ */
+
 float flightLoopCallback(float inElapsedSinceLastCall, float inElapsedTimeSinceLastFlightLoop, int inCounter,
                          void *inRefcon);
 
-/* Application object for event queue */
+/* Application object for event queue in server thread */
 static atools::gui::ConsoleApplication *app = nullptr;
 
+/* Called on simulator startup */
 PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc)
 {
   qDebug() << "LittleXpConnect" << Q_FUNC_INFO;
@@ -59,7 +65,7 @@ PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc)
   app->setApplicationName("Little XpConnect");
   app->setOrganizationName("ABarthel");
   app->setOrganizationDomain("abarthel.org");
-  app->setApplicationVersion("0.0.1.develop");
+  app->setApplicationVersion("0.3.0.develop");
 
   // Initialize logging and force logfiles into the system or user temp directory
   atools::logging::LoggingHandler::initializeForTemp(":/littlexpconnect/resources/config/logging.cfg");
@@ -71,12 +77,14 @@ PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc)
   strcpy(outSig, "ABarthel.LittleXpConnect.Connect");
   strcpy(outDesc, "Connects Little Navmap to X-Plane.");
 
-  // Create object but do not start it yet
+  // Create object instance but do not start it yet
   xpc::XpConnect::instance();
 
+  // Always successfull
   return 1;
 }
 
+/* Called when simulator terminates */
 PLUGIN_API void XPluginStop(void)
 {
   qDebug() << "LittleXpConnect" << Q_FUNC_INFO;
@@ -84,42 +92,49 @@ PLUGIN_API void XPluginStop(void)
   atools::logging::LoggingHandler::shutdown();
 }
 
+/* Enable plugin - can be called more than once during a simulator session */
 PLUGIN_API int XPluginEnable(void)
 {
   qDebug() << "LittleXpConnect" << Q_FUNC_INFO;
 
-  // Register callback into method and start all threads and the TCP server
+  // Register callback into method
   XPLMRegisterFlightLoopCallback(flightLoopCallback, 5.f, &xpc::XpConnect::instance());
+
+  // Start all threads and the TCP server
   xpc::XpConnect::instance().pluginEnable();
 
   return 1;
 }
 
+/* Disable plugin - can be called more than once during a simulator session */
 PLUGIN_API void XPluginDisable(void)
 {
   qDebug() << "LittleXpConnect" << Q_FUNC_INFO;
 
-  // Unregister call back and shut down all threads and the server
+  // Unregister call back
   XPLMUnregisterFlightLoopCallback(flightLoopCallback, &xpc::XpConnect::instance());
+
+  // Shut down all threads and the TCP server
   xpc::XpConnect::instance().pluginDisable();
 }
 
+/* called on special messages like aircraft loaded, etc. */
 PLUGIN_API void XPluginReceiveMessage(XPLMPluginID inFromWho, long inMessage, void *inParam)
 {
-  // Pass to object
+  // Pass call to singleton
   xpc::XpConnect::instance().receiveMessage(inFromWho, inMessage, inParam);
 }
 
 float flightLoopCallback(float inElapsedSinceLastCall, float inElapsedTimeSinceLastFlightLoop, int inCounter,
                          void *inRefcon)
 {
-  // Use provided object pointer since it is faster
+  // Use provided object pointer since it is faster and return seconds to next activation
   return static_cast<xpc::XpConnect *>(inRefcon)->flightLoopCallback(inElapsedSinceLastCall,
                                                                      inElapsedTimeSinceLastFlightLoop, inCounter);
 }
 
 // =======================================================================================
-// LittleXpConnectTest
+// LittleXpConnectTest mock up
 // =======================================================================================
 
 void LittleXpConnectTest::start()

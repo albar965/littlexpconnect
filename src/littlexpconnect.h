@@ -20,7 +20,7 @@
 
 #include "littlexpconnect_global.h"
 
-/* Simple test mock up*/
+/* Simple test mock up to be called from outside */
 class LXPC_EXPORT LittleXpConnectTest
 {
 

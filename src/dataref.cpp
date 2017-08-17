@@ -24,6 +24,7 @@
 DataRef::DataRef(DataRefPtrVector& refs, const QString& dataRefName)
   : name(dataRefName)
 {
+  // Add to array but do find it yet (still invalid)
   refs.append(this);
 }
 
@@ -37,35 +38,29 @@ DataRef::DataRef()
 
 }
 
-bool DataRef::resolve()
+bool DataRef::find()
 {
   dataRef = XPLMFindDataRef(name.toLatin1());
-
   if(dataRef == NULL)
+    qWarning() << Q_FUNC_INFO << "Cannot find" << name;
+  else
   {
-    qWarning() << "Cannot find dataref" << name;
-    return false;
+    dataRefType = XPLMGetDataRefTypes(dataRef);
+    if(dataRefType == xplmType_Unknown)
+      qWarning() << Q_FUNC_INFO << name << "has unexpected type xplmType_Unknown";
   }
 
-  dataRefType = XPLMGetDataRefTypes(dataRef);
-  return true;
-}
-
-bool DataRef::isValid() const
-{
-  return !name.isEmpty() && dataRef != NULL && dataRefType != xplmType_Unknown;
-}
-
-void DataRef::clear()
-{
-  name.clear();
-  dataRef = NULL;
-  dataRefType = xplmType_Unknown;
+  return isValid();
 }
 
 QVector<int> DataRef::valueIntArr() const
 {
+  checkType(xplmType_IntArray);
+
+  // Get size first by calling with null pointer
   int size = XPLMGetDatavi(dataRef, nullptr, 0, 0);
+
+  // Get the array contents
   IntVector retval(size);
   XPLMGetDatavi(dataRef, retval.data(), 0, size);
   return retval;
@@ -73,7 +68,12 @@ QVector<int> DataRef::valueIntArr() const
 
 QVector<float> DataRef::valueFloatArr() const
 {
+  checkType(xplmType_FloatArray);
+
+  // Get size first by calling with null pointer
   int size = XPLMGetDatavf(dataRef, nullptr, 0, 0);
+
+  // Get the array contents
   FloatVector retval(size);
   XPLMGetDatavf(dataRef, retval.data(), 0, size);
   return retval;
@@ -81,7 +81,12 @@ QVector<float> DataRef::valueFloatArr() const
 
 QByteArray DataRef::valueByteArr() const
 {
+  checkType(xplmType_Data);
+
+  // Get size first by calling with null pointer
   int size = XPLMGetDatab(dataRef, nullptr, 0, 0);
+
+  // Get the array contents
   QByteArray retval(size, 0);
   XPLMGetDatab(dataRef, retval.data(), 0, size);
   return retval;
@@ -89,6 +94,8 @@ QByteArray DataRef::valueByteArr() const
 
 void DataRef::valueIntArr(IntVector& array) const
 {
+  checkType(xplmType_IntArray);
+
   int size = XPLMGetDatavi(dataRef, nullptr, 0, 0);
   array.resize(size);
   XPLMGetDatavi(dataRef, array.data(), 0, size);
@@ -96,6 +103,8 @@ void DataRef::valueIntArr(IntVector& array) const
 
 void DataRef::valueFloatArr(FloatVector& array) const
 {
+  checkType(xplmType_FloatArray);
+
   int size = XPLMGetDatavf(dataRef, nullptr, 0, 0);
   array.resize(size);
   XPLMGetDatavf(dataRef, array.data(), 0, size);
@@ -108,9 +117,10 @@ void DataRef::valueByteArr(QByteArray& bytes) const
   XPLMGetDatab(dataRef, bytes.data(), 0, size);
 }
 
-QString DataRef::valueString() const
+void DataRef::checkType(int type) const
 {
-  return QString(valueByteArr());
+  if((dataRefType & type) == 0)
+    qWarning() << Q_FUNC_INFO << "Type mismatch" << dataRefType << "does not cover" << type;
 }
 
 int DataRef::valueIntArrSum() const
@@ -127,22 +137,4 @@ float DataRef::valueFloatArrSum() const
   for(float val : valueFloatArr())
     sumValue += val;
   return sumValue;
-}
-
-int DataRef::valueIntArrAvg() const
-{
-  int sumValue = 0.f;
-  IntVector arr = valueIntArr();
-  for(float val : arr)
-    sumValue += val;
-  return atools::roundToInt(static_cast<float>(sumValue) / static_cast<float>(arr.size()));
-}
-
-float DataRef::valueFloatArrAvg() const
-{
-  float sumValue = 0.f;
-  FloatVector arr = valueFloatArr();
-  for(float val : arr)
-    sumValue += val;
-  return sumValue / arr.size();
 }

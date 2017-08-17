@@ -31,41 +31,69 @@ typedef QVector<float> FloatVector;
 typedef QVector<int> IntVector;
 typedef QVector<DataRef *> DataRefPtrVector;
 
+/*
+ * Hides the XPLM data ref accessor methods and provides methods for easier access than the C interface.
+ *
+ * The accessor methods do not check if the type is valid. That has to be done by the user.
+ */
 class DataRef
 {
 public:
+  /*
+   * Initializes a dataref but does not call the find method yet.
+   * DataRef is not valid yet after construction.
+   *
+   * @param refs Object adds itself to the list when constructed.
+   * @param name Path/name of the dataref like "sim/aircraft/view/acf_tailnum".
+   */
   DataRef(DataRefPtrVector& refs, const QString& dataRefName);
   DataRef(const QString& dataRefName);
   DataRef();
 
-  bool setRef(const QString& dataRefName);
-  bool resolve();
+  /*
+   * Calls the find method and return true if that dataref name was valid and found.
+   * Prints a warning into the log if the ref could not be found.
+   */
+  bool find();
 
-  bool isValid() const;
-  void clear();
+  /* returns true if ref was found. */
+  bool isValid() const
+  {
+    return !name.isEmpty() && dataRef != NULL && dataRefType != xplmType_Unknown;
+  }
 
+  /* get float value or 0 if invalid */
   float valueFloat() const
   {
+    checkType(xplmType_Float);
     return XPLMGetDataf(dataRef);
   }
 
+  /* get double value or 0 if invalid */
   double valueDouble() const
   {
+    checkType(xplmType_Double);
     return XPLMGetDatad(dataRef);
   }
 
+  /* get int value or 0 if invalid */
   int valueInt() const
   {
+    checkType(xplmType_Int);
     return XPLMGetDatai(dataRef);
   }
 
-  QString valueString() const;
+  /* get string from an UTF-8 byte array value or empty string if invalid */
+  QString valueString() const
+  {
+    return QString(valueByteArr());
+  }
 
+  /* Get the sum of all values in an array. */
   int valueIntArrSum() const;
   float valueFloatArrSum() const;
-  int valueIntArrAvg() const;
-  float valueFloatArrAvg() const;
 
+  /* Get arrays. The length of the array is check before  retrieving the values.*/
   IntVector valueIntArr() const;
   FloatVector valueFloatArr() const;
   QByteArray valueByteArr() const;
@@ -74,17 +102,21 @@ public:
   void valueFloatArr(FloatVector& array) const;
   void valueByteArr(QByteArray& bytes) const;
 
+  /* Get the type of the dataref after calling find */
   XPLMDataTypeID getDataRefType() const
   {
     return dataRefType;
   }
 
+  /* Name of the dataref as passed to the constructor */
   const QString& getName() const
   {
     return name;
   }
 
 private:
+  void checkType(int type) const;
+
   XPLMDataRef dataRef = NULL;
   XPLMDataTypeID dataRefType = 0;
   QString name;

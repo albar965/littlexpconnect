@@ -53,27 +53,36 @@ namespace xpc {
 
 XpConnect *XpConnect::object = nullptr;
 
+// DataRefs ======================================================
 namespace dr {
+// Contains all datarefs for simple initialization
 static DataRefPtrVector dataRefs;
 
 static DataRef simBuild(dataRefs, "sim/version/sim_build_string");
 static DataRef xplmBuild(dataRefs, "sim/version/xplm_build_string");
+static DataRef simPaused(dataRefs, "sim/time/paused");
 
 // SimConnectUserAircraft
-static DataRef windSpeedKts(dataRefs, "sim/weather/wind_speed_kt");
-static DataRef windDirectionDegT(dataRefs, "sim/weather/wind_direction_degt");
+static DataRef windSpeedKts(dataRefs, "sim/cockpit2/gauges/indicators/wind_speed_kts");
+static DataRef windDirectionDegMag(dataRefs, "sim/cockpit2/gauges/indicators/wind_heading_deg_mag");
 
+// Temperatures
 // Static air temperature (SAT) is also called: outside air temperature (OAT) or true air temperature
+// Lower than TAT
 static DataRef ambientTemperatureCelsius(dataRefs, "sim/weather/temperature_ambient_c");
+
 // Total air temperature (TAT) is also called: indicated air temperature (IAT) or ram air temperature (RAT)
-static DataRef totalAirTemperatureCelsius(dataRefs, "sim/cockpit2/temperature/outside_air_temp_degc");
+// higher than SAT
+static DataRef totalAirTemperatureCelsius(dataRefs, "sim/weather/temperature_le_c");
 
 static DataRef seaLevelPressureMbar(dataRefs, "sim/physics/earth_pressure_p");
 
+// Ice
 static DataRef pitotIcePercent(dataRefs, "sim/flightmodel/failures/pitot_ice");
 static DataRef structuralIcePercent(dataRefs, "sim/flightmodel/failures/frm_ice");
 static DataRef structuralIcePercent2(dataRefs, "sim/flightmodel/failures/frm_ice2");
 
+// Weight
 static DataRef airplaneTotalWeightKgs(dataRefs, "sim/flightmodel/weight/m_total");
 static DataRef airplaneMaxGrossWeightKgs(dataRefs, "sim/aircraft/weight/acf_m_max");
 static DataRef airplaneEmptyWeightKgs(dataRefs, "sim/aircraft/weight/acf_m_empty");
@@ -90,8 +99,9 @@ static DataRef ambientVisibilityMeter(dataRefs, "sim/weather/visibility_reported
 static DataRef trackMagDeg(dataRefs, "sim/cockpit2/gauges/indicators/ground_track_mag_pilot");
 // static DataRef trackTrueDeg(dataRefs, ""); value calculated
 
-static DataRef localTimeSec(dataRefs, "sim/time/local_time_sec");
+// Date and time
 static DataRef localDateDays(dataRefs, "sim/time/local_date_days");
+static DataRef localTimeSec(dataRefs, "sim/time/local_time_sec");
 static DataRef zuluTimeSec(dataRefs, "sim/time/zulu_time_sec");
 
 // SimConnectAircraft
@@ -99,13 +109,17 @@ static DataRef airplaneReg(dataRefs, "sim/aircraft/view/acf_tailnum");
 static DataRef airplaneTitle(dataRefs, "sim/aircraft/view/acf_descrip");
 static DataRef airplaneType(dataRefs, "sim/aircraft/view/acf_ICAO");
 
+// Position and more
 static DataRef latPositionDeg(dataRefs, "sim/flightmodel/position/latitude");
 static DataRef lonPositionDeg(dataRefs, "sim/flightmodel/position/longitude");
 static DataRef indicatedSpeedKts(dataRefs, "sim/flightmodel/position/indicated_airspeed");
 static DataRef trueSpeedKts(dataRefs, "sim/flightmodel/position/true_airspeed");
 static DataRef groundSpeedKts(dataRefs, "sim/flightmodel/position/groundspeed");
+
 static DataRef indicatedAltitudeFt(dataRefs, "sim/cockpit2/gauges/indicators/altitude_ft_pilot");
-static DataRef elevPositionMeter(dataRefs, "sim/flightmodel/position/elevation");
+static DataRef actualAltitudeMeter(dataRefs, "sim/flightmodel/position/elevation");
+static DataRef aglAltitudeFt(dataRefs, "sim/cockpit2/gauges/indicators/radio_altimeter_height_ft_pilot");
+
 static DataRef headingTrueDeg(dataRefs, "sim/flightmodel/position/true_psi");
 static DataRef headingMagDeg(dataRefs, "sim/flightmodel/position/mag_psi");
 static DataRef machSpeed(dataRefs, "sim/flightmodel/misc/machno");
@@ -136,6 +150,9 @@ enum XpEngineType
 // ServerThread
 // ====================================================================================
 
+/*
+ * Main thread running everything else. Contains the event loop.
+ */
 class ServerThread :
   public QThread
 {
@@ -161,7 +178,7 @@ void ServerThread::run()
 {
   XpConnect::instance().createNavServer();
   exec();
-  XpConnect::instance().destroyNavServer();
+  XpConnect::instance().deleteNavServer();
 }
 
 // ====================================================================================
@@ -215,6 +232,7 @@ void XpConnect::pluginEnable()
 
   qInfo() << "Simulator build" << dr::simBuild.valueString() << "XPLM build" << dr::xplmBuild.valueString();
 
+  // Start main server thread which will spawn everything else
   deleteServerThread();
   serverThread = new ServerThread();
   serverThread->start();
@@ -238,41 +256,46 @@ float XpConnect::flightLoopCallback(float inElapsedSinceLastCall, float inElapse
   // << "inCounter" << inCounter;
 
   {
-    QMutexLocker locker(&copyDataMutex);
-    atools::fs::sc::SimConnectUserAircraft& userAircraft = currentData.userAircraft;
+    // Copy into a temporary object first to make the sync area smaller and get this quickly done
+    atools::fs::sc::SimConnectData data;
+    atools::fs::sc::SimConnectUserAircraft& userAircraft = data.userAircraft;
 
-    userAircraft.altitudeAboveGroundFt = atools::fs::sc::SC_INVALID_FLOAT; // not available - disable display
-    userAircraft.groundAltitudeFt = atools::fs::sc::SC_INVALID_FLOAT; // not available - disable display
+    userAircraft.magVarDeg = dr::magVarDeg.valueFloat();
+
+    // Wind and ambient parameters
     userAircraft.windSpeedKts = dr::windSpeedKts.valueFloat();
-    userAircraft.windDirectionDegT = dr::windDirectionDegT.valueFloat();
+    userAircraft.windDirectionDegT = dr::windDirectionDegMag.valueFloat() - userAircraft.magVarDeg;
     userAircraft.ambientTemperatureCelsius = dr::ambientTemperatureCelsius.valueFloat();
     userAircraft.totalAirTemperatureCelsius = dr::totalAirTemperatureCelsius.valueFloat();
-    userAircraft.seaLevelPressureMbar = dr::seaLevelPressureMbar.valueFloat();
+    userAircraft.seaLevelPressureMbar = dr::seaLevelPressureMbar.valueFloat() / 100.f;
+
+    // Ice
     userAircraft.pitotIcePercent = dr::pitotIcePercent.valueFloat() * 100.f;
     userAircraft.structuralIcePercent = (dr::structuralIcePercent.valueFloat() +
                                          dr::structuralIcePercent2.valueFloat()) / 2.f * 100.f;
+
+    // Weight
     userAircraft.airplaneTotalWeightLbs = kgToLbs(dr::airplaneTotalWeightKgs.valueFloat());
     userAircraft.airplaneMaxGrossWeightLbs = kgToLbs(dr::airplaneMaxGrossWeightKgs.valueFloat());
     userAircraft.airplaneEmptyWeightLbs = kgToLbs(dr::airplaneEmptyWeightKgs.valueFloat());
 
+    // Fuel flow in weight
     userAircraft.fuelTotalWeightLbs = kgToLbs(dr::fuelTotalWeightKgs.valueFloat());
-    userAircraft.fuelFlowPPH = kgToLbs(dr::fuelFlowKgSec8.valueFloatArrSum()) * 60.f;
+    userAircraft.fuelFlowPPH = kgToLbs(dr::fuelFlowKgSec8.valueFloatArrSum()) * 3600.f;
 
-    userAircraft.magVarDeg = dr::magVarDeg.valueFloat();
     userAircraft.ambientVisibilityMeter = dr::ambientVisibilityMeter.valueFloat();
-    userAircraft.trackMagDeg = dr::trackMagDeg.valueFloat();
-    userAircraft.trackTrueDeg = userAircraft.trackMagDeg + userAircraft.magVarDeg;
 
     // Build local time and use timezone offset from simulator
+    // X-Plane does not allow to set the year
     QDate localDate = QDate::currentDate();
     localDate.setDate(localDate.year(), 1, 1);
     localDate = localDate.addDays(dr::localDateDays.valueInt());
-    int localTimeSec = dr::localTimeSec.valueInt();
-    int zuluTimeSec = dr::zuluTimeSec.valueInt();
+    int localTimeSec = static_cast<int>(dr::localTimeSec.valueFloat());
+    int zuluTimeSec = static_cast<int>(dr::zuluTimeSec.valueFloat());
     int offsetSeconds = zuluTimeSec - localTimeSec;
 
     QTime localTime = QTime::fromMSecsSinceStartOfDay(localTimeSec * 1000);
-    QDateTime localDateTime(localDate, localTime, Qt::OffsetFromUTC, offsetSeconds);
+    QDateTime localDateTime(localDate, localTime, Qt::OffsetFromUTC, -offsetSeconds);
     userAircraft.localDateTime = localDateTime;
 
     QTime zuluTime = QTime::fromMSecsSinceStartOfDay(zuluTimeSec * 1000);
@@ -288,20 +311,32 @@ float XpConnect::flightLoopCallback(float inElapsedSinceLastCall, float inElapse
     // userAircraft.fromIdent;              // not available
     // userAircraft.toIdent;                // not available
 
-    userAircraft.position = atools::geo::Pos(dr::lonPositionDeg.valueFloat(),
-                                             dr::latPositionDeg.valueFloat(),
-                                             dr::elevPositionMeter.valueFloat());
+    float actualAlt = atools::geo::meterToFeet(dr::actualAltitudeMeter.valueFloat());
+    userAircraft.position =
+      atools::geo::Pos(dr::lonPositionDeg.valueFloat(), dr::latPositionDeg.valueFloat(), actualAlt);
+
+    userAircraft.altitudeAboveGroundFt = dr::aglAltitudeFt.valueFloat();
+    userAircraft.groundAltitudeFt = actualAlt - userAircraft.altitudeAboveGroundFt;
     userAircraft.indicatedAltitudeFt = dr::indicatedAltitudeFt.valueFloat();
+
+    // Heading and track
     userAircraft.headingMagDeg = dr::headingMagDeg.valueFloat();
     userAircraft.headingTrueDeg = dr::headingTrueDeg.valueFloat();
+    userAircraft.trackMagDeg = dr::trackMagDeg.valueFloat();
+    userAircraft.trackTrueDeg = userAircraft.trackMagDeg - userAircraft.magVarDeg;
+
+    // Speed
     userAircraft.indicatedSpeedKts = dr::indicatedSpeedKts.valueFloat();
     userAircraft.trueSpeedKts = dr::trueSpeedKts.valueFloat();
     userAircraft.machSpeed = dr::machSpeed.valueFloat();
     userAircraft.verticalSpeedFeetPerMin = dr::verticalSpeedFeetPerMin.valueFloat();
     userAircraft.groundSpeedKts = dr::groundSpeedKts.valueFloat();
-    userAircraft.modelRadiusFt = 0; // not available - disable display in client
+
+    // Model
+    userAircraft.modelRadiusFt = 0; // not available - disable display in client which will use a default value
     userAircraft.wingSpanFt = 0; // not available- disable display in client
 
+    // Set misc flags
     userAircraft.flags = atools::fs::sc::IS_USER;
     if(dr::onGround.valueInt() > 0)
       userAircraft.flags |= atools::fs::sc::ON_GROUND;
@@ -310,14 +345,19 @@ float XpConnect::flightLoopCallback(float inElapsedSinceLastCall, float inElapse
     // IN_CLOUD = 0x0002, - not available
     // IN_SNOW = 0x0008,  - not available
 
-    userAircraft.category = atools::fs::sc::UNKNOWN; // not available - Disable display of category on client
+    // Category is not available - Disable display of category on client
+    userAircraft.category = atools::fs::sc::UNKNOWN;
     // AIRPLANE, HELICOPTER, BOAT, GROUNDVEHICLE, CONTROLTOWER, SIMPLEOBJECT, VIEWER
 
+    // Value to calculate fuel volume from mass
     float fuelMassToVolDivider = 6.f;
+
+    // Get the engine array
     IntVector engines = dr::engineType8.valueIntArr();
     userAircraft.engineType = atools::fs::sc::UNSUPPORTED;
     // PISTON = 0, JET = 1, NO_ENGINE = 2, HELO_TURBINE = 3, UNSUPPORTED = 4, TURBOPROP = 5
 
+    // Get engine type
     for(int engine : engines)
     {
       dr::XpEngineType type = static_cast<dr::XpEngineType>(engine);
@@ -345,13 +385,21 @@ float XpConnect::flightLoopCallback(float inElapsedSinceLastCall, float inElapse
           break;
       }
       if(userAircraft.engineType != atools::fs::sc::UNSUPPORTED)
+        // Found one - stop here
         break;
     }
 
+    // Calculate fuell volume based on type
     userAircraft.fuelTotalQuantityGallons = userAircraft.fuelTotalWeightLbs / fuelMassToVolDivider;
     userAircraft.fuelFlowGPH = userAircraft.fuelFlowPPH / fuelMassToVolDivider;
 
     userAircraft.numberOfEngines = static_cast<quint8>(dr::numberOfEngines.valueInt());
+
+    {
+      // Syncronize since DataReaderThread accesses these too
+      QMutexLocker locker(&copyDataMutex);
+      currentData = data;
+    }
   }
 
   return 1.f;
@@ -362,7 +410,7 @@ void XpConnect::initDataRefs()
   for(DataRef *ref : dr::dataRefs)
   {
     if(!ref->isValid())
-      ref->resolve();
+      ref->find();
   }
 }
 
@@ -390,7 +438,8 @@ void XpConnect::receiveMessage(XPLMPluginID inFromWho, long inMessage, void *inP
       case XPLM_MSG_AIRPLANE_COUNT_CHANGED:
         qDebug() << "XPLM_MSG_AIRPLANE_COUNT_CHANGED";
         break;
-      case XPLM_MSG_PLANE_UNLOADED: qDebug() << "XPLM_MSG_PLANE_UNLOADED";
+      case XPLM_MSG_PLANE_UNLOADED:
+        qDebug() << "XPLM_MSG_PLANE_UNLOADED";
         break;
     }
   }
@@ -418,26 +467,27 @@ void XpConnect::createNavServer()
 {
   qDebug() << "LittleXpConnect" << Q_FUNC_INFO;
 
+  // Bind the callback to the copyData methods
   using namespace std::placeholders;
-  atools::fs::sc::DataCopyFunctionType func = std::bind(&XpConnect::copyData, this, _1, _2, _3);
+  atools::fs::sc::DataCopyFunctionType dataCopyFunc = std::bind(&XpConnect::copyData, this, _1, _2, _3);
 
+  // Create the handler which will be used by the DataReaderThread to fetch the data
   bool verbose = false;
-  atools::fs::sc::XpConnectHandler *xpHandler = new atools::fs::sc::XpConnectHandler(func, verbose);
+  atools::fs::sc::XpConnectHandler *xpHandler = new atools::fs::sc::XpConnectHandler(dataCopyFunc, verbose);
   connectHandler = xpHandler;
 
   dataReader = new atools::fs::sc::DataReaderThread(nullptr, connectHandler, verbose);
+  dataReader->setReconnectRateSec(10); // TODO
+  dataReader->setUpdateRate(1000); // TODO
 
-  dataReader->setReconnectRateSec(10);
-  dataReader->setUpdateRate(1000);
-
-  // Create nav server but to not start it yet
-  navServer = new atools::fs::ns::NavServer(nullptr, atools::fs::ns::NO_HTML, 51968);
+  // Create nav TCP server but to not start it yet
+  navServer = new atools::fs::ns::NavServer(nullptr, atools::fs::ns::NO_HTML, 51968); // TODO
 
   dataReader->start();
   navServer->startServer(dataReader);
 }
 
-void XpConnect::destroyNavServer()
+void XpConnect::deleteNavServer()
 {
   if(navServer != nullptr)
     navServer->stopServer();
