@@ -12,12 +12,15 @@ Additionally my atools static library is needed.
 Windows
 ------------------------------------------------------
 
-- Get "Win32 OpenSSL v1.0.1u" from https://slproweb.com/products/Win32OpenSSL.html
-  and install it.
-- Make sure SimConnect for FSX or P3D is installed.
+You need the MSYS2 64 Bit environment to build a 64 bit version of this plugin.
+
+Install MSYS2, update and then install the additonal packages:
+pacman -S mingw-w64-x86_64-toolchain mingw-w64-i686-qt mingw-w64-i686-qt5 mingw-w64-x86_64-qt mingw-w64-x86_64-qt5
+
+- Make sure SimConnect for FSX or P3D is installed for the atools library.
 - Get and install Qt Creator from http://www.qt.io.
 - Use "../build-%{CurrentProject:Name}-%{CurrentBuild:Name}" for "Default build directory"
-     in the Qt Creator options dialog.
+  in the Qt Creator options dialog.
 - Import atools and littlexpconnect into the workspace.
 - Configure the projects and enable shadow build for release or debug versions.
 -- Clone atools from GIT to e.g.: "C:\Projects\atools"
@@ -28,6 +31,7 @@ Windows
 - Set the build kit for atools and littlexpconnect to MinGW 32bit.
 - Run qmake from Qt Creator for all projects
 - Build all projects from Qt Creator
+- Create and run the target "deploy". This will create a director ..\deploy\Little XpConnect with the plugin.
 
 Do not use the default shadow build directory names, this will break project dependencies.
 

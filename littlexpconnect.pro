@@ -4,7 +4,6 @@
 #
 #-------------------------------------------------
 
-#QT       += network widgets
 QT       += core network
 
 QT       -= gui
@@ -22,16 +21,14 @@ CONFIG(release, debug|release):CONF_TYPE=release
 
 # Windows ==================
 win32 {
-  QT_HOME=C:\\Qt\\5.9.1\\mingw53_32
-  OPENSSL=C:\\OpenSSL-Win32
+  QT_HOME=C:\\msys64\\mingw64
   GIT_BIN='C:\\Git\\bin\\git'
-  XPSDK_HOME=C:\\X-PlaneSDK
-  XP_HOME=C:\\Games\\X-Plane 11
+  XPSDK_HOME='C:\\X-Plane SDK'
+  XP_HOME='C:\\Games\\X-Plane 11'
 }
 
 # Linux ==================
 unix:!macx {
-  QT_HOME=/home/alex/Qt/5.9.1/gcc_64
   XPSDK_HOME=/home/alex/Programme/XPSDK
   XP_HOME=\"/home/alex/Daten/Programme/X-Plane 11\"
 }
@@ -53,10 +50,10 @@ INCLUDEPATH += $$PWD/../atools/src $$PWD/src $${XPSDK_HOME}/CHeaders/XPLM $${XPS
 
 win32 {
 DEFINES += _USE_MATH_DEFINES
-  LIBS += -L $$PWD/../build-atools-$${CONF_TYPE}/$${CONF_TYPE} -l atools
+  LIBS += -L$$PWD/../build-atools-$${CONF_TYPE}/$${CONF_TYPE} -latools
+  LIBS += -L$${XPSDK_HOME}\Libraries\Win -lXPLM_64 -lXPWidgets_64
   LIBS += -lz
   PRE_TARGETDEPS += $$PWD/../build-atools-$${CONF_TYPE}/$${CONF_TYPE}/libatools.a
-  WINDEPLOY_FLAGS = --compiler-runtime
 }
 
 unix {
@@ -71,19 +68,8 @@ macx {
   LIBS += -lz
 }
 
-
+# Compiling the DLL but not using it
 DEFINES += LITTLEXPCONNECT_LIBRARY
-
-# The following define makes your compiler emit warnings if you use
-# any feature of Qt which as been marked as deprecated (the exact warnings
-# depend on your compiler). Please consult the documentation of the
-# deprecated API in order to know how to port your code away from it.
-DEFINES += QT_DEPRECATED_WARNINGS
-
-# You can also make your code fail to compile if you use deprecated APIs.
-# In order to do so, uncomment the following line.
-# You can also select to disable deprecated APIs only up to a certain version of Qt.
-#DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 # =====================================================================
 # Files
@@ -120,12 +106,60 @@ DISTFILES += \
     LICENSE.txt \
     README.txt
 
-unix:!macx {
-  DEPLOY_DIR=$${XP_HOME}/Resources/plugins/LittleXpConnect
+# =====================================================================
+# Deployment commands
+# =====================================================================
 
+
+# Linux specific deploy target
+unix:!macx {
+  DEPLOY_DIR=\"$$PWD/../deploy/Little XpConnect\"
+
+  deploy.commands = rm -Rfv $${DEPLOY_DIR} &&
   deploy.commands = mkdir -pv $${DEPLOY_DIR}/64 &&
-  deploy.commands += cp -av $${OUT_PWD}/liblittlexpconnect.so.1.0.0 $${DEPLOY_DIR}/64/lin.xpl
+  deploy.commands += cp -av $${OUT_PWD}/liblittlexpconnect.so.1.0.0 $${DEPLOY_DIR}/64/lin.xpl &&
+  deploy.commands += cp -vf $${PWD}/CHANGELOG.txt $${DEPLOY_DIR} &&
+  deploy.commands += cp -vf $${PWD}/README.txt $${DEPLOY_DIR} &&
+  deploy.commands += cp -vf $${PWD}/LICENSE.txt $${DEPLOY_DIR} &&
+  deploy.commands += cp -vfa $${QT_HOME}/lib/libicudata.so*  $${DEPLOY_DIR}/64 &&
+  deploy.commands += cp -vfa $${QT_HOME}/lib/libicui18n.so*  $${DEPLOY_DIR}/64 &&
+  deploy.commands += cp -vfa $${QT_HOME}/lib/libicuuc.so*  $${DEPLOY_DIR}/64 &&
+  deploy.commands += cp -vfa $${QT_HOME}/lib/libQt5Core.so*  $${DEPLOY_DIR}/64 &&
+  deploy.commands += cp -vfa $${QT_HOME}/lib/libQt5Network.so*  $${DEPLOY_DIR}/64
 }
 
+
+# Windows specific deploy target
+win32 {
+  # Create backslashed path
+  WINPWD=$${PWD}
+  WINPWD ~= s,/,\\,g
+  WINOUT_PWD=$${OUT_PWD}
+  WINOUT_PWD ~= s,/,\\,g
+  DEPLOY_DIR_NAME=Little XpConnect
+  DEPLOY_DIR_WIN=\"$${WINPWD}\\..\\deploy\\$${DEPLOY_DIR_NAME}\"
+
+  CONFIG(debug, debug|release):DLL_SUFFIX=d
+  CONFIG(release, debug|release):DLL_SUFFIX=
+
+  deploy.commands = rmdir /s /q $${DEPLOY_DIR_WIN} &
+  deploy.commands += mkdir $${DEPLOY_DIR_WIN} &&
+  deploy.commands += mkdir $${DEPLOY_DIR_WIN}\\64 &&
+  deploy.commands += mkdir $${DEPLOY_DIR_WIN}\\64\\platforms &&
+  deploy.commands += copy $${WINOUT_PWD}\\$${CONF_TYPE}\\littlexpconnect.dll $${DEPLOY_DIR_WIN}\\64\\win.xpl &&
+  deploy.commands += xcopy $${WINPWD}\\CHANGELOG.txt $${DEPLOY_DIR_WIN} &&
+  deploy.commands += xcopy $${WINPWD}\\README.txt $${DEPLOY_DIR_WIN} &&
+  deploy.commands += xcopy $${WINPWD}\\LICENSE.txt $${DEPLOY_DIR_WIN} &&
+  deploy.commands += xcopy $${QT_HOME}\\share\\qt5\\plugins\\platforms\qwindows.dll $${DEPLOY_DIR_WIN}\\64\\platforms &&
+  deploy.commands += xcopy $${QT_HOME}\\bin\\libgcc*.dll $${DEPLOY_DIR_WIN}\\64 &&
+  deploy.commands += xcopy $${QT_HOME}\\bin\\libstdc*.dll $${DEPLOY_DIR_WIN}\\64 &&
+  deploy.commands += xcopy $${QT_HOME}\\bin\\libwinpthread*.dll $${DEPLOY_DIR_WIN}\\64 &&
+  deploy.commands += xcopy $${QT_HOME}\\bin\\libicudt$${DLL_SUFFIX}58.dll $${DEPLOY_DIR_WIN}\\64 &&
+  deploy.commands += xcopy $${QT_HOME}\\bin\\libicuin$${DLL_SUFFIX}58.dll $${DEPLOY_DIR_WIN}\\64 &&
+  deploy.commands += xcopy $${QT_HOME}\\bin\\libicuuc$${DLL_SUFFIX}58.dll $${DEPLOY_DIR_WIN}\\64 &&
+  deploy.commands += xcopy $${QT_HOME}\\bin\\zlib1.dll $${DEPLOY_DIR_WIN}\\64 &&
+  deploy.commands += xcopy $${QT_HOME}\\bin\\Qt5Network$${DLL_SUFFIX}.dll $${DEPLOY_DIR_WIN}\\64 &&
+  deploy.commands += xcopy $${QT_HOME}\\bin\\Qt5Core$${DLL_SUFFIX}.dll $${DEPLOY_DIR_WIN}\\64
+}
 
 QMAKE_EXTRA_TARGETS += deploy

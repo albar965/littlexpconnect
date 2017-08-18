@@ -2,7 +2,7 @@ Little XpConnect
 ================
 
 A free and open source X-Plane plugin that allows to use Little Navmap as a moving map when flying.
-Little Navmap can connect locally or remote to this plugin which runs its own TCP server.
+Little Navmap can connect locally or remote to this plugin which runs its own TCP network server.
 
 Little Navmap is a free open source flight planner, navigation tool, moving map, airport search and
 airport information system for Flight Simulator X, Prepar3D and X-Plane.
@@ -22,6 +22,11 @@ See the Little XpConnect help for more information. All online here: https://www
 
 Copy the whole plugin directory "Little XpConnect" into the plugins directory within your Resources directory
 in the X-Plane installation directory.
+
+-- FILES ----------------------------------------------------------------------------
+
+-- CONFIGURATION ----------------------------------------------------------------------------
+
 
 -- LICENSE ----------------------------------------------------------------------------
 

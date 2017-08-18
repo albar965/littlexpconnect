@@ -98,6 +98,7 @@ PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc)
 PLUGIN_API void XPluginStop(void)
 {
   qDebug() << "LittleXpConnect" << Q_FUNC_INFO;
+  Settings::instance().syncSettings();
   xpc::XpConnect::instance().shutdown();
   LoggingHandler::shutdown();
 }
