@@ -100,6 +100,9 @@ private:
   /* Initilaize the datarefs and print a warning if something is wrong. */
   void initDataRefs();
 
+  /* Call rate for flightLoopCallback */
+  float fetchRateSecs = 0.2f;
+
   /* Navserver that waits and accepts tcp connections. Starts a NavServerWorker in a thread for each connection */
   atools::fs::ns::NavServer *navServer = nullptr;
 

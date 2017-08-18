@@ -55,10 +55,10 @@ XpConnect *XpConnect::object = nullptr;
 
 /* key names for atools::settings */
 static const QLatin1Literal SETTINGS_OPTIONS_DEFAULT_PORT("Options/DefaultPort");
-static const QLatin1Literal SETTINGS_OPTIONS_UPDATE_RATE("Options/UpdateRate");
+static const QLatin1Literal SETTINGS_OPTIONS_UPDATE_RATE_MS("Options/UpdateRate");
+static const QLatin1Literal SETTINGS_OPTIONS_FETCH_RATE_MS("Options/FetchRate");
 static const QLatin1Literal SETTINGS_OPTIONS_FETCH_AI_AIRCRAFT("Options/FetchAiAircraft");
-static const QLatin1Literal SETTINGS_OPTIONS_VERBOSE("Options/Verbose");
-static const QLatin1Literal SETTINGS_OPTIONS_RECONNECT_RATE("Options/ReconnectRate");
+static const QLatin1Literal SETTINGS_OPTIONS_RECONNECT_RATE_SEC("Options/ReconnectRate");
 static const QLatin1Literal SETTINGS_OPTIONS_FETCH_AI_SHIP("Options/FetchAiShip");
 
 // DataRefs ======================================================
@@ -262,6 +262,7 @@ void XpConnect::pluginDisable()
 
 float XpConnect::flightLoopCallback(float inElapsedSinceLastCall, float inElapsedTimeSinceLastFlightLoop, int inCounter)
 {
+  // All datarefs are read on the X-Plane main plugin thread
   Q_UNUSED(inElapsedSinceLastCall);
   Q_UNUSED(inElapsedTimeSinceLastFlightLoop);
   Q_UNUSED(inCounter);
@@ -416,7 +417,7 @@ float XpConnect::flightLoopCallback(float inElapsedSinceLastCall, float inElapse
     }
   }
 
-  return 1.f;
+  return fetchRateSecs;
 }
 
 void XpConnect::initDataRefs()
@@ -494,8 +495,11 @@ void XpConnect::createNavServer()
 
   Settings& settings = Settings::instance();
 
-  dataReader->setReconnectRateSec(settings.getAndStoreValue(xpc::SETTINGS_OPTIONS_RECONNECT_RATE, 10).toInt());
-  dataReader->setUpdateRate(settings.getAndStoreValue(xpc::SETTINGS_OPTIONS_UPDATE_RATE, 500).toUInt());
+  dataReader->setReconnectRateSec(settings.getAndStoreValue(xpc::SETTINGS_OPTIONS_RECONNECT_RATE_SEC, 10).toInt());
+  // Update rate that is used to send out network packets
+  dataReader->setUpdateRate(settings.getAndStoreValue(xpc::SETTINGS_OPTIONS_UPDATE_RATE_MS, 500).toUInt());
+
+  fetchRateSecs = settings.getAndStoreValue(xpc::SETTINGS_OPTIONS_FETCH_RATE_MS, 200).toFloat() / 1000.f;
 
   atools::fs::sc::Options options = atools::fs::sc::NO_OPTION;
   if(settings.getAndStoreValue(xpc::SETTINGS_OPTIONS_FETCH_AI_AIRCRAFT, true).toBool())

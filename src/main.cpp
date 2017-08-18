@@ -107,7 +107,7 @@ PLUGIN_API int XPluginEnable(void)
 {
   qDebug() << "LittleXpConnect" << Q_FUNC_INFO;
 
-  // Register callback into method
+  // Register callback into method - first call in five seconds
   XPLMRegisterFlightLoopCallback(flightLoopCallback, 5.f, &xpc::XpConnect::instance());
 
   // Start all threads and the TCP server
