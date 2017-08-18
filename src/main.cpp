@@ -15,7 +15,16 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *****************************************************************************/
 
-#include "littlexpconnect.h"
+// Include definitions for import and export for shared library
+#include "littlexpconnect_global.h"
+
+#include "logging/logginghandler.h"
+#include "logging/loggingutil.h"
+#include "settings/settings.h"
+#include "xpconnect.h"
+#include "fs/sc/simconnectdata.h"
+#include "fs/sc/simconnectreply.h"
+#include "gui/consoleapplication.h"
 
 #include <QDebug>
 
@@ -26,22 +35,20 @@ extern "C" {
 #include "XPLMUtilities.h"
 }
 
-#include "logging/logginghandler.h"
-#include "logging/loggingutil.h"
-#include "xpconnect.h"
-#include "fs/sc/simconnectdata.h"
-#include "fs/sc/simconnectreply.h"
-
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "gui/consoleapplication.h"
-
 /*
  * This file contains the C functions needed by the XPLM API. All functionality will be delegated to
  * the singleton XpConnect.
+ *
+ * This is the only file which exports symbols
  */
+
+using atools::logging::LoggingHandler;
+using atools::logging::LoggingUtil;
+using atools::settings::Settings;
 
 float flightLoopCallback(float inElapsedSinceLastCall, float inElapsedTimeSinceLastFlightLoop, int inCounter,
                          void *inRefcon);
@@ -68,14 +75,17 @@ PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc)
   app->setApplicationVersion("0.3.0.develop");
 
   // Initialize logging and force logfiles into the system or user temp directory
-  atools::logging::LoggingHandler::initializeForTemp(":/littlexpconnect/resources/config/logging.cfg");
-  atools::logging::LoggingUtil::logSystemInformation();
-  atools::logging::LoggingUtil::logStandardPaths();
+  LoggingHandler::initializeForTemp(Settings::getOverloadedPath(":/littlexpconnect/resources/config/logging.cfg"));
+  LoggingUtil::logSystemInformation();
+  LoggingUtil::logStandardPaths();
 
   // Pass plugin info to X-Plane
   strcpy(outName, "Little XpConnect");
   strcpy(outSig, "ABarthel.LittleXpConnect.Connect");
   strcpy(outDesc, "Connects Little Navmap to X-Plane.");
+
+  // Create an instance here since it will be accessed from the main server thread
+  Settings::instance();
 
   // Create object instance but do not start it yet
   xpc::XpConnect::instance();
@@ -89,7 +99,7 @@ PLUGIN_API void XPluginStop(void)
 {
   qDebug() << "LittleXpConnect" << Q_FUNC_INFO;
   xpc::XpConnect::instance().shutdown();
-  atools::logging::LoggingHandler::shutdown();
+  LoggingHandler::shutdown();
 }
 
 /* Enable plugin - can be called more than once during a simulator session */
@@ -131,36 +141,4 @@ float flightLoopCallback(float inElapsedSinceLastCall, float inElapsedTimeSinceL
   // Use provided object pointer since it is faster and return seconds to next activation
   return static_cast<xpc::XpConnect *>(inRefcon)->flightLoopCallback(inElapsedSinceLastCall,
                                                                      inElapsedTimeSinceLastFlightLoop, inCounter);
-}
-
-// =======================================================================================
-// LittleXpConnectTest mock up
-// =======================================================================================
-
-void LittleXpConnectTest::start()
-{
-  char name[1024], sig[1024], desc[1024];
-
-  XPluginStart(name, sig, desc);
-}
-
-void LittleXpConnectTest::stop()
-{
-  XPluginStop();
-}
-
-void LittleXpConnectTest::enable()
-{
-  XPluginEnable();
-}
-
-void LittleXpConnectTest::disable()
-{
-  XPluginDisable();
-}
-
-void LittleXpConnectTest::callback()
-{
-  static int i = 0;
-  flightLoopCallback(1.f, 0.1f, i++, nullptr);
 }

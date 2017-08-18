@@ -115,8 +115,9 @@ private:
   /* Temp storage for the data copied from the datarefs to avoid unneded locking. */
   atools::fs::sc::SimConnectData currentData;
 
-  /* Nedded to sync between flightLoopCallback on X-Plane main thread and copyData on DataReaderThread context. */
-  QMutex copyDataMutex;
+  /* Nedded to sync between flightLoopCallback on X-Plane main thread and copyData on DataReaderThread context.
+   *  Used when copying data to currentData. */
+  QMutex currentDataMutex;
 
   /* Singleton instance */
   static XpConnect *object;

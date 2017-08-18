@@ -37,21 +37,29 @@ extern "C" {
 #include "fs/sc/simconnecttypes.h"
 #include "gui/consoleapplication.h"
 #include "fs/util/fsutil.h"
-
 #include "fs/ns/navserver.h"
 #include "fs/sc/connecthandler.h"
 #include "fs/sc/datareaderthread.h"
 #include "geo/calculations.h"
-
 #include "fs/sc/xpconnecthandler.h"
+#include "settings/settings.h"
 
 #include <QThread>
 
 using atools::geo::kgToLbs;
+using atools::settings::Settings;
 
 namespace xpc {
 
 XpConnect *XpConnect::object = nullptr;
+
+/* key names for atools::settings */
+static const QLatin1Literal SETTINGS_OPTIONS_DEFAULT_PORT("Options/DefaultPort");
+static const QLatin1Literal SETTINGS_OPTIONS_UPDATE_RATE("Options/UpdateRate");
+static const QLatin1Literal SETTINGS_OPTIONS_FETCH_AI_AIRCRAFT("Options/FetchAiAircraft");
+static const QLatin1Literal SETTINGS_OPTIONS_VERBOSE("Options/Verbose");
+static const QLatin1Literal SETTINGS_OPTIONS_RECONNECT_RATE("Options/ReconnectRate");
+static const QLatin1Literal SETTINGS_OPTIONS_FETCH_AI_SHIP("Options/FetchAiShip");
 
 // DataRefs ======================================================
 namespace dr {
@@ -126,10 +134,10 @@ static DataRef machSpeed(dataRefs, "sim/flightmodel/misc/machno");
 static DataRef verticalSpeedFeetPerMin(dataRefs, "sim/flightmodel/position/vh_ind_fpm");
 static DataRef numberOfEngines(dataRefs, "sim/aircraft/engine/acf_num_engines");
 
-static DataRef onGround(dataRefs, "sim/flightmodel/failures/onground_any"); // TODO
-static DataRef rainPercentage(dataRefs, "sim/weather/rain_percent"); // TODO
+static DataRef onGround(dataRefs, "sim/flightmodel/failures/onground_any");
+static DataRef rainPercentage(dataRefs, "sim/weather/rain_percent");
 
-static DataRef engineType8(dataRefs, "sim/aircraft/prop/acf_en_type"); // TODO
+static DataRef engineType8(dataRefs, "sim/aircraft/prop/acf_en_type");
 // 0 = recip carb, 1 = recip injected, 2 = free turbine, 3 = electric, 4 = lo bypass jet, 5 = hi bypass jet, 6 = rocket, 7 = tip rockets, 8 = fixed turbine
 enum XpEngineType
 {
@@ -176,8 +184,15 @@ ServerThread::~ServerThread()
 
 void ServerThread::run()
 {
+  // Create TCP server and threads
   XpConnect::instance().createNavServer();
-  exec();
+
+  // Start event loop
+  int result = exec();
+
+  qInfo() << Q_FUNC_INFO << "Event loop exited with result" << result;
+
+  // Shutdown all
   XpConnect::instance().deleteNavServer();
 }
 
@@ -245,8 +260,7 @@ void XpConnect::pluginDisable()
   qDebug() << Q_FUNC_INFO << "Server deleted";
 }
 
-float XpConnect::flightLoopCallback(float inElapsedSinceLastCall, float inElapsedTimeSinceLastFlightLoop,
-                                    int inCounter)
+float XpConnect::flightLoopCallback(float inElapsedSinceLastCall, float inElapsedTimeSinceLastFlightLoop, int inCounter)
 {
   Q_UNUSED(inElapsedSinceLastCall);
   Q_UNUSED(inElapsedTimeSinceLastFlightLoop);
@@ -396,8 +410,8 @@ float XpConnect::flightLoopCallback(float inElapsedSinceLastCall, float inElapse
     userAircraft.numberOfEngines = static_cast<quint8>(dr::numberOfEngines.valueInt());
 
     {
-      // Syncronize since DataReaderThread accesses these too
-      QMutexLocker locker(&copyDataMutex);
+      // Syncronize since DataReaderThread accesses these too through the callback
+      QMutexLocker locker(&currentDataMutex);
       currentData = data;
     }
   }
@@ -451,7 +465,7 @@ bool XpConnect::copyData(atools::fs::sc::SimConnectData& data, int radiusKm, ato
   Q_UNUSED(options);
 
   {
-    QMutexLocker locker(&copyDataMutex);
+    QMutexLocker locker(&currentDataMutex);
     if(currentData.isUserAircraftValid())
     {
       data = currentData;
@@ -477,11 +491,22 @@ void XpConnect::createNavServer()
   connectHandler = xpHandler;
 
   dataReader = new atools::fs::sc::DataReaderThread(nullptr, connectHandler, verbose);
-  dataReader->setReconnectRateSec(10); // TODO
-  dataReader->setUpdateRate(1000); // TODO
 
-  // Create nav TCP server but to not start it yet
-  navServer = new atools::fs::ns::NavServer(nullptr, atools::fs::ns::NO_HTML, 51968); // TODO
+  Settings& settings = Settings::instance();
+
+  dataReader->setReconnectRateSec(settings.getAndStoreValue(xpc::SETTINGS_OPTIONS_RECONNECT_RATE, 10).toInt());
+  dataReader->setUpdateRate(settings.getAndStoreValue(xpc::SETTINGS_OPTIONS_UPDATE_RATE, 500).toUInt());
+
+  atools::fs::sc::Options options = atools::fs::sc::NO_OPTION;
+  if(settings.getAndStoreValue(xpc::SETTINGS_OPTIONS_FETCH_AI_AIRCRAFT, true).toBool())
+    options |= atools::fs::sc::FETCH_AI_AIRCRAFT;
+  if(settings.getAndStoreValue(xpc::SETTINGS_OPTIONS_FETCH_AI_SHIP, true).toBool())
+    options |= atools::fs::sc::FETCH_AI_BOAT;
+  dataReader->setSimconnectOptions(options);
+
+  // Create nav TCP server but do not start it yet
+  int defaultPort = settings.getAndStoreValue(xpc::SETTINGS_OPTIONS_DEFAULT_PORT, 51968).toInt();
+  navServer = new atools::fs::ns::NavServer(nullptr, atools::fs::ns::NO_HTML, defaultPort);
 
   dataReader->start();
   navServer->startServer(dataReader);

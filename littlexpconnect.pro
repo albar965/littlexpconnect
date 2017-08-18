@@ -95,12 +95,11 @@ unix:DEFINES += GIT_REVISION=
 #'\\"$$system(git rev-parse --short HEAD)\\"'
 
 SOURCES += \
-    src/littlexpconnect.cpp \
     src/xpconnect.cpp \
-    src/dataref.cpp
+    src/dataref.cpp \
+    src/main.cpp
 
 HEADERS += \
-    src/littlexpconnect.h \
     src/littlexpconnect_global.h \
     src/xpconnect.h \
     src/dataref.h
