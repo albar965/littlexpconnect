@@ -64,7 +64,7 @@ public:
   static XpConnect& instance();
 
   /* delete instance an all servers and threads */
-  void shutdown();
+  static void shutdown();
 
   /* Starts main server thread, all threads and the TCP server */
   void pluginEnable();
@@ -120,7 +120,7 @@ private:
 
   /* Nedded to sync between flightLoopCallback on X-Plane main thread and copyData on DataReaderThread context.
    *  Used when copying data to currentData. */
-  QMutex currentDataMutex;
+  QMutex *currentDataMutex = nullptr;
 
   /* Singleton instance */
   static XpConnect *object;

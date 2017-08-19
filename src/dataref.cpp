@@ -24,18 +24,20 @@
 DataRef::DataRef(DataRefPtrVector& refs, const QString& dataRefName)
   : name(dataRefName)
 {
-  // Add to array but do find it yet (still invalid)
+  // Add to array but do not find it yet (still invalid)
   refs.append(this);
+  qDebug() << Q_FUNC_INFO << name;
 }
 
 DataRef::DataRef(const QString& dataRefName)
   : name(dataRefName)
 {
+  qDebug() << Q_FUNC_INFO << name;
 }
 
 DataRef::DataRef()
 {
-
+  qDebug() << Q_FUNC_INFO << name;
 }
 
 bool DataRef::find()

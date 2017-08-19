@@ -19,6 +19,11 @@ TEMPLATE = lib
 CONFIG(debug, debug|release):CONF_TYPE=debug
 CONFIG(release, debug|release):CONF_TYPE=release
 
+DEFINES+=XPLM200=1
+DEFINES+=APL=0
+DEFINES+=IBM=0
+DEFINES+=LIN=1
+
 # Windows ==================
 win32 {
   QT_HOME=C:\\msys64\\mingw64
@@ -36,6 +41,8 @@ unix:!macx {
 
 # Mac OS X ==================
 macx {
+  QT_HOME=/Users/alex/Qt/5.9.1/clang_64
+  XPSDK_HOME=/Users/alex/XPSDK
 }
 
 # End of configuration section
@@ -70,6 +77,7 @@ unix:!macx {
 
 macx {
   LIBS += -lz
+  LIBS += -F$${XPSDK_HOME}/Libraries/Mac -framework XPLM -framework XPWidgets
 }
 
 # Compiling the DLL but not using it
@@ -130,6 +138,19 @@ unix:!macx {
   deploy.commands += cp -vfa $${QT_HOME}/lib/libQt5Network.so*  $${DEPLOY_DIR}/64
 }
 
+# MacOS specific deploy target
+macx {
+  DEPLOY_DIR=\"$$PWD/../deploy/Little XpConnect\"
+
+  deploy.commands = rm -Rfv $${DEPLOY_DIR} &&
+  deploy.commands += mkdir -pv $${DEPLOY_DIR} &&
+  deploy.commands += cp -av $${OUT_PWD}/liblittlexpconnect.1.0.0.dylib $${DEPLOY_DIR}/mac.xpl &&
+  deploy.commands += cp -vf $${PWD}/CHANGELOG.txt $${DEPLOY_DIR} &&
+  deploy.commands += cp -vf $${PWD}/README.txt $${DEPLOY_DIR} &&
+  deploy.commands += cp -vf $${PWD}/LICENSE.txt $${DEPLOY_DIR} &&
+  deploy.commands += cp -vfa $${QT_HOME}/lib/QtNetwork.framework  $${DEPLOY_DIR} &&
+  deploy.commands += cp -vfa $${QT_HOME}/lib/QtCore.framework  $${DEPLOY_DIR}
+}
 
 # Windows specific deploy target
 win32 {
