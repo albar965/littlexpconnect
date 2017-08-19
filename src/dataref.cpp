@@ -55,7 +55,9 @@ bool DataRef::find()
 
 QVector<int> DataRef::valueIntArr() const
 {
+#ifdef DATAREF_VALIDATION
   checkType(xplmType_IntArray);
+#endif
 
   // Get size first by calling with null pointer
   int size = XPLMGetDatavi(dataRef, nullptr, 0, 0);
@@ -68,7 +70,9 @@ QVector<int> DataRef::valueIntArr() const
 
 QVector<float> DataRef::valueFloatArr() const
 {
+#ifdef DATAREF_VALIDATION
   checkType(xplmType_FloatArray);
+#endif
 
   // Get size first by calling with null pointer
   int size = XPLMGetDatavf(dataRef, nullptr, 0, 0);
@@ -81,7 +85,9 @@ QVector<float> DataRef::valueFloatArr() const
 
 QByteArray DataRef::valueByteArr() const
 {
+#ifdef DATAREF_VALIDATION
   checkType(xplmType_Data);
+#endif
 
   // Get size first by calling with null pointer
   int size = XPLMGetDatab(dataRef, nullptr, 0, 0);
@@ -94,7 +100,9 @@ QByteArray DataRef::valueByteArr() const
 
 void DataRef::valueIntArr(IntVector& array) const
 {
+#ifdef DATAREF_VALIDATION
   checkType(xplmType_IntArray);
+#endif
 
   int size = XPLMGetDatavi(dataRef, nullptr, 0, 0);
   array.resize(size);
@@ -103,7 +111,9 @@ void DataRef::valueIntArr(IntVector& array) const
 
 void DataRef::valueFloatArr(FloatVector& array) const
 {
+#ifdef DATAREF_VALIDATION
   checkType(xplmType_FloatArray);
+#endif
 
   int size = XPLMGetDatavf(dataRef, nullptr, 0, 0);
   array.resize(size);
@@ -117,11 +127,14 @@ void DataRef::valueByteArr(QByteArray& bytes) const
   XPLMGetDatab(dataRef, bytes.data(), 0, size);
 }
 
+#ifdef DATAREF_VALIDATION
 void DataRef::checkType(int type) const
 {
   if((dataRefType & type) == 0)
     qWarning() << Q_FUNC_INFO << "Type mismatch" << dataRefType << "does not cover" << type;
 }
+
+#endif
 
 int DataRef::valueIntArrSum() const
 {

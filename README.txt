@@ -15,20 +15,53 @@ This plugin is only useful for X-plane and is available for Windows, macOS and L
                                <- (Network) -> Little Navmap on Computer 2
 
 ------------------------------------------------------------------------------
-
-See the Little XpConnect help for more information. All online here: https://www.gitbook.com/@albar965
-
--- INSTALLATION ----------------------------------------------------------------------------
+-- INSTALLATION --------------------------------------------------------------
+------------------------------------------------------------------------------
 
 Copy the whole plugin directory "Little XpConnect" into the plugins directory within your Resources directory
-in the X-Plane installation directory.
+in the X-Plane installation.
+The complete path should look like:
+.../X-Plane 11/Resources/plugins/Little XpConnect
 
--- FILES ----------------------------------------------------------------------------
+You can check the X-Plane plugin manager to see if it is loaded  correctly.
 
--- CONFIGURATION ----------------------------------------------------------------------------
+When connecting with Little Navmap use the computer name where X-Plane is running and
+the default port 51968. Use "localhost" if X-Plane and Little Navmap run on the same computer.
 
+------------------------------------------------------------------------------
+-- FILES ---------------------------------------------------------------------
+------------------------------------------------------------------------------
 
--- LICENSE ----------------------------------------------------------------------------
+The Plugin creates a log file which can be found in
+* "C:\Users\YOURUSERNAME\AppData\Local\Temp\abarthel-little_xpconnect.log" for Windows,
+* "/tmp/abarthel-little_xpconnect.log" for Linux and
+* "/var/folders/RANDOMIZED_DIRECTORY_NAME/abarthel-little_xpconnect.log" for macOS.
+
+Additionally a small settings file is created which can be found in
+* "C:\Users\YOURUSERNAME\AppData\Roaming\ABarthel\little_xpconnect.ini" for Windows,
+* "$HOME/.config/ABarthel/little_xpconnect.ini" for Linux and macOS.
+
+------------------------------------------------------------------------------
+-- CONFIGURATION -------------------------------------------------------------
+------------------------------------------------------------------------------
+
+Settings can only be changed using the configuration file "little_xpconnect.ini".
+
+[Options]
+DefaultPort=51968     : This is the default port to connect to. Change this if it collides with another program.
+FetchAiAircraft=true  : Also get AI aircraft (not available yet)
+FetchAiShip=true      : Also get AI ships (not available yet)
+FetchRate=200         : Data will be fetched from X-Plane every 200 milliseconds.
+                        Lower this value to get a more fluid movement of the aircraft symbol on the map.
+                        Increase this value if you think it causes performance problems.
+ReconnectRate=10      : Not used. Ignore
+UpdateRate=500        : Data will be sent over the network ever 500 milliseconds.
+                        Lower this value to get a more fluid movement of the aircraft symbol on the map.
+                        Increase this value if you have a slow network.
+
+------------------------------------------------------------------------------
+-- LICENSE -------------------------------------------------------------------
+------------------------------------------------------------------------------
 
 This software is licensed under GPL3 or any later version.
 

@@ -33,8 +33,8 @@ typedef QVector<DataRef *> DataRefPtrVector;
 
 /*
  * Hides the XPLM data ref accessor methods and provides methods for easier access than the C interface.
- *
- * The accessor methods do not check if the type is valid. That has to be done by the user.
+ * The class allows only reading of datarefs.
+ * The accessor methods can optionally check if the type is valid (define DATAREF_VALIDATION).
  */
 class DataRef
 {
@@ -65,21 +65,27 @@ public:
   /* get float value or 0 if invalid */
   float valueFloat() const
   {
+#ifdef DATAREF_VALIDATION
     checkType(xplmType_Float);
+#endif
     return XPLMGetDataf(dataRef);
   }
 
   /* get double value or 0 if invalid */
   double valueDouble() const
   {
+#ifdef DATAREF_VALIDATION
     checkType(xplmType_Double);
+#endif
     return XPLMGetDatad(dataRef);
   }
 
   /* get int value or 0 if invalid */
   int valueInt() const
   {
+#ifdef DATAREF_VALIDATION
     checkType(xplmType_Int);
+#endif
     return XPLMGetDatai(dataRef);
   }
 
@@ -115,7 +121,10 @@ public:
   }
 
 private:
+#ifdef DATAREF_VALIDATION
   void checkType(int type) const;
+
+#endif
 
   XPLMDataRef dataRef = NULL;
   XPLMDataTypeID dataRefType = 0;

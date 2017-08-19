@@ -431,33 +431,9 @@ void XpConnect::initDataRefs()
 
 void XpConnect::receiveMessage(XPLMPluginID inFromWho, long inMessage, void *inParam)
 {
+  Q_UNUSED(inFromWho);
+  Q_UNUSED(inMessage);
   Q_UNUSED(inParam);
-  qDebug() << "LittleXpConnect" << Q_FUNC_INFO << "inFromWho" << inFromWho << "inMessage" << inMessage;
-
-  if(inFromWho == XPLM_PLUGIN_XPLANE)
-  {
-    switch(inMessage)
-    {
-      case XPLM_MSG_PLANE_CRASHED:
-        qDebug() << "XPLM_MSG_PLANE_CRASHED";
-        break;
-      case XPLM_MSG_PLANE_LOADED:
-        qDebug() << "XPLM_MSG_PLANE_LOADED";
-        break;
-      case XPLM_MSG_AIRPORT_LOADED:
-        qDebug() << "XPLM_MSG_AIRPORT_LOADED";
-        break;
-      case XPLM_MSG_SCENERY_LOADED:
-        qDebug() << "XPLM_MSG_SCENERY_LOADED";
-        break;
-      case XPLM_MSG_AIRPLANE_COUNT_CHANGED:
-        qDebug() << "XPLM_MSG_AIRPLANE_COUNT_CHANGED";
-        break;
-      case XPLM_MSG_PLANE_UNLOADED:
-        qDebug() << "XPLM_MSG_PLANE_UNLOADED";
-        break;
-    }
-  }
 }
 
 bool XpConnect::copyData(atools::fs::sc::SimConnectData& data, int radiusKm, atools::fs::sc::Options options)
@@ -496,9 +472,11 @@ void XpConnect::createNavServer()
   Settings& settings = Settings::instance();
 
   dataReader->setReconnectRateSec(settings.getAndStoreValue(xpc::SETTINGS_OPTIONS_RECONNECT_RATE_SEC, 10).toInt());
-  // Update rate that is used to send out network packets
-  dataReader->setUpdateRate(settings.getAndStoreValue(xpc::SETTINGS_OPTIONS_UPDATE_RATE_MS, 500).toUInt());
 
+  // Update rate that is used to send out network packets
+  dataReader->setUpdateRate(settings.getAndStoreValue(xpc::SETTINGS_OPTIONS_UPDATE_RATE_MS, 250).toUInt());
+
+  // The flight loop method is called this often
   fetchRateSecs = settings.getAndStoreValue(xpc::SETTINGS_OPTIONS_FETCH_RATE_MS, 200).toFloat() / 1000.f;
 
   atools::fs::sc::Options options = atools::fs::sc::NO_OPTION;

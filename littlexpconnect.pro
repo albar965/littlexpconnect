@@ -29,6 +29,7 @@ win32 {
 
 # Linux ==================
 unix:!macx {
+  QT_HOME=/home/alex/Qt/5.9.1/gcc_64
   XPSDK_HOME=/home/alex/Programme/XPSDK
   XP_HOME=\"/home/alex/Daten/Programme/X-Plane 11\"
 }
@@ -59,6 +60,9 @@ DEFINES += _USE_MATH_DEFINES
 unix {
   LIBS += -L $$PWD/../build-atools-$${CONF_TYPE} -l atools
   PRE_TARGETDEPS += $$PWD/../build-atools-$${CONF_TYPE}/libatools.a
+
+  # Use relative path to current .so directory to search for shared libraries
+  QMAKE_RPATHDIR=.
 }
 unix:!macx {
   LIBS += -lz
@@ -77,8 +81,7 @@ DEFINES += LITTLEXPCONNECT_LIBRARY
 
 # Get the current GIT revision to include it into the code
 win32:DEFINES += GIT_REVISION='\\"$$system($${GIT_BIN} rev-parse --short HEAD)\\"'
-unix:DEFINES += GIT_REVISION=
-#'\\"$$system(git rev-parse --short HEAD)\\"'
+unix:DEFINES += GIT_REVISION='\\"$$system(git rev-parse --short HEAD)\\"'
 
 SOURCES += \
     src/xpconnect.cpp \
@@ -109,7 +112,6 @@ DISTFILES += \
 # =====================================================================
 # Deployment commands
 # =====================================================================
-
 
 # Linux specific deploy target
 unix:!macx {
