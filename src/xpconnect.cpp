@@ -18,50 +18,15 @@
 #include "xpconnect.h"
 #include "dataref.h"
 
-extern "C" {
-#include "XPLMPlugin.h"
-#include "XPLMDisplay.h"
-#include "XPLMGraphics.h"
-#include "XPLMProcessing.h"
-#include "XPLMDataAccess.h"
-#include "XPLMMenus.h"
-#include "XPLMUtilities.h"
-#include "XPWidgets.h"
-#include "XPStandardWidgets.h"
-#include "XPLMScenery.h"
-}
-
-#include "fs/sc/xpconnecthandler.h"
+#include "fs/sc/simconnectuseraircraft.h"
 #include "fs/sc/simconnectdata.h"
-#include "fs/sc/simconnectreply.h"
 #include "fs/sc/simconnecttypes.h"
-#include "gui/consoleapplication.h"
 #include "fs/util/fsutil.h"
-#ifdef TCPSERVER
-#include "fs/ns/navserver.h"
-#include "fs/sc/connecthandler.h"
-#include "fs/sc/datareaderthread.h"
-#endif
 #include "geo/calculations.h"
-#include "fs/sc/xpconnecthandler.h"
-#include "settings/settings.h"
-
-#include <QThread>
 
 using atools::geo::kgToLbs;
-using atools::settings::Settings;
 
 namespace xpc {
-
-#ifdef TCPSERVER
-XpConnect *XpConnect::object = nullptr;
-#endif
-
-/* key names for atools::settings */
-static const QLatin1Literal SETTINGS_OPTIONS_DEFAULT_PORT("Options/DefaultPort");
-static const QLatin1Literal SETTINGS_OPTIONS_UPDATE_RATE_MS("Options/UpdateRate");
-static const QLatin1Literal SETTINGS_OPTIONS_FETCH_RATE_MS("Options/FetchRate");
-static const QLatin1Literal SETTINGS_OPTIONS_FETCH_AI_AIRCRAFT("Options/FetchAiAircraft");
 
 // DataRefs ======================================================
 namespace dr {
@@ -156,121 +121,7 @@ enum XpEngineType
 
 }
 
-// ====================================================================================
-// ServerThread
-// ====================================================================================
-#ifdef TCPSERVER
-/*
- * Main thread running everything else. Contains the event loop.
- */
-class ServerThread :
-  public QThread
-{
-public:
-  explicit ServerThread(XpConnect *xpc)
-    : connect(xpc)
-  {
-
-  }
-
-  virtual ~ServerThread();
-
-private:
-  virtual void run() override;
-
-  xpc::XpConnect *connect;
-};
-
-ServerThread::~ServerThread()
-{
-  qDebug() << Q_FUNC_INFO;
-}
-
-void ServerThread::run()
-{
-  // Create TCP server and threads
-  connect->createNavServer();
-
-  qInfo() << Q_FUNC_INFO << "========== Event loop started";
-
-  // Start event loop
-  int result = exec();
-
-  qInfo() << Q_FUNC_INFO << "========== Event loop exited with result" << result;
-
-  // Shutdown all
-  connect->deleteNavServer();
-}
-
-// ====================================================================================
-// XpConnect
-// ====================================================================================
-
-void XpConnect::createServerThread()
-{
-  deleteServerThread();
-  serverThread = new ServerThread(this);
-  serverThread->start();
-}
-
-void XpConnect::deleteServerThread()
-{
-  if(serverThread != nullptr)
-  {
-    serverThread->quit();
-    serverThread->wait();
-    delete serverThread;
-    serverThread = nullptr;
-  }
-}
-
-XpConnect::XpConnect()
-{
-  currentDataMutex = new QMutex();
-}
-
-XpConnect::~XpConnect()
-{
-  qDebug() << Q_FUNC_INFO << "delete server thread";
-  deleteServerThread();
-  qDebug() << Q_FUNC_INFO << "delete mutex";
-  delete currentDataMutex;
-  qDebug() << Q_FUNC_INFO << "delete mutex done";
-}
-
-XpConnect& XpConnect::instance()
-{
-  if(object == nullptr)
-    object = new XpConnect();
-  return *object;
-}
-
-void XpConnect::shutdown()
-{
-  delete object;
-  object = nullptr;
-}
-
-void XpConnect::pluginEnable()
-{
-  initDataRefs();
-
-  qInfo() << "Simulator build" << dr::simBuild.valueString() << "XPLM build" << dr::xplmBuild.valueString();
-
-  // Start main server thread which will spawn everything else
-  createServerThread();
-  qDebug() << Q_FUNC_INFO << "Server started";
-}
-
-void XpConnect::pluginDisable()
-{
-  deleteServerThread();
-  qDebug() << Q_FUNC_INFO << "Server deleted";
-}
-
-#endif
-
-bool XpConnect::fillSimConnectData(atools::fs::sc::SimConnectData& data)
+bool XpConnect::fillSimConnectData(atools::fs::sc::SimConnectData& data, bool fetchAi)
 {
   atools::fs::sc::SimConnectUserAircraft& userAircraft = data.userAircraft;
 
@@ -412,37 +263,9 @@ bool XpConnect::fillSimConnectData(atools::fs::sc::SimConnectData& data)
 
   userAircraft.numberOfEngines = static_cast<quint8>(dr::numberOfEngines.valueInt());
 
+  // TODO multiplayer aircraft
+
   return true;
-}
-
-#ifdef TCPSERVER
-float XpConnect::flightLoopCallback(float inElapsedSinceLastCall, float inElapsedTimeSinceLastFlightLoop, int inCounter)
-{
-  // All datarefs are read on the X-Plane main plugin thread
-  Q_UNUSED(inElapsedSinceLastCall);
-  Q_UNUSED(inElapsedTimeSinceLastFlightLoop);
-  Q_UNUSED(inCounter);
-  // qDebug() << "LittleXpConnect" << Q_FUNC_INFO << "inElapsedSinceLastCall" << inElapsedSinceLastCall
-  // << "inElapsedTimeSinceLastFlightLoop" << inElapsedTimeSinceLastFlightLoop
-  // << "inCounter" << inCounter;
-
-  {
-    if(currentDataMutex == nullptr)
-      return false;
-
-    // Copy into a temporary object first to make the sync area smaller and get this quickly done
-    atools::fs::sc::SimConnectData data;
-    fillSimConnectData(data);
-
-    {
-      QMutexLocker locker(currentDataMutex);
-      Q_UNUSED(locker);
-      // Syncronize since DataReaderThread accesses these too through the callback
-      currentData = data;
-    }
-  }
-
-  return fetchRateSecs;
 }
 
 void XpConnect::initDataRefs()
@@ -454,98 +277,4 @@ void XpConnect::initDataRefs()
   }
 }
 
-void XpConnect::receiveMessage(XPLMPluginID inFromWho, long inMessage, void *inParam)
-{
-  Q_UNUSED(inFromWho);
-  Q_UNUSED(inMessage);
-  Q_UNUSED(inParam);
-}
-
-bool XpConnect::copyData(atools::fs::sc::SimConnectData& data, int radiusKm, atools::fs::sc::Options options)
-{
-  Q_UNUSED(radiusKm);
-  Q_UNUSED(options);
-
-  if(currentDataMutex == nullptr)
-    return false;
-
-  QMutexLocker locker(currentDataMutex);
-  Q_UNUSED(locker);
-  if(currentData.isUserAircraftValid())
-  {
-    data = currentData;
-    currentData = atools::fs::sc::EMPTY_SIMCONNECT_DATA;
-  }
-  else
-    return false;
-
-  return true;
-}
-
-void XpConnect::createNavServer()
-{
-  qDebug() << "LittleXpConnect" << Q_FUNC_INFO;
-
-  // Bind the callback to the copyData methods
-  using namespace std::placeholders;
-  atools::fs::sc::DataCopyFunctionType dataCopyFunc = std::bind(&XpConnect::copyData, this, _1, _2, _3);
-
-  // Create the handler which will be used by the DataReaderThread to fetch the data
-  bool verbose = false;
-  atools::fs::sc::XpConnectHandler *xpHandler = new atools::fs::sc::XpConnectHandler(dataCopyFunc, verbose);
-  connectHandler = xpHandler;
-
-  dataReader = new atools::fs::sc::DataReaderThread(nullptr, connectHandler, verbose);
-
-  Settings& settings = Settings::instance();
-
-  // Not needed in plugin
-  dataReader->setReconnectRateSec(10);
-
-  // Update rate that is used to send out network packets
-  dataReader->setUpdateRate(settings.getAndStoreValue(xpc::SETTINGS_OPTIONS_UPDATE_RATE_MS, 250).toUInt());
-
-  // The flight loop method is called this often
-  fetchRateSecs = settings.getAndStoreValue(xpc::SETTINGS_OPTIONS_FETCH_RATE_MS, 200).toFloat() / 1000.f;
-
-  atools::fs::sc::Options options = atools::fs::sc::NO_OPTION;
-  if(settings.getAndStoreValue(xpc::SETTINGS_OPTIONS_FETCH_AI_AIRCRAFT, true).toBool())
-    options |= atools::fs::sc::FETCH_AI_AIRCRAFT;
-  dataReader->setSimconnectOptions(options);
-
-  // Create nav TCP server but do not start it yet
-  int defaultPort = settings.getAndStoreValue(xpc::SETTINGS_OPTIONS_DEFAULT_PORT, 51968).toInt();
-  navServer = new atools::fs::ns::NavServer(nullptr, atools::fs::ns::NO_HTML, defaultPort);
-
-  dataReader->start();
-  navServer->startServer(dataReader);
-}
-
-void XpConnect::deleteNavServer()
-{
-  if(navServer != nullptr)
-  {
-    navServer->stopServer();
-    delete navServer;
-    navServer = nullptr;
-    qDebug() << Q_FUNC_INFO << "navServer stopped";
-  }
-
-  if(dataReader != nullptr)
-  {
-    dataReader->terminateThread();
-    delete dataReader;
-    dataReader = nullptr;
-    qDebug() << Q_FUNC_INFO << "dataReader terminated";
-  }
-
-  if(connectHandler != nullptr)
-  {
-    delete connectHandler;
-    connectHandler = nullptr;
-    qDebug() << Q_FUNC_INFO << "connectHandler deleted";
-  }
-}
-
-#endif
 } // namespace xpc

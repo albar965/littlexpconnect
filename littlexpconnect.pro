@@ -94,12 +94,14 @@ unix:DEFINES += GIT_REVISION='\\"$$system(git rev-parse --short HEAD)\\"'
 SOURCES += \
     src/xpconnect.cpp \
     src/dataref.cpp \
-    src/main.cpp
+    src/main.cpp \
+    src/sharedmemorywriter.cpp
 
 HEADERS += \
     src/littlexpconnect_global.h \
     src/xpconnect.h \
-    src/dataref.h
+    src/dataref.h \
+    src/sharedmemorywriter.h
 
 unix {
     target.path = /usr/lib

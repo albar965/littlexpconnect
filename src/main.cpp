@@ -21,10 +21,9 @@
 #include "logging/logginghandler.h"
 #include "logging/loggingutil.h"
 #include "settings/settings.h"
-#include "xpconnect.h"
-#include "fs/sc/simconnectdata.h"
-#include "fs/sc/simconnectreply.h"
 #include "gui/consoleapplication.h"
+#include "sharedmemorywriter.h"
+#include "xpconnect.h"
 
 #include <QDebug>
 
@@ -41,10 +40,11 @@ extern "C" {
 #include <QSharedMemory>
 #include <QDataStream>
 #include <QBuffer>
+#include <QThread>
+#include <QWaitCondition>
 
 /*
- * This file contains the C functions needed by the XPLM API. All functionality will be delegated to
- * the singleton XpConnect.
+ * This file contains the C functions needed by the XPLM API.
  *
  * This is the only file which exports symbols
  */
@@ -53,15 +53,24 @@ using atools::logging::LoggingHandler;
 using atools::logging::LoggingUtil;
 using atools::settings::Settings;
 
+namespace lxc {
+/* key names for atools::settings */
+static const QLatin1Literal SETTINGS_OPTIONS_FETCH_RATE_MS("Options/FetchRate");
+static const QLatin1Literal SETTINGS_OPTIONS_FETCH_AI_AIRCRAFT("Options/FetchAiAircraft");
+}
+
 float flightLoopCallback(float inElapsedSinceLastCall, float inElapsedTimeSinceLastFlightLoop, int inCounter,
                          void *inRefcon);
 
 /* Application object for event queue in server thread */
 static atools::gui::ConsoleApplication *app = nullptr;
-static bool pluginRunning = false;
 
-static QSharedMemory sharedMemory;
-static const int SHARED_MEMORY_SIZE = 8196;
+static bool fetchAi = true;
+static float fetchRateSecs = 0.2f;
+
+// Use a background thread to write the data to the shared memory to avoid simulator stutters due to
+// locking
+static SharedMemoryWriter *thread = nullptr;
 
 /* Called on simulator startup */
 PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc)
@@ -70,8 +79,7 @@ PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc)
 
   // Register atools types so we can stream them
   qRegisterMetaType<atools::fs::sc::SimConnectData>();
-  qRegisterMetaType<atools::fs::sc::SimConnectReply>();
-  qRegisterMetaType<atools::fs::sc::WeatherRequest>();
+  qRegisterMetaTypeStreamOperators<atools::geo::Pos>();
 
   // Create application object which is needed for the server thread event queue
   int argc = 0;
@@ -79,7 +87,7 @@ PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc)
   app->setApplicationName("Little XpConnect");
   app->setOrganizationName("ABarthel");
   app->setOrganizationDomain("abarthel.org");
-  app->setApplicationVersion("0.3.0.develop");
+  app->setApplicationVersion("0.5.0.develop");
 
   // Initialize logging and force logfiles into the system or user temp directory
   LoggingHandler::initializeForTemp(Settings::getOverloadedPath(":/littlexpconnect/resources/config/logging.cfg"));
@@ -94,23 +102,9 @@ PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc)
   // Create an instance here since it will be accessed from the main server thread
   Settings::instance();
 
-  // Create object instance but do not start it yet
-  // xpc::XpConnect::instance();
-
-  sharedMemory.setKey("LittleXpConnect");
-  if(!sharedMemory.create(SHARED_MEMORY_SIZE, QSharedMemory::ReadWrite))
-  {
-    qWarning() << "LittleXpConnect" << Q_FUNC_INFO << "Cannot create" << sharedMemory.errorString();
-
-    if(!sharedMemory.attach(QSharedMemory::ReadWrite))
-      qWarning() << "LittleXpConnect" << Q_FUNC_INFO << "Cannot attach" << sharedMemory.errorString();
-    else
-      qInfo() << "LittleXpConnect" << Q_FUNC_INFO << "Attached to" << sharedMemory.key()
-              << "native" << sharedMemory.nativeKey();
-  }
-  else
-    qInfo() << "LittleXpConnect" << Q_FUNC_INFO << "Created" << sharedMemory.key()
-            << "native" << sharedMemory.nativeKey();
+  Settings& settings = Settings::instance();
+  fetchAi = settings.getAndStoreValue(lxc::SETTINGS_OPTIONS_FETCH_AI_AIRCRAFT, true).toBool();
+  fetchRateSecs = settings.getAndStoreValue(lxc::SETTINGS_OPTIONS_FETCH_RATE_MS, 200).toFloat() / 1000.f;
 
   // Always successfull
   return 1;
@@ -119,17 +113,6 @@ PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc)
 /* Called when simulator terminates */
 PLUGIN_API void XPluginStop(void)
 {
-  // qDebug() << "LittleXpConnect" << Q_FUNC_INFO << "XpConnect shutdown";
-  // xpc::XpConnect::shutdown();
-  pluginRunning = false;
-
-  if(!sharedMemory.detach())
-    qWarning() << "Cannot detach" << sharedMemory.errorString() << "from" << sharedMemory.key()
-               << "native" << sharedMemory.nativeKey();
-  else
-    qInfo() << "LittleXpConnect" << Q_FUNC_INFO << "Detached from" << sharedMemory.key()
-            << "native" << sharedMemory.nativeKey();
-
   qDebug() << "LittleXpConnect" << Q_FUNC_INFO << "sync settings";
   Settings::instance().syncSettings();
 
@@ -144,27 +127,30 @@ PLUGIN_API int XPluginEnable(void)
 {
   qDebug() << "LittleXpConnect" << Q_FUNC_INFO;
 
+  xpc::XpConnect::initDataRefs();
+
   // Register callback into method - first call in five seconds
-  XPLMRegisterFlightLoopCallback(flightLoopCallback, 1.f, nullptr);
+  XPLMRegisterFlightLoopCallback(flightLoopCallback, 5.f, nullptr);
 
-  // Start all threads and the TCP server
-  // xpc::XpConnect::instance().pluginEnable();
-
-  pluginRunning = true;
+  // Start the backgound writer
+  thread = new SharedMemoryWriter();
+  thread->start();
   return 1;
 }
 
 /* Disable plugin - can be called more than once during a simulator session */
-PLUGIN_API void XPluginDisable(void)
+PLUGIN_API void XPluginDisable()
 {
   qDebug() << "LittleXpConnect" << Q_FUNC_INFO;
-  pluginRunning = false;
 
   // Unregister call back
   XPLMUnregisterFlightLoopCallback(flightLoopCallback, nullptr);
 
-  // Shut down all threads and the TCP server
-  // xpc::XpConnect::instance().pluginDisable();
+  qDebug() << "LittleXpConnect" << Q_FUNC_INFO << "Terminating thread";
+  thread->terminateThread();
+  delete thread;
+  thread = nullptr;
+  qDebug() << "LittleXpConnect" << Q_FUNC_INFO << "Terminating thread done";
 }
 
 /* called on special messages like aircraft loaded, etc. */
@@ -183,35 +169,8 @@ float flightLoopCallback(float inElapsedSinceLastCall, float inElapsedTimeSinceL
   Q_UNUSED(inCounter);
   Q_UNUSED(inRefcon);
 
-  atools::fs::sc::SimConnectData data;
-  if(xpc::XpConnect::fillSimConnectData(data))
-  {
-    QBuffer buffer;
-    buffer.open(QIODevice::WriteOnly);
-    data.write(&buffer);
+  // Copy data from datarefs and pass it over to the thread for writing into the shared memory
+  thread->fetchAndWriteData(fetchAi);
 
-    if(buffer.size() > SHARED_MEMORY_SIZE)
-      qWarning() << "LittleXpConnect" << Q_FUNC_INFO << "Data too large" << buffer.size() << ">" << SHARED_MEMORY_SIZE;
-    else
-    {
-      if(sharedMemory.lock())
-      {
-        memcpy(sharedMemory.data(), buffer.data().constData(), static_cast<size_t>(buffer.size()));
-        qDebug() << "Lock ok size" << buffer.size();
-        sharedMemory.unlock();
-      }
-      else
-        qInfo() << "LittleXpConnect" << Q_FUNC_INFO << "Cannot lock" << sharedMemory.key()
-                << "native" << sharedMemory.nativeKey();
-    }
-  }
-
-  return 1.f;
-
-  // if(pluginRunning)
-  //// Use provided object pointer since it is faster and return seconds to next activation
-  // return static_cast<xpc::XpConnect *>(inRefcon)->flightLoopCallback(inElapsedSinceLastCall,
-  // inElapsedTimeSinceLastFlightLoop, inCounter);
-  // else
-  // return 1.f;
+  return fetchRateSecs;
 }
