@@ -25,6 +25,8 @@
 #include "geo/calculations.h"
 
 using atools::geo::kgToLbs;
+using atools::geo::meterToFeet;
+using atools::geo::Pos;
 
 namespace xpc {
 
@@ -32,6 +34,9 @@ namespace xpc {
 namespace dr {
 // Contains all datarefs for simple initialization
 static DataRefPtrVector dataRefs;
+
+// Contains multiplayer aircraft datarefs
+static DataRefPtrVector aiDataRefs;
 
 static DataRef simBuild(dataRefs, "sim/version/sim_build_string");
 static DataRef xplmBuild(dataRefs, "sim/version/xplm_build_string");
@@ -119,17 +124,38 @@ enum XpEngineType
   FIXED_TURBINE = 8
 };
 
+// Datarefs for one AI or multiplayer aircraft
+struct MultiplayerDataRefs
+{
+  DataRef headingTrueDegAi;
+  DataRef latPositionDegAi;
+  DataRef lonPositionDegAi;
+  DataRef actualAltitudeMeterAi;
+  DataRef x;
+  DataRef y;
+};
+
+static QVector<MultiplayerDataRefs> multiplayerDataRefs;
+
+// AI values - will be updated with number
+static const QLatin1Literal HEADING_DEG_TRUE_AI("sim/multiplayer/position/plane%1_psi");
+static const QLatin1Literal LAT_POSITION_DEG_AI("sim/multiplayer/position/plane%1_lat");
+static const QLatin1Literal LON_POSITION_DEG_AI("sim/multiplayer/position/plane%1_lon");
+static const QLatin1Literal ACTUAL_ALTITUDE_METER_AI("sim/multiplayer/position/plane%1_el");
+static const QLatin1Literal POS_X("sim/multiplayer/position/plane%1_x");
+static const QLatin1Literal POS_Y("sim/multiplayer/position/plane%1_y");
+
 }
 
 bool XpConnect::fillSimConnectData(atools::fs::sc::SimConnectData& data, bool fetchAi)
 {
   atools::fs::sc::SimConnectUserAircraft& userAircraft = data.userAircraft;
 
-  float actualAlt = atools::geo::meterToFeet(dr::actualAltitudeMeter.valueFloat());
+  float actualAlt = meterToFeet(dr::actualAltitudeMeter.valueFloat());
   userAircraft.position =
-    atools::geo::Pos(dr::lonPositionDeg.valueFloat(), dr::latPositionDeg.valueFloat(), actualAlt);
+    Pos(dr::lonPositionDeg.valueFloat(), dr::latPositionDeg.valueFloat(), actualAlt);
 
-  if(!userAircraft.position.isValid() && !userAircraft.position.isNull())
+  if(!userAircraft.position.isValid() || userAircraft.position.isNull())
     return false;
 
   userAircraft.magVarDeg = dr::magVarDeg.valueFloat();
@@ -178,10 +204,8 @@ bool XpConnect::fillSimConnectData(atools::fs::sc::SimConnectData& data, bool fe
   userAircraft.airplaneModel = dr::airplaneType.valueString();
   userAircraft.airplaneReg = dr::airplaneReg.valueString();
   // userAircraft.airplaneType;           // not available - use model ICAO code in client
-  // userAircraft.airplaneAirline;        // not available
-  // userAircraft.airplaneFlightnumber;   // not available
-  // userAircraft.fromIdent;              // not available
-  // userAircraft.toIdent;                // not available
+  // not available:
+  // userAircraft.airplaneAirline; userAircraft.airplaneFlightnumber; userAircraft.fromIdent; userAircraft.toIdent;
 
   userAircraft.altitudeAboveGroundFt = dr::aglAltitudeFt.valueFloat();
   userAircraft.groundAltitudeFt = actualAlt - userAircraft.altitudeAboveGroundFt;
@@ -263,15 +287,79 @@ bool XpConnect::fillSimConnectData(atools::fs::sc::SimConnectData& data, bool fe
 
   userAircraft.numberOfEngines = static_cast<quint8>(dr::numberOfEngines.valueInt());
 
-  // TODO multiplayer aircraft
+  data.aiAircraft.clear();
+  if(fetchAi)
+  {
+    // Get AI or multiplayer aircraft ===============================
+    quint32 objId = 0;
+    for(const dr::MultiplayerDataRefs& ref : dr::multiplayerDataRefs)
+    {
+      // Check the OpenGL coordinates if the aircraft is valid
+      if(atools::almostEqual(ref.x.valueDouble(), 0.) && atools::almostEqual(ref.y.valueDouble(), 0.))
+        continue;
+
+      float actualAltAi = meterToFeet(ref.actualAltitudeMeterAi.valueFloat());
+      Pos pos(ref.lonPositionDegAi.valueFloat(), ref.latPositionDegAi.valueFloat(), actualAltAi);
+
+      if(pos.isValid() && !pos.isNull())
+      {
+        // Coordinates are ok too - must be an AI aircraft
+        atools::fs::sc::SimConnectAircraft aircraft;
+        aircraft.position = pos;
+        aircraft.headingTrueDeg = ref.headingTrueDegAi.valueFloat();
+
+        // Mark fields as unavailable
+        aircraft.headingMagDeg = atools::fs::sc::SC_INVALID_FLOAT;
+        aircraft.groundSpeedKts = atools::fs::sc::SC_INVALID_FLOAT;
+        aircraft.indicatedAltitudeFt = atools::fs::sc::SC_INVALID_FLOAT;
+        aircraft.indicatedSpeedKts = atools::fs::sc::SC_INVALID_FLOAT;
+        aircraft.trueSpeedKts = atools::fs::sc::SC_INVALID_FLOAT;
+        aircraft.machSpeed = atools::fs::sc::SC_INVALID_FLOAT;
+        aircraft.verticalSpeedFeetPerMin = atools::fs::sc::SC_INVALID_FLOAT;
+
+        aircraft.objectId = objId;
+        aircraft.category = atools::fs::sc::AIRPLANE;
+        data.aiAircraft.append(aircraft);
+        objId++;
+      }
+    }
+  }
 
   return true;
 }
 
 void XpConnect::initDataRefs()
 {
+  // Initialize datarefs for the 19 AI aircraft first
+  for(int i = 1; i < 20; i++)
+  {
+    dr::MultiplayerDataRefs refs;
+    refs.headingTrueDegAi.setName(QString(dr::HEADING_DEG_TRUE_AI).arg(i));
+    refs.latPositionDegAi.setName(QString(dr::LAT_POSITION_DEG_AI).arg(i));
+    refs.lonPositionDegAi.setName(QString(dr::LON_POSITION_DEG_AI).arg(i));
+    refs.actualAltitudeMeterAi.setName(QString(dr::ACTUAL_ALTITUDE_METER_AI).arg(i));
+
+    refs.x.setName(QString(dr::POS_X).arg(i));
+    refs.y.setName(QString(dr::POS_Y).arg(i));
+
+    // Add to the list
+    dr::multiplayerDataRefs.append(refs);
+
+    // Find them all
+    dr::MultiplayerDataRefs& r = dr::multiplayerDataRefs.last();
+    r.headingTrueDegAi.find();
+    r.latPositionDegAi.find();
+    r.lonPositionDegAi.find();
+    r.actualAltitudeMeterAi.find();
+    r.x.find();
+    r.y.find();
+  }
+
+  // Find remaining datarefs of user aircraft
   for(DataRef *ref : dr::dataRefs)
   {
+    qDebug() << ref->getName();
+
     if(!ref->isValid())
       ref->find();
   }

@@ -50,6 +50,11 @@ public:
   DataRef(const QString& dataRefName);
   DataRef();
 
+  void setName(const QString& dataRefName)
+  {
+    name = dataRefName;
+  }
+
   /*
    * Calls the find method and return true if that dataref name was valid and found.
    * Prints a warning into the log if the ref could not be found.

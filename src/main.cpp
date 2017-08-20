@@ -87,17 +87,18 @@ PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc)
   app->setApplicationName("Little XpConnect");
   app->setOrganizationName("ABarthel");
   app->setOrganizationDomain("abarthel.org");
-  app->setApplicationVersion("0.5.0.develop");
+  app->setApplicationVersion("0.7.0.develop");
 
   // Initialize logging and force logfiles into the system or user temp directory
   LoggingHandler::initializeForTemp(Settings::getOverloadedPath(":/littlexpconnect/resources/config/logging.cfg"));
   LoggingUtil::logSystemInformation();
   LoggingUtil::logStandardPaths();
 
-  // Pass plugin info to X-Plane
-  strcpy(outName, "Little XpConnect");
+  // Pass plugin information to X-Plane
+  QString info = QString("%1 %2").arg(app->applicationName()).arg(app->applicationVersion());
+  strcpy(outName, info.toLatin1().constData());
   strcpy(outSig, "ABarthel.LittleXpConnect.Connect");
-  strcpy(outDesc, "Connects Little Navmap to X-Plane.");
+  strcpy(outDesc, "Connects Little Navmap and Little Navconnect to X-Plane.");
 
   // Create an instance here since it will be accessed from the main server thread
   Settings::instance();

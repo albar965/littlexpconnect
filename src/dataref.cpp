@@ -26,22 +26,20 @@ DataRef::DataRef(DataRefPtrVector& refs, const QString& dataRefName)
 {
   // Add to array but do not find it yet (still invalid)
   refs.append(this);
-  qDebug() << Q_FUNC_INFO << name;
 }
 
 DataRef::DataRef(const QString& dataRefName)
   : name(dataRefName)
 {
-  qDebug() << Q_FUNC_INFO << name;
 }
 
 DataRef::DataRef()
 {
-  qDebug() << Q_FUNC_INFO << name;
 }
 
 bool DataRef::find()
 {
+  qDebug() << Q_FUNC_INFO << name;
   dataRef = XPLMFindDataRef(name.toLatin1());
   if(dataRef == NULL)
     qWarning() << Q_FUNC_INFO << "Cannot find" << name;
