@@ -37,9 +37,11 @@ extern "C" {
 #include "fs/sc/simconnecttypes.h"
 #include "gui/consoleapplication.h"
 #include "fs/util/fsutil.h"
+#ifdef TCPSERVER
 #include "fs/ns/navserver.h"
 #include "fs/sc/connecthandler.h"
 #include "fs/sc/datareaderthread.h"
+#endif
 #include "geo/calculations.h"
 #include "fs/sc/xpconnecthandler.h"
 #include "settings/settings.h"
@@ -51,7 +53,9 @@ using atools::settings::Settings;
 
 namespace xpc {
 
+#ifdef TCPSERVER
 XpConnect *XpConnect::object = nullptr;
+#endif
 
 /* key names for atools::settings */
 static const QLatin1Literal SETTINGS_OPTIONS_DEFAULT_PORT("Options/DefaultPort");
@@ -155,7 +159,7 @@ enum XpEngineType
 // ====================================================================================
 // ServerThread
 // ====================================================================================
-
+#ifdef TCPSERVER
 /*
  * Main thread running everything else. Contains the event loop.
  */
@@ -264,6 +268,154 @@ void XpConnect::pluginDisable()
   qDebug() << Q_FUNC_INFO << "Server deleted";
 }
 
+#endif
+
+bool XpConnect::fillSimConnectData(atools::fs::sc::SimConnectData& data)
+{
+  atools::fs::sc::SimConnectUserAircraft& userAircraft = data.userAircraft;
+
+  float actualAlt = atools::geo::meterToFeet(dr::actualAltitudeMeter.valueFloat());
+  userAircraft.position =
+    atools::geo::Pos(dr::lonPositionDeg.valueFloat(), dr::latPositionDeg.valueFloat(), actualAlt);
+
+  if(!userAircraft.position.isValid() && !userAircraft.position.isNull())
+    return false;
+
+  userAircraft.magVarDeg = dr::magVarDeg.valueFloat();
+
+  // Wind and ambient parameters
+  userAircraft.windSpeedKts = dr::windSpeedKts.valueFloat();
+  userAircraft.windDirectionDegT = dr::windDirectionDegMag.valueFloat() - userAircraft.magVarDeg;
+  userAircraft.ambientTemperatureCelsius = dr::ambientTemperatureCelsius.valueFloat();
+  userAircraft.totalAirTemperatureCelsius = dr::totalAirTemperatureCelsius.valueFloat();
+  userAircraft.seaLevelPressureMbar = dr::seaLevelPressureMbar.valueFloat() / 100.f;
+
+  // Ice
+  userAircraft.pitotIcePercent = dr::pitotIcePercent.valueFloat() * 100.f;
+  userAircraft.structuralIcePercent = (dr::structuralIcePercent.valueFloat() +
+                                       dr::structuralIcePercent2.valueFloat()) / 2.f * 100.f;
+
+  // Weight
+  userAircraft.airplaneTotalWeightLbs = kgToLbs(dr::airplaneTotalWeightKgs.valueFloat());
+  userAircraft.airplaneMaxGrossWeightLbs = kgToLbs(dr::airplaneMaxGrossWeightKgs.valueFloat());
+  userAircraft.airplaneEmptyWeightLbs = kgToLbs(dr::airplaneEmptyWeightKgs.valueFloat());
+
+  // Fuel flow in weight
+  userAircraft.fuelTotalWeightLbs = kgToLbs(dr::fuelTotalWeightKgs.valueFloat());
+  userAircraft.fuelFlowPPH = kgToLbs(dr::fuelFlowKgSec8.valueFloatArrSum()) * 3600.f;
+
+  userAircraft.ambientVisibilityMeter = dr::ambientVisibilityMeter.valueFloat();
+
+  // Build local time and use timezone offset from simulator
+  // X-Plane does not allow to set the year
+  QDate localDate = QDate::currentDate();
+  localDate.setDate(localDate.year(), 1, 1);
+  localDate = localDate.addDays(dr::localDateDays.valueInt());
+  int localTimeSec = static_cast<int>(dr::localTimeSec.valueFloat());
+  int zuluTimeSec = static_cast<int>(dr::zuluTimeSec.valueFloat());
+  int offsetSeconds = zuluTimeSec - localTimeSec;
+
+  QTime localTime = QTime::fromMSecsSinceStartOfDay(localTimeSec * 1000);
+  QDateTime localDateTime(localDate, localTime, Qt::OffsetFromUTC, -offsetSeconds);
+  userAircraft.localDateTime = localDateTime;
+
+  QTime zuluTime = QTime::fromMSecsSinceStartOfDay(zuluTimeSec * 1000);
+  userAircraft.zuluDateTime = QDateTime(localDate, zuluTime, Qt::UTC);
+
+  // SimConnectAircraft
+  userAircraft.airplaneTitle = dr::airplaneTitle.valueString();
+  userAircraft.airplaneModel = dr::airplaneType.valueString();
+  userAircraft.airplaneReg = dr::airplaneReg.valueString();
+  // userAircraft.airplaneType;           // not available - use model ICAO code in client
+  // userAircraft.airplaneAirline;        // not available
+  // userAircraft.airplaneFlightnumber;   // not available
+  // userAircraft.fromIdent;              // not available
+  // userAircraft.toIdent;                // not available
+
+  userAircraft.altitudeAboveGroundFt = dr::aglAltitudeFt.valueFloat();
+  userAircraft.groundAltitudeFt = actualAlt - userAircraft.altitudeAboveGroundFt;
+  userAircraft.indicatedAltitudeFt = dr::indicatedAltitudeFt.valueFloat();
+
+  // Heading and track
+  userAircraft.headingMagDeg = dr::headingMagDeg.valueFloat();
+  userAircraft.headingTrueDeg = dr::headingTrueDeg.valueFloat();
+  userAircraft.trackMagDeg = dr::trackMagDeg.valueFloat();
+  userAircraft.trackTrueDeg = userAircraft.trackMagDeg - userAircraft.magVarDeg;
+
+  // Speed
+  userAircraft.indicatedSpeedKts = dr::indicatedSpeedKts.valueFloat();
+  userAircraft.trueSpeedKts = dr::trueSpeedKts.valueFloat();
+  userAircraft.machSpeed = dr::machSpeed.valueFloat();
+  userAircraft.verticalSpeedFeetPerMin = dr::verticalSpeedFeetPerMin.valueFloat();
+  userAircraft.groundSpeedKts = dr::groundSpeedKts.valueFloat();
+
+  // Model
+  userAircraft.modelRadiusFt = 0; // not available - disable display in client which will use a default value
+  userAircraft.wingSpanFt = 0; // not available- disable display in client
+
+  // Set misc flags
+  userAircraft.flags = atools::fs::sc::IS_USER;
+  if(dr::onGround.valueInt() > 0)
+    userAircraft.flags |= atools::fs::sc::ON_GROUND;
+  if(dr::rainPercentage.valueFloat() > 0.1f)
+    userAircraft.flags |= atools::fs::sc::IN_RAIN;
+  // IN_CLOUD = 0x0002, - not available
+  // IN_SNOW = 0x0008,  - not available
+
+  // Category is not available - Disable display of category on client
+  userAircraft.category = atools::fs::sc::UNKNOWN;
+  // AIRPLANE, HELICOPTER, BOAT, GROUNDVEHICLE, CONTROLTOWER, SIMPLEOBJECT, VIEWER
+
+  // Value to calculate fuel volume from mass
+  float fuelMassToVolDivider = 6.f;
+
+  // Get the engine array
+  IntVector engines = dr::engineType8.valueIntArr();
+  userAircraft.engineType = atools::fs::sc::UNSUPPORTED;
+  // PISTON = 0, JET = 1, NO_ENGINE = 2, HELO_TURBINE = 3, UNSUPPORTED = 4, TURBOPROP = 5
+
+  // Get engine type
+  for(int engine : engines)
+  {
+    dr::XpEngineType type = static_cast<dr::XpEngineType>(engine);
+    switch(type)
+    {
+      case xpc::dr::ELECTRIC:
+      case xpc::dr::RECIP_CARB:
+      case xpc::dr::RECIP_INJECTED:
+        userAircraft.engineType = atools::fs::sc::PISTON;
+        fuelMassToVolDivider = 6.f; // Avgas lbs to gallons at standard temp
+        break;
+
+      case xpc::dr::FREE_TURBINE:
+      case xpc::dr::FIXED_TURBINE:
+        fuelMassToVolDivider = 6.7f; // JetA lbs to gallons at standard temp
+        userAircraft.engineType = atools::fs::sc::TURBOPROP;
+        break;
+
+      case xpc::dr::ROCKET:
+      case xpc::dr::TIP_ROCKETS:
+      case xpc::dr::LO_BYPASS_JET:
+      case xpc::dr::HI_BYPASS_JET:
+        fuelMassToVolDivider = 6.7f; // JetA lbs to gallons at standard temp
+        userAircraft.engineType = atools::fs::sc::JET;
+        break;
+    }
+    if(userAircraft.engineType != atools::fs::sc::UNSUPPORTED)
+      // Found one - stop here
+      break;
+  }
+
+  // Calculate fuell volume based on type
+  userAircraft.fuelTotalQuantityGallons = userAircraft.fuelTotalWeightLbs / fuelMassToVolDivider;
+  userAircraft.fuelFlowGPH = userAircraft.fuelFlowPPH / fuelMassToVolDivider;
+
+  userAircraft.numberOfEngines = static_cast<quint8>(dr::numberOfEngines.valueInt());
+
+  return true;
+}
+
+#ifdef TCPSERVER
 float XpConnect::flightLoopCallback(float inElapsedSinceLastCall, float inElapsedTimeSinceLastFlightLoop, int inCounter)
 {
   // All datarefs are read on the X-Plane main plugin thread
@@ -271,8 +423,8 @@ float XpConnect::flightLoopCallback(float inElapsedSinceLastCall, float inElapse
   Q_UNUSED(inElapsedTimeSinceLastFlightLoop);
   Q_UNUSED(inCounter);
   // qDebug() << "LittleXpConnect" << Q_FUNC_INFO << "inElapsedSinceLastCall" << inElapsedSinceLastCall
-  //    << "inElapsedTimeSinceLastFlightLoop" << inElapsedTimeSinceLastFlightLoop
-  //    << "inCounter" << inCounter;
+  // << "inElapsedTimeSinceLastFlightLoop" << inElapsedTimeSinceLastFlightLoop
+  // << "inCounter" << inCounter;
 
   {
     if(currentDataMutex == nullptr)
@@ -280,142 +432,7 @@ float XpConnect::flightLoopCallback(float inElapsedSinceLastCall, float inElapse
 
     // Copy into a temporary object first to make the sync area smaller and get this quickly done
     atools::fs::sc::SimConnectData data;
-    atools::fs::sc::SimConnectUserAircraft& userAircraft = data.userAircraft;
-
-    userAircraft.magVarDeg = dr::magVarDeg.valueFloat();
-
-    // Wind and ambient parameters
-    userAircraft.windSpeedKts = dr::windSpeedKts.valueFloat();
-    userAircraft.windDirectionDegT = dr::windDirectionDegMag.valueFloat() - userAircraft.magVarDeg;
-    userAircraft.ambientTemperatureCelsius = dr::ambientTemperatureCelsius.valueFloat();
-    userAircraft.totalAirTemperatureCelsius = dr::totalAirTemperatureCelsius.valueFloat();
-    userAircraft.seaLevelPressureMbar = dr::seaLevelPressureMbar.valueFloat() / 100.f;
-
-    // Ice
-    userAircraft.pitotIcePercent = dr::pitotIcePercent.valueFloat() * 100.f;
-    userAircraft.structuralIcePercent = (dr::structuralIcePercent.valueFloat() +
-                                         dr::structuralIcePercent2.valueFloat()) / 2.f * 100.f;
-
-    // Weight
-    userAircraft.airplaneTotalWeightLbs = kgToLbs(dr::airplaneTotalWeightKgs.valueFloat());
-    userAircraft.airplaneMaxGrossWeightLbs = kgToLbs(dr::airplaneMaxGrossWeightKgs.valueFloat());
-    userAircraft.airplaneEmptyWeightLbs = kgToLbs(dr::airplaneEmptyWeightKgs.valueFloat());
-
-    // Fuel flow in weight
-    userAircraft.fuelTotalWeightLbs = kgToLbs(dr::fuelTotalWeightKgs.valueFloat());
-    userAircraft.fuelFlowPPH = kgToLbs(dr::fuelFlowKgSec8.valueFloatArrSum()) * 3600.f;
-
-    userAircraft.ambientVisibilityMeter = dr::ambientVisibilityMeter.valueFloat();
-
-    // Build local time and use timezone offset from simulator
-    // X-Plane does not allow to set the year
-    QDate localDate = QDate::currentDate();
-    localDate.setDate(localDate.year(), 1, 1);
-    localDate = localDate.addDays(dr::localDateDays.valueInt());
-    int localTimeSec = static_cast<int>(dr::localTimeSec.valueFloat());
-    int zuluTimeSec = static_cast<int>(dr::zuluTimeSec.valueFloat());
-    int offsetSeconds = zuluTimeSec - localTimeSec;
-
-    QTime localTime = QTime::fromMSecsSinceStartOfDay(localTimeSec * 1000);
-    QDateTime localDateTime(localDate, localTime, Qt::OffsetFromUTC, -offsetSeconds);
-    userAircraft.localDateTime = localDateTime;
-
-    QTime zuluTime = QTime::fromMSecsSinceStartOfDay(zuluTimeSec * 1000);
-    userAircraft.zuluDateTime = QDateTime(localDate, zuluTime, Qt::UTC);
-
-    // SimConnectAircraft
-    userAircraft.airplaneTitle = dr::airplaneTitle.valueString();
-    userAircraft.airplaneModel = dr::airplaneType.valueString();
-    userAircraft.airplaneReg = dr::airplaneReg.valueString();
-    // userAircraft.airplaneType;           // not available - use model ICAO code in client
-    // userAircraft.airplaneAirline;        // not available
-    // userAircraft.airplaneFlightnumber;   // not available
-    // userAircraft.fromIdent;              // not available
-    // userAircraft.toIdent;                // not available
-
-    float actualAlt = atools::geo::meterToFeet(dr::actualAltitudeMeter.valueFloat());
-    userAircraft.position =
-      atools::geo::Pos(dr::lonPositionDeg.valueFloat(), dr::latPositionDeg.valueFloat(), actualAlt);
-
-    userAircraft.altitudeAboveGroundFt = dr::aglAltitudeFt.valueFloat();
-    userAircraft.groundAltitudeFt = actualAlt - userAircraft.altitudeAboveGroundFt;
-    userAircraft.indicatedAltitudeFt = dr::indicatedAltitudeFt.valueFloat();
-
-    // Heading and track
-    userAircraft.headingMagDeg = dr::headingMagDeg.valueFloat();
-    userAircraft.headingTrueDeg = dr::headingTrueDeg.valueFloat();
-    userAircraft.trackMagDeg = dr::trackMagDeg.valueFloat();
-    userAircraft.trackTrueDeg = userAircraft.trackMagDeg - userAircraft.magVarDeg;
-
-    // Speed
-    userAircraft.indicatedSpeedKts = dr::indicatedSpeedKts.valueFloat();
-    userAircraft.trueSpeedKts = dr::trueSpeedKts.valueFloat();
-    userAircraft.machSpeed = dr::machSpeed.valueFloat();
-    userAircraft.verticalSpeedFeetPerMin = dr::verticalSpeedFeetPerMin.valueFloat();
-    userAircraft.groundSpeedKts = dr::groundSpeedKts.valueFloat();
-
-    // Model
-    userAircraft.modelRadiusFt = 0; // not available - disable display in client which will use a default value
-    userAircraft.wingSpanFt = 0; // not available- disable display in client
-
-    // Set misc flags
-    userAircraft.flags = atools::fs::sc::IS_USER;
-    if(dr::onGround.valueInt() > 0)
-      userAircraft.flags |= atools::fs::sc::ON_GROUND;
-    if(dr::rainPercentage.valueFloat() > 0.1f)
-      userAircraft.flags |= atools::fs::sc::IN_RAIN;
-    // IN_CLOUD = 0x0002, - not available
-    // IN_SNOW = 0x0008,  - not available
-
-    // Category is not available - Disable display of category on client
-    userAircraft.category = atools::fs::sc::UNKNOWN;
-    // AIRPLANE, HELICOPTER, BOAT, GROUNDVEHICLE, CONTROLTOWER, SIMPLEOBJECT, VIEWER
-
-    // Value to calculate fuel volume from mass
-    float fuelMassToVolDivider = 6.f;
-
-    // Get the engine array
-    IntVector engines = dr::engineType8.valueIntArr();
-    userAircraft.engineType = atools::fs::sc::UNSUPPORTED;
-    // PISTON = 0, JET = 1, NO_ENGINE = 2, HELO_TURBINE = 3, UNSUPPORTED = 4, TURBOPROP = 5
-
-    // Get engine type
-    for(int engine : engines)
-    {
-      dr::XpEngineType type = static_cast<dr::XpEngineType>(engine);
-      switch(type)
-      {
-        case xpc::dr::ELECTRIC:
-        case xpc::dr::RECIP_CARB:
-        case xpc::dr::RECIP_INJECTED:
-          userAircraft.engineType = atools::fs::sc::PISTON;
-          fuelMassToVolDivider = 6.f; // Avgas lbs to gallons at standard temp
-          break;
-
-        case xpc::dr::FREE_TURBINE:
-        case xpc::dr::FIXED_TURBINE:
-          fuelMassToVolDivider = 6.7f; // JetA lbs to gallons at standard temp
-          userAircraft.engineType = atools::fs::sc::TURBOPROP;
-          break;
-
-        case xpc::dr::ROCKET:
-        case xpc::dr::TIP_ROCKETS:
-        case xpc::dr::LO_BYPASS_JET:
-        case xpc::dr::HI_BYPASS_JET:
-          fuelMassToVolDivider = 6.7f; // JetA lbs to gallons at standard temp
-          userAircraft.engineType = atools::fs::sc::JET;
-          break;
-      }
-      if(userAircraft.engineType != atools::fs::sc::UNSUPPORTED)
-        // Found one - stop here
-        break;
-    }
-
-    // Calculate fuell volume based on type
-    userAircraft.fuelTotalQuantityGallons = userAircraft.fuelTotalWeightLbs / fuelMassToVolDivider;
-    userAircraft.fuelFlowGPH = userAircraft.fuelFlowPPH / fuelMassToVolDivider;
-
-    userAircraft.numberOfEngines = static_cast<quint8>(dr::numberOfEngines.valueInt());
+    fillSimConnectData(data);
 
     {
       QMutexLocker locker(currentDataMutex);
@@ -530,4 +547,5 @@ void XpConnect::deleteNavServer()
   }
 }
 
+#endif
 } // namespace xpc

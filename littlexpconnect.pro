@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core network
+QT       += core
 
 QT       -= gui
 CONFIG += c++11
@@ -126,7 +126,7 @@ unix:!macx {
   DEPLOY_DIR=\"$$PWD/../deploy/Little XpConnect\"
 
   deploy.commands = rm -Rfv $${DEPLOY_DIR} &&
-  deploy.commands = mkdir -pv $${DEPLOY_DIR}/64 &&
+  deploy.commands += mkdir -pv $${DEPLOY_DIR}/64 &&
   deploy.commands += cp -av $${OUT_PWD}/liblittlexpconnect.so.1.0.0 $${DEPLOY_DIR}/64/lin.xpl &&
   deploy.commands += cp -vf $${PWD}/CHANGELOG.txt $${DEPLOY_DIR} &&
   deploy.commands += cp -vf $${PWD}/README.txt $${DEPLOY_DIR} &&
@@ -134,8 +134,7 @@ unix:!macx {
   deploy.commands += cp -vfa $${QT_HOME}/lib/libicudata.so*  $${DEPLOY_DIR}/64 &&
   deploy.commands += cp -vfa $${QT_HOME}/lib/libicui18n.so*  $${DEPLOY_DIR}/64 &&
   deploy.commands += cp -vfa $${QT_HOME}/lib/libicuuc.so*  $${DEPLOY_DIR}/64 &&
-  deploy.commands += cp -vfa $${QT_HOME}/lib/libQt5Core.so*  $${DEPLOY_DIR}/64 &&
-  deploy.commands += cp -vfa $${QT_HOME}/lib/libQt5Network.so*  $${DEPLOY_DIR}/64
+  deploy.commands += cp -vfa $${QT_HOME}/lib/libQt5Core.so*  $${DEPLOY_DIR}/64
 }
 
 # MacOS specific deploy target
@@ -148,7 +147,6 @@ macx {
   deploy.commands += cp -vf $${PWD}/CHANGELOG.txt $${DEPLOY_DIR} &&
   deploy.commands += cp -vf $${PWD}/README.txt $${DEPLOY_DIR} &&
   deploy.commands += cp -vf $${PWD}/LICENSE.txt $${DEPLOY_DIR} &&
-  deploy.commands += cp -vfa $${QT_HOME}/lib/QtNetwork.framework  $${DEPLOY_DIR} &&
   deploy.commands += cp -vfa $${QT_HOME}/lib/QtCore.framework  $${DEPLOY_DIR}
 }
 
@@ -181,7 +179,6 @@ win32 {
   deploy.commands += xcopy $${QT_HOME}\\bin\\libicuin$${DLL_SUFFIX}58.dll $${DEPLOY_DIR_WIN}\\64 &&
   deploy.commands += xcopy $${QT_HOME}\\bin\\libicuuc$${DLL_SUFFIX}58.dll $${DEPLOY_DIR_WIN}\\64 &&
   deploy.commands += xcopy $${QT_HOME}\\bin\\zlib1.dll $${DEPLOY_DIR_WIN}\\64 &&
-  deploy.commands += xcopy $${QT_HOME}\\bin\\Qt5Network$${DLL_SUFFIX}.dll $${DEPLOY_DIR_WIN}\\64 &&
   deploy.commands += xcopy $${QT_HOME}\\bin\\Qt5Core$${DLL_SUFFIX}.dll $${DEPLOY_DIR_WIN}\\64
 }
 

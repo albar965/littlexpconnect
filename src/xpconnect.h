@@ -58,6 +58,7 @@ class ServerThread;
 class XpConnect
 {
 public:
+#ifdef TCPSERVER
   ~XpConnect();
 
   /* Create and instance but does nothing else. Not thread safe. */
@@ -83,7 +84,11 @@ public:
    * SimConnectData object currentData. Called on the thread context of the DataReaderThread.
    *  returns true if something was copied. */
   bool copyData(atools::fs::sc::SimConnectData& data, int radiusKm, atools::fs::sc::Options options);
+#endif
 
+  static bool fillSimConnectData(atools::fs::sc::SimConnectData& data);
+
+#ifdef TCPSERVER
 private:
   friend class ServerThread;
 
@@ -124,6 +129,8 @@ private:
 
   /* Singleton instance */
   static XpConnect *object;
+#endif
+
 };
 
 } // namespace xpc

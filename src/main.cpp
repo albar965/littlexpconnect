@@ -38,6 +38,9 @@ extern "C" {
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <QSharedMemory>
+#include <QDataStream>
+#include <QBuffer>
 
 /*
  * This file contains the C functions needed by the XPLM API. All functionality will be delegated to
@@ -56,6 +59,9 @@ float flightLoopCallback(float inElapsedSinceLastCall, float inElapsedTimeSinceL
 /* Application object for event queue in server thread */
 static atools::gui::ConsoleApplication *app = nullptr;
 static bool pluginRunning = false;
+
+static QSharedMemory sharedMemory;
+static const int SHARED_MEMORY_SIZE = 8196;
 
 /* Called on simulator startup */
 PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc)
@@ -89,7 +95,22 @@ PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc)
   Settings::instance();
 
   // Create object instance but do not start it yet
-  xpc::XpConnect::instance();
+  // xpc::XpConnect::instance();
+
+  sharedMemory.setKey("LittleXpConnect");
+  if(!sharedMemory.create(SHARED_MEMORY_SIZE, QSharedMemory::ReadWrite))
+  {
+    qWarning() << "LittleXpConnect" << Q_FUNC_INFO << "Cannot create" << sharedMemory.errorString();
+
+    if(!sharedMemory.attach(QSharedMemory::ReadWrite))
+      qWarning() << "LittleXpConnect" << Q_FUNC_INFO << "Cannot attach" << sharedMemory.errorString();
+    else
+      qInfo() << "LittleXpConnect" << Q_FUNC_INFO << "Attached to" << sharedMemory.key()
+              << "native" << sharedMemory.nativeKey();
+  }
+  else
+    qInfo() << "LittleXpConnect" << Q_FUNC_INFO << "Created" << sharedMemory.key()
+            << "native" << sharedMemory.nativeKey();
 
   // Always successfull
   return 1;
@@ -98,8 +119,16 @@ PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc)
 /* Called when simulator terminates */
 PLUGIN_API void XPluginStop(void)
 {
-  qDebug() << "LittleXpConnect" << Q_FUNC_INFO << "XpConnect shutdown";
-  xpc::XpConnect::shutdown();
+  // qDebug() << "LittleXpConnect" << Q_FUNC_INFO << "XpConnect shutdown";
+  // xpc::XpConnect::shutdown();
+  pluginRunning = false;
+
+  if(!sharedMemory.detach())
+    qWarning() << "Cannot detach" << sharedMemory.errorString() << "from" << sharedMemory.key()
+               << "native" << sharedMemory.nativeKey();
+  else
+    qInfo() << "LittleXpConnect" << Q_FUNC_INFO << "Detached from" << sharedMemory.key()
+            << "native" << sharedMemory.nativeKey();
 
   qDebug() << "LittleXpConnect" << Q_FUNC_INFO << "sync settings";
   Settings::instance().syncSettings();
@@ -116,10 +145,11 @@ PLUGIN_API int XPluginEnable(void)
   qDebug() << "LittleXpConnect" << Q_FUNC_INFO;
 
   // Register callback into method - first call in five seconds
-  XPLMRegisterFlightLoopCallback(flightLoopCallback, 1.f, &xpc::XpConnect::instance());
+  XPLMRegisterFlightLoopCallback(flightLoopCallback, 1.f, nullptr);
 
   // Start all threads and the TCP server
-  xpc::XpConnect::instance().pluginEnable();
+  // xpc::XpConnect::instance().pluginEnable();
+
   pluginRunning = true;
   return 1;
 }
@@ -131,10 +161,10 @@ PLUGIN_API void XPluginDisable(void)
   pluginRunning = false;
 
   // Unregister call back
-  XPLMUnregisterFlightLoopCallback(flightLoopCallback, &xpc::XpConnect::instance());
+  XPLMUnregisterFlightLoopCallback(flightLoopCallback, nullptr);
 
   // Shut down all threads and the TCP server
-  xpc::XpConnect::instance().pluginDisable();
+  // xpc::XpConnect::instance().pluginDisable();
 }
 
 /* called on special messages like aircraft loaded, etc. */
@@ -148,10 +178,40 @@ PLUGIN_API void XPluginReceiveMessage(XPLMPluginID inFromWho, long inMessage, vo
 float flightLoopCallback(float inElapsedSinceLastCall, float inElapsedTimeSinceLastFlightLoop, int inCounter,
                          void *inRefcon)
 {
-  if(pluginRunning)
-    // Use provided object pointer since it is faster and return seconds to next activation
-    return static_cast<xpc::XpConnect *>(inRefcon)->flightLoopCallback(inElapsedSinceLastCall,
-                                                                     inElapsedTimeSinceLastFlightLoop, inCounter);
-  else
-    return 1.f;
+  Q_UNUSED(inElapsedSinceLastCall);
+  Q_UNUSED(inElapsedTimeSinceLastFlightLoop);
+  Q_UNUSED(inCounter);
+  Q_UNUSED(inRefcon);
+
+  atools::fs::sc::SimConnectData data;
+  if(xpc::XpConnect::fillSimConnectData(data))
+  {
+    QBuffer buffer;
+    buffer.open(QIODevice::WriteOnly);
+    data.write(&buffer);
+
+    if(buffer.size() > SHARED_MEMORY_SIZE)
+      qWarning() << "LittleXpConnect" << Q_FUNC_INFO << "Data too large" << buffer.size() << ">" << SHARED_MEMORY_SIZE;
+    else
+    {
+      if(sharedMemory.lock())
+      {
+        memcpy(sharedMemory.data(), buffer.data().constData(), static_cast<size_t>(buffer.size()));
+        qDebug() << "Lock ok size" << buffer.size();
+        sharedMemory.unlock();
+      }
+      else
+        qInfo() << "LittleXpConnect" << Q_FUNC_INFO << "Cannot lock" << sharedMemory.key()
+                << "native" << sharedMemory.nativeKey();
+    }
+  }
+
+  return 1.f;
+
+  // if(pluginRunning)
+  //// Use provided object pointer since it is faster and return seconds to next activation
+  // return static_cast<xpc::XpConnect *>(inRefcon)->flightLoopCallback(inElapsedSinceLastCall,
+  // inElapsedTimeSinceLastFlightLoop, inCounter);
+  // else
+  // return 1.f;
 }

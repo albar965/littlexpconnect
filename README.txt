@@ -50,11 +50,9 @@ Settings can only be changed using the configuration file "little_xpconnect.ini"
 [Options]
 DefaultPort=51968     : This is the default port to connect to. Change this if it collides with another program.
 FetchAiAircraft=true  : Also get AI aircraft (not available yet)
-FetchAiShip=true      : Also get AI ships (not available yet)
 FetchRate=200         : Data will be fetched from X-Plane every 200 milliseconds.
                         Lower this value to get a more fluid movement of the aircraft symbol on the map.
                         Increase this value if you think it causes performance problems.
-ReconnectRate=10      : Not used. Ignore
 UpdateRate=500        : Data will be sent over the network ever 500 milliseconds.
                         Lower this value to get a more fluid movement of the aircraft symbol on the map.
                         Increase this value if you have a slow network.
