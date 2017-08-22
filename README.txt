@@ -1,32 +1,35 @@
-Little XpConnect
+Little Xpconnect
 ================
 
 A free and open source X-Plane plugin that allows to use Little Navmap as a moving map when flying.
-Little Navmap can connect locally or remote to this plugin which runs its own TCP network server.
+Little Navmap can connect locally to this plugin. Remote or networked setups can be done with
+the Little Navconnect program.
 
 Little Navmap is a free open source flight planner, navigation tool, moving map, airport search and
 airport information system for Flight Simulator X, Prepar3D and X-Plane.
 
-This plugin is only useful for X-plane and is available for Windows, macOS and Linux (all 64 bit only).
+This plugin is only useful for X-Plane and is available for Windows, macOS and Linux (all 64 bit only).
+Only tested on X-Plane 11.
 
-|Windows, Linux or Mac Machine       |         Windows, Linux or Mac Machines  |
+|Windows, Linux or Mac Machine        |         Windows, Linux or Mac Machine  |
 --------------------------------------------------------------------------------
-| X-Plane <-> Little XpConnect <- (Local)   -> Little Navmap on Computer 1
-                               <- (Network) -> Little Navmap on Computer 2
+| X-Plane <-> Little Xpconnect  <- (Local)   -> Little Navmap
 
 ------------------------------------------------------------------------------
 -- INSTALLATION --------------------------------------------------------------
 ------------------------------------------------------------------------------
 
-Copy the whole plugin directory "Little XpConnect" into the plugins directory within your Resources directory
+Copy the whole plugin directory "Little Xpconnect" into the plugins directory within your Resources directory
 in the X-Plane installation.
 The complete path should look like:
-.../X-Plane 11/Resources/plugins/Little XpConnect
+.../X-Plane 11/Resources/plugins/Little Xpconnect
 
 You can check the X-Plane plugin manager to see if it is loaded  correctly.
 
 When connecting with Little Navmap use the computer name where X-Plane is running and
 the default port 51968. Use "localhost" if X-Plane and Little Navmap run on the same computer.
+
+The installation on Linux and macOS computers is simlar except different paths.
 
 ------------------------------------------------------------------------------
 -- FILES ---------------------------------------------------------------------
@@ -48,14 +51,11 @@ Additionally a small settings file is created which can be found in
 Settings can only be changed using the configuration file "little_xpconnect.ini".
 
 [Options]
-DefaultPort=51968     : This is the default port to connect to. Change this if it collides with another program.
-FetchAiAircraft=true  : Also get AI aircraft (not available yet)
+FetchAiAircraft=true  : Also get AI aircraft. You can disable this if
+                        you think the plugin causes performance problems.
 FetchRate=200         : Data will be fetched from X-Plane every 200 milliseconds.
                         Lower this value to get a more fluid movement of the aircraft symbol on the map.
-                        Increase this value if you think it causes performance problems.
-UpdateRate=500        : Data will be sent over the network ever 500 milliseconds.
-                        Lower this value to get a more fluid movement of the aircraft symbol on the map.
-                        Increase this value if you have a slow network.
+                        Increase this value if you think the plugin causes performance problems.
 
 ------------------------------------------------------------------------------
 -- LICENSE -------------------------------------------------------------------
@@ -67,7 +67,7 @@ The source code for this application is available at Github:
 https://github.com/albar965/atools
 https://github.com/albar965/littlexpconnect
 
-The source code for Little XpConnect is available at Github too:
+The source code for Little Xpconnect is available at Github too:
 https://github.com/albar965/littlexpconnect
 
 Copyright 2015-2017 Alexander Barthel (albar965@mailbox.org).

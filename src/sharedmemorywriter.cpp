@@ -18,6 +18,7 @@
 #include "sharedmemorywriter.h"
 
 #include "xpconnect.h"
+#include "fs/sc/xpconnecthandler.h"
 
 #include <QBuffer>
 #include <QDataStream>
@@ -58,9 +59,9 @@ void SharedMemoryWriter::writeData(const QByteArray& simDataBytes, bool terminat
   stream << static_cast<quint32>(terminated);
   stream.writeRawData(simDataBytes.constData(), static_cast<int>(simDataBytes.size()));
 
-  if(allBytes.size() > SHARED_MEMORY_SIZE)
-    qWarning() << "LittleXpConnect" << Q_FUNC_INFO
-               << "Data too large" << allBytes.size() << ">" << SHARED_MEMORY_SIZE;
+  if(allBytes.size() > atools::fs::sc::SHARED_MEMORY_SIZE)
+    qWarning() << "LittleXpconnect" << Q_FUNC_INFO
+               << "Data too large" << allBytes.size() << ">" << atools::fs::sc::SHARED_MEMORY_SIZE;
   else
   {
     if(sharedMemory.lock())
@@ -70,28 +71,28 @@ void SharedMemoryWriter::writeData(const QByteArray& simDataBytes, bool terminat
       sharedMemory.unlock();
     }
     else
-      qInfo() << "LittleXpConnect" << Q_FUNC_INFO << "Cannot lock" << sharedMemory.key()
+      qInfo() << "LittleXpconnect" << Q_FUNC_INFO << "Cannot lock" << sharedMemory.key()
               << "native" << sharedMemory.nativeKey();
   }
 }
 
 void SharedMemoryWriter::run()
 {
-  qDebug() << "LittleXpConnect" << Q_FUNC_INFO;
+  qDebug() << "LittleXpconnect" << Q_FUNC_INFO;
 
-  sharedMemory.setKey("LittleXpConnect");
-  if(!sharedMemory.create(SHARED_MEMORY_SIZE, QSharedMemory::ReadWrite))
+  sharedMemory.setKey(atools::fs::sc::SHARED_MEMORY_KEY);
+  if(!sharedMemory.create(atools::fs::sc::SHARED_MEMORY_SIZE, QSharedMemory::ReadWrite))
   {
-    qWarning() << "LittleXpConnect" << Q_FUNC_INFO << "Cannot create" << sharedMemory.errorString();
+    qWarning() << "LittleXpconnect" << Q_FUNC_INFO << "Cannot create" << sharedMemory.errorString();
 
     if(!sharedMemory.attach(QSharedMemory::ReadWrite))
-      qWarning() << "LittleXpConnect" << Q_FUNC_INFO << "Cannot attach" << sharedMemory.errorString();
+      qWarning() << "LittleXpconnect" << Q_FUNC_INFO << "Cannot attach" << sharedMemory.errorString();
     else
-      qInfo() << "LittleXpConnect" << Q_FUNC_INFO << "Attached to" << sharedMemory.key()
+      qInfo() << "LittleXpconnect" << Q_FUNC_INFO << "Attached to" << sharedMemory.key()
               << "native" << sharedMemory.nativeKey();
   }
   else
-    qInfo() << "LittleXpConnect" << Q_FUNC_INFO << "Created" << sharedMemory.key()
+    qInfo() << "LittleXpconnect" << Q_FUNC_INFO << "Created" << sharedMemory.key()
             << "native" << sharedMemory.nativeKey();
 
   waitMutex.lock();
@@ -120,12 +121,12 @@ void SharedMemoryWriter::run()
       writeData(simDataBytes, false);
   }
   waitMutex.unlock();
-  qDebug() << "LittleXpConnect" << Q_FUNC_INFO << "terminate" << terminate;
+  qDebug() << "LittleXpconnect" << Q_FUNC_INFO << "terminate" << terminate;
 
   if(!sharedMemory.detach())
     qWarning() << "Cannot detach" << sharedMemory.errorString() << "from" << sharedMemory.key()
                << "native" << sharedMemory.nativeKey();
   else
-    qInfo() << "LittleXpConnect" << Q_FUNC_INFO << "Detached from" << sharedMemory.key()
+    qInfo() << "LittleXpconnect" << Q_FUNC_INFO << "Detached from" << sharedMemory.key()
             << "native" << sharedMemory.nativeKey();
 }

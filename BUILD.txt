@@ -31,7 +31,7 @@ pacman -S mingw-w64-x86_64-toolchain mingw-w64-i686-qt mingw-w64-i686-qt5 mingw-
 - Set the build kit for atools and littlexpconnect to MinGW 32bit.
 - Run qmake from Qt Creator for all projects
 - Build all projects from Qt Creator
-- Create and run the target "deploy". This will create a director ..\deploy\Little XpConnect with the plugin.
+- Create and run the target "deploy". This will create a director ..\deploy\Little Xpconnect with the plugin.
 
 Do not use the default shadow build directory names, this will break project dependencies.
 

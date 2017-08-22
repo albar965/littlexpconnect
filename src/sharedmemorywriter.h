@@ -47,9 +47,6 @@ private:
   virtual void run() override;
   void writeData(const QByteArray& simDataBytes, bool terminated);
 
-  /* Defaul size of the shared memory segment */
-  static const int SHARED_MEMORY_SIZE = 8196;
-
   bool terminate = false;
   atools::fs::sc::SimConnectData data;
 

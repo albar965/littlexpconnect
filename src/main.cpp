@@ -75,7 +75,7 @@ static SharedMemoryWriter *thread = nullptr;
 /* Called on simulator startup */
 PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc)
 {
-  qDebug() << "LittleXpConnect" << Q_FUNC_INFO;
+  qDebug() << "LittleXpconnect" << Q_FUNC_INFO;
 
   // Register atools types so we can stream them
   qRegisterMetaType<atools::fs::sc::SimConnectData>();
@@ -84,7 +84,7 @@ PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc)
   // Create application object which is needed for the server thread event queue
   int argc = 0;
   app = new atools::gui::ConsoleApplication(argc, nullptr);
-  app->setApplicationName("Little XpConnect");
+  app->setApplicationName("Little Xpconnect");
   app->setOrganizationName("ABarthel");
   app->setOrganizationDomain("abarthel.org");
   app->setApplicationVersion("0.7.0.develop");
@@ -97,7 +97,7 @@ PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc)
   // Pass plugin information to X-Plane
   QString info = QString("%1 %2").arg(app->applicationName()).arg(app->applicationVersion());
   strcpy(outName, info.toLatin1().constData());
-  strcpy(outSig, "ABarthel.LittleXpConnect.Connect");
+  strcpy(outSig, "ABarthel.LittleXpconnect.Connect");
   strcpy(outDesc, "Connects Little Navmap and Little Navconnect to X-Plane.");
 
   // Create an instance here since it will be accessed from the main server thread
@@ -114,19 +114,19 @@ PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc)
 /* Called when simulator terminates */
 PLUGIN_API void XPluginStop(void)
 {
-  qDebug() << "LittleXpConnect" << Q_FUNC_INFO << "sync settings";
+  qDebug() << "LittleXpconnect" << Q_FUNC_INFO << "sync settings";
   Settings::instance().syncSettings();
 
-  qDebug() << "LittleXpConnect" << Q_FUNC_INFO << "Logging shutdown";
+  qDebug() << "LittleXpconnect" << Q_FUNC_INFO << "Logging shutdown";
   LoggingHandler::shutdown();
 
-  qDebug() << "LittleXpConnect" << Q_FUNC_INFO << "Logging shutdown done";
+  qDebug() << "LittleXpconnect" << Q_FUNC_INFO << "Logging shutdown done";
 }
 
 /* Enable plugin - can be called more than once during a simulator session */
 PLUGIN_API int XPluginEnable(void)
 {
-  qDebug() << "LittleXpConnect" << Q_FUNC_INFO;
+  qDebug() << "LittleXpconnect" << Q_FUNC_INFO;
 
   xpc::XpConnect::initDataRefs();
 
@@ -142,16 +142,16 @@ PLUGIN_API int XPluginEnable(void)
 /* Disable plugin - can be called more than once during a simulator session */
 PLUGIN_API void XPluginDisable()
 {
-  qDebug() << "LittleXpConnect" << Q_FUNC_INFO;
+  qDebug() << "LittleXpconnect" << Q_FUNC_INFO;
 
   // Unregister call back
   XPLMUnregisterFlightLoopCallback(flightLoopCallback, nullptr);
 
-  qDebug() << "LittleXpConnect" << Q_FUNC_INFO << "Terminating thread";
+  qDebug() << "LittleXpconnect" << Q_FUNC_INFO << "Terminating thread";
   thread->terminateThread();
   delete thread;
   thread = nullptr;
-  qDebug() << "LittleXpConnect" << Q_FUNC_INFO << "Terminating thread done";
+  qDebug() << "LittleXpconnect" << Q_FUNC_INFO << "Terminating thread done";
 }
 
 /* called on special messages like aircraft loaded, etc. */

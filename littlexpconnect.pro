@@ -125,7 +125,7 @@ DISTFILES += \
 
 # Linux specific deploy target
 unix:!macx {
-  DEPLOY_DIR=\"$$PWD/../deploy/Little XpConnect\"
+  DEPLOY_DIR=\"$$PWD/../deploy/Little Xpconnect\"
 
   deploy.commands = rm -Rfv $${DEPLOY_DIR} &&
   deploy.commands += mkdir -pv $${DEPLOY_DIR}/64 &&
@@ -141,7 +141,7 @@ unix:!macx {
 
 # MacOS specific deploy target
 macx {
-  DEPLOY_DIR=\"$$PWD/../deploy/Little XpConnect\"
+  DEPLOY_DIR=\"$$PWD/../deploy/Little Xpconnect\"
 
   deploy.commands = rm -Rfv $${DEPLOY_DIR} &&
   deploy.commands += mkdir -pv $${DEPLOY_DIR} &&
@@ -159,7 +159,7 @@ win32 {
   WINPWD ~= s,/,\\,g
   WINOUT_PWD=$${OUT_PWD}
   WINOUT_PWD ~= s,/,\\,g
-  DEPLOY_DIR_NAME=Little XpConnect
+  DEPLOY_DIR_NAME=Little Xpconnect
   DEPLOY_DIR_WIN=\"$${WINPWD}\\..\\deploy\\$${DEPLOY_DIR_NAME}\"
 
   CONFIG(debug, debug|release):DLL_SUFFIX=d
