@@ -1,3 +1,8 @@
+Version 0.9.0.develop
+
+* Added deployment for Windows, macOS and Linux.
+* Complete rework. Changed from TCP server to shared memory approach.
+
 Version 0.3.0.develop
 
 * Initial working version. No weather requests and no traffic yet.
