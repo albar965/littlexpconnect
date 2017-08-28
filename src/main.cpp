@@ -87,7 +87,7 @@ PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc)
   app->setApplicationName("Little Xpconnect");
   app->setOrganizationName("ABarthel");
   app->setOrganizationDomain("abarthel.org");
-  app->setApplicationVersion("0.9.0.develop");
+  app->setApplicationVersion("0.9.1.develop");
 
   // Initialize logging and force logfiles into the system or user temp directory
   LoggingHandler::initializeForTemp(Settings::getOverloadedPath(":/littlexpconnect/resources/config/logging.cfg"));

@@ -26,6 +26,7 @@
 
 using atools::geo::kgToLbs;
 using atools::geo::meterToFeet;
+using atools::geo::meterToNm;
 using atools::geo::Pos;
 
 namespace xpc {
@@ -49,13 +50,13 @@ static DataRef windDirectionDegMag(dataRefs, "sim/cockpit2/gauges/indicators/win
 // Temperatures
 // Static air temperature (SAT) is also called: outside air temperature (OAT) or true air temperature
 // Lower than TAT
-static DataRef ambientTemperatureCelsius(dataRefs, "sim/weather/temperature_ambient_c");
+static DataRef ambientTemperatureC(dataRefs, "sim/weather/temperature_ambient_c");
 
 // Total air temperature (TAT) is also called: indicated air temperature (IAT) or ram air temperature (RAT)
 // higher than SAT
-static DataRef totalAirTemperatureCelsius(dataRefs, "sim/weather/temperature_le_c");
+static DataRef leTemperatureC(dataRefs, "sim/weather/temperature_le_c");
 
-static DataRef seaLevelPressureMbar(dataRefs, "sim/physics/earth_pressure_p");
+static DataRef seaLevelPressurePascal(dataRefs, "sim/physics/earth_pressure_p");
 
 // Ice
 static DataRef pitotIcePercent(dataRefs, "sim/flightmodel/failures/pitot_ice");
@@ -71,11 +72,12 @@ static DataRef airplanePayloadWeightKgs(dataRefs, "sim/flightmodel/weight/m_fixe
 // static DataRef fuelTotalQuantityGallons(dataRefs, ""); value calculated
 static DataRef fuelTotalWeightKgs(dataRefs, "sim/flightmodel/weight/m_fuel_total");
 
+// Value for up to eight engines
 static DataRef fuelFlowKgSec8(dataRefs, "sim/cockpit2/engine/indicators/fuel_flow_kg_sec");
 // static DataRef fuelFlowGPH(dataRefs, ""); value calculated
 
 static DataRef magVarDeg(dataRefs, "sim/flightmodel/position/magnetic_variation");
-static DataRef ambientVisibilityMeter(dataRefs, "sim/weather/visibility_reported_m");
+static DataRef ambientVisibilityM(dataRefs, "sim/weather/visibility_reported_m");
 static DataRef trackMagDeg(dataRefs, "sim/cockpit2/gauges/indicators/ground_track_mag_pilot");
 // static DataRef trackTrueDeg(dataRefs, ""); value calculated
 
@@ -89,23 +91,28 @@ static DataRef airplaneReg(dataRefs, "sim/aircraft/view/acf_tailnum");
 static DataRef airplaneTitle(dataRefs, "sim/aircraft/view/acf_descrip");
 static DataRef airplaneType(dataRefs, "sim/aircraft/view/acf_ICAO");
 
-// Position and more
+// Position
 static DataRef latPositionDeg(dataRefs, "sim/flightmodel/position/latitude");
 static DataRef lonPositionDeg(dataRefs, "sim/flightmodel/position/longitude");
-static DataRef indicatedSpeedKts(dataRefs, "sim/flightmodel/position/indicated_airspeed");
-static DataRef trueSpeedKts(dataRefs, "sim/flightmodel/position/true_airspeed");
-static DataRef groundSpeedKts(dataRefs, "sim/flightmodel/position/groundspeed");
 
+// Speeds
+static DataRef indicatedSpeedKts(dataRefs, "sim/flightmodel/position/indicated_airspeed");
+static DataRef trueSpeedMs(dataRefs, "sim/flightmodel/position/true_airspeed");
+static DataRef groundSpeedMs(dataRefs, "sim/flightmodel/position/groundspeed");
+static DataRef machSpeed(dataRefs, "sim/flightmodel/misc/machno");
+static DataRef verticalSpeedFpm(dataRefs, "sim/flightmodel/position/vh_ind_fpm");
+
+// Altitude
 static DataRef indicatedAltitudeFt(dataRefs, "sim/cockpit2/gauges/indicators/altitude_ft_pilot");
 static DataRef actualAltitudeMeter(dataRefs, "sim/flightmodel/position/elevation");
 static DataRef aglAltitudeFt(dataRefs, "sim/cockpit2/gauges/indicators/radio_altimeter_height_ft_pilot");
 
+// Heading
 static DataRef headingTrueDeg(dataRefs, "sim/flightmodel/position/true_psi");
 static DataRef headingMagDeg(dataRefs, "sim/flightmodel/position/mag_psi");
-static DataRef machSpeed(dataRefs, "sim/flightmodel/misc/machno");
-static DataRef verticalSpeedFeetPerMin(dataRefs, "sim/flightmodel/position/vh_ind_fpm");
-static DataRef numberOfEngines(dataRefs, "sim/aircraft/engine/acf_num_engines");
 
+// Misc
+static DataRef numberOfEngines(dataRefs, "sim/aircraft/engine/acf_num_engines");
 static DataRef onGround(dataRefs, "sim/flightmodel/failures/onground_any");
 static DataRef rainPercentage(dataRefs, "sim/weather/rain_percent");
 
@@ -163,14 +170,14 @@ bool XpConnect::fillSimConnectData(atools::fs::sc::SimConnectData& data, bool fe
   // Wind and ambient parameters
   userAircraft.windSpeedKts = dr::windSpeedKts.valueFloat();
   userAircraft.windDirectionDegT = dr::windDirectionDegMag.valueFloat() - userAircraft.magVarDeg;
-  userAircraft.ambientTemperatureCelsius = dr::ambientTemperatureCelsius.valueFloat();
-  userAircraft.totalAirTemperatureCelsius = dr::totalAirTemperatureCelsius.valueFloat();
-  userAircraft.seaLevelPressureMbar = dr::seaLevelPressureMbar.valueFloat() / 100.f;
+  userAircraft.ambientTemperatureCelsius = dr::ambientTemperatureC.valueFloat();
+  userAircraft.totalAirTemperatureCelsius = dr::leTemperatureC.valueFloat();
+  userAircraft.seaLevelPressureMbar = dr::seaLevelPressurePascal.valueFloat() / 100.f;
 
   // Ice
   userAircraft.pitotIcePercent = dr::pitotIcePercent.valueFloat() * 100.f;
-  userAircraft.structuralIcePercent = (dr::structuralIcePercent.valueFloat() +
-                                       dr::structuralIcePercent2.valueFloat()) / 2.f * 100.f;
+  userAircraft.structuralIcePercent = std::max(dr::structuralIcePercent.valueFloat(),
+                                               dr::structuralIcePercent2.valueFloat()) * 100.f;
 
   // Weight
   userAircraft.airplaneTotalWeightLbs = kgToLbs(dr::airplaneTotalWeightKgs.valueFloat());
@@ -181,7 +188,7 @@ bool XpConnect::fillSimConnectData(atools::fs::sc::SimConnectData& data, bool fe
   userAircraft.fuelTotalWeightLbs = kgToLbs(dr::fuelTotalWeightKgs.valueFloat());
   userAircraft.fuelFlowPPH = kgToLbs(dr::fuelFlowKgSec8.valueFloatArrSum()) * 3600.f;
 
-  userAircraft.ambientVisibilityMeter = dr::ambientVisibilityMeter.valueFloat();
+  userAircraft.ambientVisibilityMeter = dr::ambientVisibilityM.valueFloat();
 
   // Build local time and use timezone offset from simulator
   // X-Plane does not allow to set the year
@@ -219,10 +226,10 @@ bool XpConnect::fillSimConnectData(atools::fs::sc::SimConnectData& data, bool fe
 
   // Speed
   userAircraft.indicatedSpeedKts = dr::indicatedSpeedKts.valueFloat();
-  userAircraft.trueSpeedKts = dr::trueSpeedKts.valueFloat();
+  userAircraft.trueSpeedKts = meterToNm(dr::trueSpeedMs.valueFloat() * 3600.f);
   userAircraft.machSpeed = dr::machSpeed.valueFloat();
-  userAircraft.verticalSpeedFeetPerMin = dr::verticalSpeedFeetPerMin.valueFloat();
-  userAircraft.groundSpeedKts = dr::groundSpeedKts.valueFloat();
+  userAircraft.verticalSpeedFeetPerMin = dr::verticalSpeedFpm.valueFloat();
+  userAircraft.groundSpeedKts = meterToNm(dr::groundSpeedMs.valueFloat() * 3600.f);
 
   // Model
   userAircraft.modelRadiusFt = 0; // not available - disable display in client which will use a default value
