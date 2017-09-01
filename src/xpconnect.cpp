@@ -27,6 +27,7 @@
 using atools::geo::kgToLbs;
 using atools::geo::meterToFeet;
 using atools::geo::meterToNm;
+using atools::roundToInt;
 using atools::geo::Pos;
 
 namespace xpc {
@@ -115,6 +116,12 @@ static DataRef headingMagDeg(dataRefs, "sim/flightmodel/position/mag_psi");
 static DataRef numberOfEngines(dataRefs, "sim/aircraft/engine/acf_num_engines");
 static DataRef onGround(dataRefs, "sim/flightmodel/failures/onground_any");
 static DataRef rainPercentage(dataRefs, "sim/weather/rain_percent");
+
+// Size in local coordinates (meter)
+// points to the right side of the aircraft
+static DataRef aircraftSizeX(dataRefs, "sim/aircraft/view/acf_size_x");
+// points to the tail of the aircraft
+static DataRef aircraftSizeZ(dataRefs, "sim/aircraft/view/acf_size_z");
 
 static DataRef engineType8(dataRefs, "sim/aircraft/prop/acf_en_type");
 // 0 = recip carb, 1 = recip injected, 2 = free turbine, 3 = electric, 4 = lo bypass jet, 5 = hi bypass jet, 6 = rocket, 7 = tip rockets, 8 = fixed turbine
@@ -232,8 +239,11 @@ bool XpConnect::fillSimConnectData(atools::fs::sc::SimConnectData& data, bool fe
   userAircraft.groundSpeedKts = meterToNm(dr::groundSpeedMs.valueFloat() * 3600.f);
 
   // Model
-  userAircraft.modelRadiusFt = 0; // not available - disable display in client which will use a default value
-  userAircraft.wingSpanFt = 0; // not available- disable display in client
+  // points to the tail of the aircraft
+  userAircraft.modelRadiusFt = static_cast<quint16>(roundToInt(meterToFeet(dr::aircraftSizeZ.valueFloat())));
+
+  // points to the right side of the aircraft - wingspan will be used before model radius for painting
+  userAircraft.wingSpanFt = static_cast<quint16>(roundToInt(meterToFeet(dr::aircraftSizeX.valueFloat() * 2.)));
 
   // Set misc flags
   userAircraft.flags = atools::fs::sc::IS_USER;
