@@ -1,3 +1,7 @@
+Version 1.0.0.beta
+
+* Fetching aircraft wing span and model size now.
+
 Version 0.9.1.develop
 
 * Fixed wrong TAS and GS
