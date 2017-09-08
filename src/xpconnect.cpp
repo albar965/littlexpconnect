@@ -246,7 +246,7 @@ bool XpConnect::fillSimConnectData(atools::fs::sc::SimConnectData& data, bool fe
   userAircraft.wingSpanFt = static_cast<quint16>(roundToInt(meterToFeet(dr::aircraftSizeX.valueFloat() * 2.)));
 
   // Set misc flags
-  userAircraft.flags = atools::fs::sc::IS_USER;
+  userAircraft.flags = atools::fs::sc::IS_USER | atools::fs::sc::SIM_XPLANE;
   if(dr::onGround.valueInt() > 0)
     userAircraft.flags |= atools::fs::sc::ON_GROUND;
   if(dr::rainPercentage.valueFloat() > 0.1f)
@@ -322,6 +322,7 @@ bool XpConnect::fillSimConnectData(atools::fs::sc::SimConnectData& data, bool fe
       {
         // Coordinates are ok too - must be an AI aircraft
         atools::fs::sc::SimConnectAircraft aircraft;
+        aircraft.flags = atools::fs::sc::SIM_XPLANE;
         aircraft.position = pos;
         aircraft.headingTrueDeg = ref.headingTrueDegAi.valueFloat();
 

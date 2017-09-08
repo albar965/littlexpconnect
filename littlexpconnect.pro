@@ -149,7 +149,12 @@ macx {
   deploy.commands += cp -vf $${PWD}/CHANGELOG.txt $${DEPLOY_DIR} &&
   deploy.commands += cp -vf $${PWD}/README.txt $${DEPLOY_DIR} &&
   deploy.commands += cp -vf $${PWD}/LICENSE.txt $${DEPLOY_DIR} &&
-  deploy.commands += cp -vfa $${QT_HOME}/lib/QtCore.framework  $${DEPLOY_DIR}
+  deploy.commands += cp -vfa $${QT_HOME}/lib/QtCore.framework  $${DEPLOY_DIR} &&
+  deploy.commands += rm -Rfv $${DEPLOY_DIR}/QtCore.framework/Headers &&
+  deploy.commands += rm -fv $${DEPLOY_DIR}/QtCore.framework/QtCore_debug &&
+  deploy.commands += rm -fv $${DEPLOY_DIR}/QtCore.framework/QtCore_debug.prl &&
+  deploy.commands += rm -Rfv $${DEPLOY_DIR}/QtCore.framework/Versions/*/Headers &&
+  deploy.commands += rm -fv $${DEPLOY_DIR}/QtCore.framework/Versions/*/QtCore_debug
 }
 
 # Windows specific deploy target
