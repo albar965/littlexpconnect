@@ -1,35 +1,48 @@
 Little Xpconnect
 ================
 
-A free and open source X-Plane plugin that allows to use Little Navmap as a moving map when flying.
-Little Navmap can connect locally to this plugin. Remote or networked setups can be done with
-the Little Navconnect program.
+A free and open source X-Plane plugin that allows to use Little Navmap as a
+moving map when flying. Little Navmap can connect locally to this plugin.
+Remote or networked setups can be done with the Little Navconnect program.
 
-Little Navmap is a free open source flight planner, navigation tool, moving map, airport search and
-airport information system for Flight Simulator X, Prepar3D and X-Plane.
+Little Navmap is a free open source flight planner, navigation tool, moving
+map, airport search and airport information system for Flight Simulator X,
+Prepar3D and X-Plane.
 
-This plugin is only useful for X-Plane and is available for Windows, macOS and Linux (all 64 bit only).
-Only tested on X-Plane 11.
+This plugin is only useful for X-Plane and is available for Windows, macOS and
+Linux (all 64 bit only). Only tested on X-Plane 11.
 
-|Windows, Linux or Mac Machine        |         Windows, Linux or Mac Machine  |
---------------------------------------------------------------------------------
-| X-Plane <-> Little Xpconnect  <- (Local)   -> Little Navmap
+Local connection scenario:
+
+|Windows, Linux or Mac Machine      |    Windows, Linux or Mac Machine  |
+-------------------------------------------------------------------------
+X-Plane <-> Little Xpconnect  <- (Local) -> Little Navmap
+
+
+Network scenario for X-Plane using the Little Xpconnect plugin and the Little
+Navonnect agent:
+
+|Windows, Linux or Mac Machine                           |     Windows, Linux or Mac Machines  |
+------------------------------------------------------------------------------------------------
+X-Plane <-> Little XpConnect <-> Little Navonnect <- (Network) -> Little Navmap on Computer 1
+                                                  <- (Network) -> Little Navmap on Computer 2
 
 ------------------------------------------------------------------------------
 -- INSTALLATION --------------------------------------------------------------
 ------------------------------------------------------------------------------
 
-Copy the whole plugin directory "Little Xpconnect" into the plugins directory within your Resources directory
-in the X-Plane installation.
-The complete path should look like:
+Download the correct archive for your operating system. The program is bundled
+with Little Navmap and can be downloaded separately too.
+
+Copy the whole plugin directory "Little Xpconnect" into the directory "plugins"
+in the directory "Resources" in the X-Plane installation. The complete path
+should look like:
 .../X-Plane 11/Resources/plugins/Little Xpconnect
 
 You can check the X-Plane plugin manager to see if it is loaded  correctly.
 
-When connecting with Little Navmap use the computer name where X-Plane is running and
-the default port 51968. Use "localhost" if X-Plane and Little Navmap run on the same computer.
-
-The installation on Linux and macOS computers is simlar except different paths.
+When connecting with Little Navmap choose the "Connect directly to a local
+X-Plane simulator" option. See the Little Navmap manual for more information.
 
 ------------------------------------------------------------------------------
 -- FILES ---------------------------------------------------------------------
@@ -48,14 +61,17 @@ Additionally a small settings file is created which can be found in
 -- CONFIGURATION -------------------------------------------------------------
 ------------------------------------------------------------------------------
 
-Settings can only be changed using the configuration file "little_xpconnect.ini".
+Settings can only be changed using the configuration file
+"little_xpconnect.ini".
 
 [Options]
 FetchAiAircraft=true  : Also get AI aircraft. You can disable this if
                         you think the plugin causes performance problems.
-FetchRate=200         : Data will be fetched from X-Plane every 200 milliseconds.
-                        Lower this value to get a more fluid movement of the aircraft symbol on the map.
-                        Increase this value if you think the plugin causes performance problems.
+FetchRate=200         : Data will be fetched from X-Plane every 200
+                        milliseconds.
+                        Lower this value to get a more fluid movement of the
+                        aircraft symbol on the map. Increase this value if you
+                        think the plugin causes performance problems.
 
 ------------------------------------------------------------------------------
 -- LICENSE -------------------------------------------------------------------
