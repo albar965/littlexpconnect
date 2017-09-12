@@ -43,6 +43,9 @@ unix:!macx {
 macx {
   QT_HOME=/Users/alex/Qt/5.9.1/clang_64
   XPSDK_HOME=/Users/alex/XPSDK
+
+  # Compatibility down to OS X Mountain Lion 10.8
+  QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.8
 }
 
 # End of configuration section
