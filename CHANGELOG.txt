@@ -1,3 +1,7 @@
+Version 1.0.3
+
+* Bumped up version due to changes in atools.
+
 Version 1.0.2
 
 * No changes except release version.

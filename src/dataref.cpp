@@ -40,7 +40,7 @@ DataRef::DataRef()
 bool DataRef::find()
 {
   qDebug() << Q_FUNC_INFO << name;
-  dataRef = XPLMFindDataRef(name.toLatin1());
+  dataRef = XPLMFindDataRef(name.toLatin1().constData());
   if(dataRef == NULL)
     qWarning() << Q_FUNC_INFO << "Cannot find" << name;
   else
