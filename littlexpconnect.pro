@@ -8,6 +8,7 @@ QT       += core
 
 QT       -= gui
 CONFIG += c++11
+CONFIG += dll
 
 TARGET = littlexpconnect
 TEMPLATE = lib
@@ -54,6 +55,11 @@ macx {
 DEFINES += QT_NO_CAST_FROM_BYTEARRAY
 DEFINES += QT_NO_CAST_TO_ASCII
 #DEFINES += QT_NO_CAST_FROM_ASCII
+
+# Link all static in Windows to avoid DLL conflicts with other plugins
+win32 {
+QMAKE_LFLAGS=-static -static-libstdc++ -static-libgcc
+}
 
 # =====================================================================
 # Dependencies
@@ -180,20 +186,10 @@ win32 {
   deploy.commands = rmdir /s /q $${DEPLOY_DIR_WIN} &
   deploy.commands += mkdir $${DEPLOY_DIR_WIN} &&
   deploy.commands += mkdir $${DEPLOY_DIR_WIN}\\64 &&
-  deploy.commands += mkdir $${DEPLOY_DIR_WIN}\\64\\platforms &&
   deploy.commands += copy $${WINOUT_PWD}\\$${CONF_TYPE}\\littlexpconnect.dll $${DEPLOY_DIR_WIN}\\64\\win.xpl &&
   deploy.commands += xcopy $${WINPWD}\\CHANGELOG.txt $${DEPLOY_DIR_WIN} &&
   deploy.commands += xcopy $${WINPWD}\\README.txt $${DEPLOY_DIR_WIN} &&
-  deploy.commands += xcopy $${WINPWD}\\LICENSE.txt $${DEPLOY_DIR_WIN} &&
-  deploy.commands += xcopy $${QT_HOME}\\share\\qt5\\plugins\\platforms\qwindows.dll $${DEPLOY_DIR_WIN}\\64\\platforms &&
-  deploy.commands += xcopy $${QT_HOME}\\bin\\libgcc*.dll $${DEPLOY_DIR_WIN}\\64 &&
-  deploy.commands += xcopy $${QT_HOME}\\bin\\libstdc*.dll $${DEPLOY_DIR_WIN}\\64 &&
-  deploy.commands += xcopy $${QT_HOME}\\bin\\libwinpthread*.dll $${DEPLOY_DIR_WIN}\\64 &&
-  deploy.commands += xcopy $${QT_HOME}\\bin\\libicudt$${DLL_SUFFIX}58.dll $${DEPLOY_DIR_WIN}\\64 &&
-  deploy.commands += xcopy $${QT_HOME}\\bin\\libicuin$${DLL_SUFFIX}58.dll $${DEPLOY_DIR_WIN}\\64 &&
-  deploy.commands += xcopy $${QT_HOME}\\bin\\libicuuc$${DLL_SUFFIX}58.dll $${DEPLOY_DIR_WIN}\\64 &&
-  deploy.commands += xcopy $${QT_HOME}\\bin\\zlib1.dll $${DEPLOY_DIR_WIN}\\64 &&
-  deploy.commands += xcopy $${QT_HOME}\\bin\\Qt5Core$${DLL_SUFFIX}.dll $${DEPLOY_DIR_WIN}\\64
+  deploy.commands += xcopy $${WINPWD}\\LICENSE.txt $${DEPLOY_DIR_WIN} 
 }
 
 QMAKE_EXTRA_TARGETS += deploy
