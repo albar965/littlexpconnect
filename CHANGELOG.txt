@@ -1,3 +1,8 @@
+Version 1.0.4
+
+* Fixed problem with DLL conflicts in Xpconnect by linking statically now for Windows.
+  All DLLs removed from distribution.
+
 Version 1.0.3
 
 * Bumped up version due to changes in atools.
