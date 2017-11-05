@@ -34,6 +34,10 @@ X-Plane <-> Little XpConnect <-> Little Navonnect <- (Network) -> Little Navmap 
 Download the correct archive for your operating system. The program is bundled
 with Little Navmap and can be downloaded separately too.
 
+Delete any old "Little Xpconnect" installations in the plugins directory before copying
+the new version.
+Do not merge new and old installtions.
+
 Copy the whole plugin directory "Little Xpconnect" into the directory "plugins"
 in the directory "Resources" in the X-Plane installation. The complete path
 should look like:
