@@ -7,7 +7,7 @@
 QT       += core
 
 QT       -= gui
-CONFIG += c++11
+CONFIG += c++14
 CONFIG += dll
 
 TARGET = littlexpconnect
@@ -189,7 +189,7 @@ win32 {
   deploy.commands += copy $${WINOUT_PWD}\\$${CONF_TYPE}\\littlexpconnect.dll $${DEPLOY_DIR_WIN}\\64\\win.xpl &&
   deploy.commands += xcopy $${WINPWD}\\CHANGELOG.txt $${DEPLOY_DIR_WIN} &&
   deploy.commands += xcopy $${WINPWD}\\README.txt $${DEPLOY_DIR_WIN} &&
-  deploy.commands += xcopy $${WINPWD}\\LICENSE.txt $${DEPLOY_DIR_WIN} 
+  deploy.commands += xcopy $${WINPWD}\\LICENSE.txt $${DEPLOY_DIR_WIN}
 }
 
 QMAKE_EXTRA_TARGETS += deploy
