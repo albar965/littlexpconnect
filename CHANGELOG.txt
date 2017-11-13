@@ -1,3 +1,8 @@
+Version 1.0.5
+
+* Updated readme with important note about update.
+* Logging now omits unknown:0 for release builds.
+
 Version 1.0.4
 
 * Fixed problem with DLL conflicts in Xpconnect by linking statically now for Windows.
