@@ -1,3 +1,8 @@
+Version 1.0.6
+
+* Fixed Linux build to avoid problems with shared libraries on some platforms.
+* Changed macOS requirement to minimum of 10.10.
+
 Version 1.0.5
 
 * Updated readme with important note about update.
