@@ -35,14 +35,14 @@ win32 {
 
 # Linux ==================
 unix:!macx {
-  QT_HOME=/home/alex/Qt/5.9.1/gcc_64
+  QT_HOME=/home/alex/Qt/5.9.3/gcc_64
   XPSDK_HOME=/home/alex/Programme/XPSDK
   XP_HOME=\"/home/alex/Daten/Programme/X-Plane 11\"
 }
 
 # Mac OS X ==================
 macx {
-  QT_HOME=/Users/alex/Qt/5.9.1/clang_64
+  QT_HOME=/Users/alex/Qt/5.9.3/clang_64
   XPSDK_HOME=/Users/alex/XPSDK
 
   # Compatibility down to OS X 10.10
