@@ -43,6 +43,7 @@ static DataRefPtrVector aiDataRefs;
 static DataRef simBuild(dataRefs, "sim/version/sim_build_string");
 static DataRef xplmBuild(dataRefs, "sim/version/xplm_build_string");
 static DataRef simPaused(dataRefs, "sim/time/paused");
+static DataRef simReplay(dataRefs, "sim/operation/prefs/replay_mode");
 
 // SimConnectUserAircraft
 static DataRef windSpeedKts(dataRefs, "sim/cockpit2/gauges/indicators/wind_speed_kts");
@@ -249,10 +250,17 @@ bool XpConnect::fillSimConnectData(atools::fs::sc::SimConnectData& data, bool fe
   userAircraft.flags = atools::fs::sc::IS_USER | atools::fs::sc::SIM_XPLANE;
   if(dr::onGround.valueInt() > 0)
     userAircraft.flags |= atools::fs::sc::ON_GROUND;
+
   if(dr::rainPercentage.valueFloat() > 0.1f)
     userAircraft.flags |= atools::fs::sc::IN_RAIN;
   // IN_CLOUD = 0x0002, - not available
   // IN_SNOW = 0x0008,  - not available
+
+  if(dr::simPaused.valueInt() > 0)
+    userAircraft.flags |= atools::fs::sc::SIM_PAUSED;
+
+  if(dr::simReplay.valueInt() > 0)
+    userAircraft.flags |= atools::fs::sc::SIM_REPLAY;
 
   // Category is not available - Disable display of category on client
   userAircraft.category = atools::fs::sc::UNKNOWN;
