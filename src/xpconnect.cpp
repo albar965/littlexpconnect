@@ -234,7 +234,7 @@ bool XpConnect::fillSimConnectData(atools::fs::sc::SimConnectData& data, bool fe
 
   // Speed
   userAircraft.indicatedSpeedKts = dr::indicatedSpeedKts.valueFloat();
-  userAircraft.trueSpeedKts = meterToNm(dr::trueSpeedMs.valueFloat() * 3600.f);
+  userAircraft.trueAirspeedKts = meterToNm(dr::trueSpeedMs.valueFloat() * 3600.f);
   userAircraft.machSpeed = dr::machSpeed.valueFloat();
   userAircraft.verticalSpeedFeetPerMin = dr::verticalSpeedFpm.valueFloat();
   userAircraft.groundSpeedKts = meterToNm(dr::groundSpeedMs.valueFloat() * 3600.f);
@@ -339,7 +339,7 @@ bool XpConnect::fillSimConnectData(atools::fs::sc::SimConnectData& data, bool fe
         aircraft.groundSpeedKts = atools::fs::sc::SC_INVALID_FLOAT;
         aircraft.indicatedAltitudeFt = atools::fs::sc::SC_INVALID_FLOAT;
         aircraft.indicatedSpeedKts = atools::fs::sc::SC_INVALID_FLOAT;
-        aircraft.trueSpeedKts = atools::fs::sc::SC_INVALID_FLOAT;
+        aircraft.trueAirspeedKts = atools::fs::sc::SC_INVALID_FLOAT;
         aircraft.machSpeed = atools::fs::sc::SC_INVALID_FLOAT;
         aircraft.verticalSpeedFeetPerMin = atools::fs::sc::SC_INVALID_FLOAT;
 
