@@ -46,7 +46,7 @@ win32 {
 
 # Linux ==================
 unix:!macx {
-  QT_HOME=/home/alex/Qt/5.9.3/gcc_64
+  QT_HOME=/home/alex/Qt/5.9.5/gcc_64
   XPSDK_HOME=/home/alex/Programme/XPSDK
   XP_HOME=\"/home/alex/Daten/Programme/X-Plane 11\"
 }
