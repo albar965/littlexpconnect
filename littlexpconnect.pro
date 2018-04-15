@@ -53,7 +53,7 @@ unix:!macx {
 
 # Mac OS X ==================
 macx {
-  QT_HOME=/Users/alex/Qt/5.9.1/clang_64
+  QT_HOME=/Users/alex/Qt/5.9.5/clang_64
   XPSDK_HOME=/Users/alex/XPSDK
 
   # Compatibility down to OS X 10.10
