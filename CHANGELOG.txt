@@ -1,3 +1,7 @@
+Version 1.0.8.beta
+
+* Updated from Qt 5.9.3 to 5.9.5
+
 Version 1.0.6
 
 * Fixed Linux build to avoid problems with shared libraries on some platforms.
