@@ -173,7 +173,7 @@ bool XpConnect::fillSimConnectData(atools::fs::sc::SimConnectData& data, bool fe
   if(!userAircraft.position.isValid() || userAircraft.position.isNull())
     return false;
 
-  userAircraft.magVarDeg = dr::magVarDeg.valueFloat();
+  userAircraft.magVarDeg = -dr::magVarDeg.valueFloat();
 
   // Wind and ambient parameters
   userAircraft.windSpeedKts = dr::windSpeedKts.valueFloat();
