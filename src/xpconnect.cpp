@@ -177,7 +177,7 @@ bool XpConnect::fillSimConnectData(atools::fs::sc::SimConnectData& data, bool fe
 
   // Wind and ambient parameters
   userAircraft.windSpeedKts = dr::windSpeedKts.valueFloat();
-  userAircraft.windDirectionDegT = dr::windDirectionDegMag.valueFloat() - userAircraft.magVarDeg;
+  userAircraft.windDirectionDegT = dr::windDirectionDegMag.valueFloat() + userAircraft.magVarDeg;
   userAircraft.ambientTemperatureCelsius = dr::ambientTemperatureC.valueFloat();
   userAircraft.totalAirTemperatureCelsius = dr::leTemperatureC.valueFloat();
   userAircraft.seaLevelPressureMbar = dr::seaLevelPressurePascal.valueFloat() / 100.f;
@@ -230,7 +230,7 @@ bool XpConnect::fillSimConnectData(atools::fs::sc::SimConnectData& data, bool fe
   userAircraft.headingMagDeg = dr::headingMagDeg.valueFloat();
   userAircraft.headingTrueDeg = dr::headingTrueDeg.valueFloat();
   userAircraft.trackMagDeg = dr::trackMagDeg.valueFloat();
-  userAircraft.trackTrueDeg = userAircraft.trackMagDeg - userAircraft.magVarDeg;
+  userAircraft.trackTrueDeg = userAircraft.trackMagDeg + userAircraft.magVarDeg;
 
   // Speed
   userAircraft.indicatedSpeedKts = dr::indicatedSpeedKts.valueFloat();
