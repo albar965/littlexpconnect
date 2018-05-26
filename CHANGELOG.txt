@@ -1,3 +1,8 @@
+Version 1.0.9.rc1
+
+* Fixed inverted magnetic variation.
+* Corrected true aircraft track and true wind direction.
+
 Version 1.0.8.beta
 
 * Updated from Qt 5.9.3 to 5.9.5
