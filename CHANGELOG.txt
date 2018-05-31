@@ -1,4 +1,4 @@
-Version 1.0.9.rc1
+Version 1.0.9
 
 * Fixed inverted magnetic variation.
 * Corrected true aircraft track and true wind direction.
