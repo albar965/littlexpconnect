@@ -20,7 +20,54 @@
 #include "atools.h"
 
 #include <QDebug>
+#include <QDir>
 
+extern "C" {
+#include "XPLMPlanes.h"
+}
+
+QString getAircraftModelFilepath(int index)
+{
+  char outFileName[1024]; // Filename only
+  char outPath[1024]; // Full filepath including filename
+
+  XPLMGetNthAircraftModel(index, outFileName, outPath);
+
+  return QString(outPath) /* + QDir::separator() + QString(outFileName)*/;
+}
+
+void readValuesFromAcfFile(QHash<QString, QString>& keyValuePairs, const QString& filepath, const QStringList& keys)
+{
+  QFile file(filepath);
+
+  if(file.open(QIODevice::ReadOnly | QIODevice::Text))
+  {
+    qDebug() << Q_FUNC_INFO << "Reading from" << filepath << "keys" << keys;
+
+    QTextStream stream(&file);
+
+    int lines = 0;
+    // Read until all keys are found or at end of file
+    while(!stream.atEnd() && keyValuePairs.size() < keys.size())
+    {
+      QString line = stream.readLine().trimmed();
+      QString key = line.section(' ', 1, 1);
+
+      if(keys.contains(key))
+        // Found a required key
+        keyValuePairs.insert(key, line.section(' ', 2).trimmed());
+      lines++;
+    }
+
+    file.close();
+    qDebug() << Q_FUNC_INFO << "Reading from" << filepath << "done read" << lines << "lines"
+             << "Key/values found" << keyValuePairs;
+  }
+  else
+    qWarning() << Q_FUNC_INFO << "Cannot open file" << filepath << "error" << file.errorString();
+}
+
+// ==========================================================================================
 DataRef::DataRef(DataRefPtrVector& refs, const QString& dataRefName)
   : name(dataRefName)
 {

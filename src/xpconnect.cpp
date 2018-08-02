@@ -162,6 +162,16 @@ static const QLatin1Literal POS_Y("sim/multiplayer/position/plane%1_y");
 
 }
 
+XpConnect::XpConnect()
+{
+  qDebug() << Q_FUNC_INFO;
+}
+
+XpConnect::~XpConnect()
+{
+  qDebug() << Q_FUNC_INFO;
+}
+
 bool XpConnect::fillSimConnectData(atools::fs::sc::SimConnectData& data, bool fetchAi)
 {
   atools::fs::sc::SimConnectUserAircraft& userAircraft = data.userAircraft;
@@ -306,7 +316,7 @@ bool XpConnect::fillSimConnectData(atools::fs::sc::SimConnectData& data, bool fe
       break;
   }
 
-  // Calculate fuell volume based on type
+  // Calculate fuel volume based on type
   userAircraft.fuelTotalQuantityGallons = userAircraft.fuelTotalWeightLbs / fuelMassToVolDivider;
   userAircraft.fuelFlowGPH = userAircraft.fuelFlowPPH / fuelMassToVolDivider;
 
@@ -345,7 +355,54 @@ bool XpConnect::fillSimConnectData(atools::fs::sc::SimConnectData& data, bool fe
 
         aircraft.objectId = objId;
         aircraft.category = atools::fs::sc::AIRPLANE;
+        aircraft.engineType = atools::fs::sc::UNSUPPORTED;
+
+        // Read values from .acf file which are not available by the API ====================================
+        QString aircraftModelFilepath = getAircraftModelFilepath(static_cast<int>(objId + 1));
+        QHash<QString, QString> *keyValuePairs = acfFileValues.object(aircraftModelFilepath);
+        if(keyValuePairs == nullptr)
+        {
+          // Read and cache the values
+          keyValuePairs = new QHash<QString, QString>();
+          // "acf/_is_airliner",  "acf/_is_general_aviation",
+          readValuesFromAcfFile(*keyValuePairs, aircraftModelFilepath, {"acf/_name",
+                                                                        "acf/_is_helicopter",
+                                                                        "_engn/0/_type"});
+          acfFileValues.insert(aircraftModelFilepath, keyValuePairs);
+        }
+
+        // Use attributes from the acf file ======================================
+        aircraft.airplaneTitle = keyValuePairs->value("acf/_name");
+
+        // Engine type - use first engine only ======================
+        // PISTON = 0, JET = 1, NO_ENGINE = 2, HELO_TURBINE = 3, UNSUPPORTED = 4, TURBOPROP = 5
+        aircraft.engineType = atools::fs::sc::UNSUPPORTED;
+        const QString engineType = keyValuePairs->value("_engn/0/_type");
+        if(engineType.startsWith("JET") || engineType.startsWith("ROC"))
+          aircraft.engineType = atools::fs::sc::JET;
+        else if(engineType.startsWith("RCP"))
+          aircraft.engineType = atools::fs::sc::PISTON;
+        else if(engineType.startsWith("TRB"))
+          aircraft.engineType = atools::fs::sc::TURBOPROP;
+
+        // Extra Aircraft/B-52G NASA/B-52G NASA.acf:P _engn/0/_type JET
+        // Extra Aircraft/B747-100 NASA/B747-100 NASA.acf:P _engn/0/_type JET_HIB
+        // Extra Aircraft/C-130/C-130.acf:P _engn/0/_type TRB_FIX
+        // Extra Aircraft/X-15/X-15.acf:P _engn/0/_type ROC
+        // Laminar Research/Aerolite 103/Aerolite_103.acf:P _engn/0/_type RCP_CRB
+        // Laminar Research/Baron B58/Baron_58.acf:P _engn/0/_type RCP_INJ
+        // Laminar Research/Boeing B747-400/747-400.acf:P _engn/0/_type JET
+        // Laminar Research/KingAir C90B/C90B.acf:P _engn/0/_type TRB_FRE
+
+        // Category ======================
+        // AIRPLANE, HELICOPTER, BOAT, GROUNDVEHICLE, CONTROLTOWER, SIMPLEOBJECT, VIEWER, UNKNOWN
+        if(keyValuePairs->value("acf/_is_helicopter").toInt() == 1)
+          aircraft.category = atools::fs::sc::HELICOPTER;
+        else
+          aircraft.category = atools::fs::sc::AIRPLANE;
+
         data.aiAircraft.append(aircraft);
+
         objId++;
       }
     }

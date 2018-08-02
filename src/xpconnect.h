@@ -18,6 +18,8 @@
 #ifndef LITTLEXPC_XPCONNECT_H
 #define LITTLEXPC_XPCONNECT_H
 
+#include <QCache>
+
 namespace atools {
 namespace fs {
 namespace sc {
@@ -34,11 +36,18 @@ namespace xpc {
 class XpConnect
 {
 public:
+  XpConnect();
+  ~XpConnect();
+
   /* Fill SimConnectData from X-Plane datarefs. Returns true if data was found */
-  static bool fillSimConnectData(atools::fs::sc::SimConnectData& data, bool fetchAi);
+  bool fillSimConnectData(atools::fs::sc::SimConnectData& data, bool fetchAi);
 
   /* Initilaize the datarefs and print a warning if something is wrong. */
-  static void initDataRefs();
+  void initDataRefs();
+
+private:
+  /* Cache key value pairs from acf files to avoid reading the files. */
+  QCache<QString, QHash<QString, QString> > acfFileValues;
 
 };
 

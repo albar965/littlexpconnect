@@ -25,19 +25,22 @@
 
 SharedMemoryWriter::SharedMemoryWriter()
 {
-
+  qDebug() << Q_FUNC_INFO;
+  xpConnect = new xpc::XpConnect();
+  xpConnect->initDataRefs();
 }
 
 SharedMemoryWriter::~SharedMemoryWriter()
 {
-
+  qDebug() << Q_FUNC_INFO;
+  delete xpConnect;
 }
 
 void SharedMemoryWriter::fetchAndWriteData(bool fetchAi)
 {
   {
     QMutexLocker locker(&dataMutex);
-    if(!xpc::XpConnect::fillSimConnectData(data, fetchAi))
+    if(!xpConnect->fillSimConnectData(data, fetchAi))
       data = atools::fs::sc::EMPTY_SIMCONNECT_DATA;
   }
 

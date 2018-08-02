@@ -129,14 +129,13 @@ PLUGIN_API int XPluginEnable(void)
 {
   qDebug() << "LittleXpconnect" << Q_FUNC_INFO;
 
-  xpc::XpConnect::initDataRefs();
+  // Start the backgound writer
+  thread = new SharedMemoryWriter();
+  thread->start();
 
   // Register callback into method - first call in five seconds
   XPLMRegisterFlightLoopCallback(flightLoopCallback, 5.f, nullptr);
 
-  // Start the backgound writer
-  thread = new SharedMemoryWriter();
-  thread->start();
   return 1;
 }
 

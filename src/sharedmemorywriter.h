@@ -60,6 +60,8 @@ private:
   /* Shared memory for local communication */
   QSharedMemory sharedMemory;
 
+  xpc::XpConnect *xpConnect = nullptr;
+
 };
 
 #endif // SHAREDMEMORYWRITERTHREAD_H

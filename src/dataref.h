@@ -31,6 +31,13 @@ typedef QVector<float> FloatVector;
 typedef QVector<int> IntVector;
 typedef QVector<DataRef *> DataRefPtrVector;
 
+/* Get full path to the acf file for the aircraft at the given index. 0 is the user aircraft. */
+QString getAircraftModelFilepath(int index);
+
+/* Read keys from acf file. Reading stops if all keys are found. Use rarely and cache values since
+ * it can read up to 100000 lines of text. */
+void readValuesFromAcfFile(QHash<QString, QString>& keyValuePairs, const QString& filepath, const QStringList& keys);
+
 /*
  * Hides the XPLM data ref accessor methods and provides methods for easier access than the C interface.
  * The class allows only reading of datarefs.
@@ -64,7 +71,7 @@ public:
   /* returns true if ref was found. */
   bool isValid() const
   {
-    return !name.isEmpty() && dataRef != NULL && dataRefType != xplmType_Unknown;
+    return !name.isEmpty() && dataRef != nullptr && dataRefType != xplmType_Unknown;
   }
 
   /* get float value or 0 if invalid */
@@ -131,7 +138,7 @@ private:
 
 #endif
 
-  XPLMDataRef dataRef = NULL;
+  XPLMDataRef dataRef = nullptr;
   XPLMDataTypeID dataRefType = 0;
   QString name;
 };
