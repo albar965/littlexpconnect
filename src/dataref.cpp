@@ -51,6 +51,13 @@ void readValuesFromAcfFile(QHash<QString, QString>& keyValuePairs, const QString
     while(!stream.atEnd() && keyValuePairs.size() < keys.size())
     {
       QString line = stream.readLine().trimmed();
+
+      if(line == "PROPERTIES_END")
+        break;
+
+      if(!line.startsWith("P "))
+        continue;
+
       QString key = line.section(' ', 1, 1);
 
       if(keys.contains(key))

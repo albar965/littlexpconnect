@@ -364,15 +364,19 @@ bool XpConnect::fillSimConnectData(atools::fs::sc::SimConnectData& data, bool fe
         {
           // Read and cache the values
           keyValuePairs = new QHash<QString, QString>();
-          // "acf/_is_airliner",  "acf/_is_general_aviation",
-          readValuesFromAcfFile(*keyValuePairs, aircraftModelFilepath, {"acf/_name",
+          // "acf/_is_airliner",  "acf/_is_general_aviation","acf/_callsign", "acf/_name"
+          readValuesFromAcfFile(*keyValuePairs, aircraftModelFilepath, {"acf/_descrip",
+                                                                        "acf/_ICAO",
+                                                                        "acf/_tailnum",
                                                                         "acf/_is_helicopter",
                                                                         "_engn/0/_type"});
           acfFileValues.insert(aircraftModelFilepath, keyValuePairs);
         }
 
         // Use attributes from the acf file ======================================
-        aircraft.airplaneTitle = keyValuePairs->value("acf/_name");
+        aircraft.airplaneTitle = keyValuePairs->value("acf/_descrip"); // Cessna 172 SP Skyhawk - 180HP
+        aircraft.airplaneModel = keyValuePairs->value("acf/_ICAO"); // C172
+        aircraft.airplaneReg = keyValuePairs->value("acf/_tailnum"); // Registration N172SP
 
         // Engine type - use first engine only ======================
         // PISTON = 0, JET = 1, NO_ENGINE = 2, HELO_TURBINE = 3, UNSUPPORTED = 4, TURBOPROP = 5
