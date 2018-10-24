@@ -1,3 +1,8 @@
+Version 1.0.10.beta
+
+* Log file is now rotated if the file size of 1 MB is exceeded. This avoid overwriting on startup and eases error reporting.
+  albar965/littlenavmap#275
+
 Version 1.0.9
 
 * Fixed inverted magnetic variation.
