@@ -2,6 +2,9 @@ Version 1.0.10.beta
 
 * Log file is now rotated if the file size of 1 MB is exceeded. This avoid overwriting on startup and eases error reporting.
   albar965/littlenavmap#275
+* Added airplane model and registration. Now using description for title. albar965/littlenavmap#271
+* Now reading X-Plane acf files once to get aircraft name and engine type for a better classification in Navmap.
+  Allows to show helicopter and jet AI symbols in Navmap. albar965/littlenavmap#271
 
 Version 1.0.9
 
