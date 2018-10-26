@@ -44,6 +44,9 @@ should look like:
 .../X-Plane 11/Resources/plugins/Little Xpconnect
 
 You can check the X-Plane plugin manager to see if it is loaded  correctly.
+The installation was successful if "Little Xpconnect" shows up in the plugin manager.
+
+Note that "Little Xpconnect" does not add menu items in the X-Plane "Plugins" menu.
 
 When connecting with Little Navmap choose the "Connect directly to a local
 X-Plane simulator" option. See the Little Navmap manual for more information.
