@@ -1,6 +1,6 @@
-Version 1.0.11.rc1
+Version 1.0.11
 
-No changes.
+No changes except version.
 
 Version 1.0.10.beta
 
