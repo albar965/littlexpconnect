@@ -24,6 +24,7 @@ namespace atools {
 namespace fs {
 namespace sc {
 class SimConnectData;
+class SimConnectAircraft;
 }
 }
 }
@@ -48,6 +49,8 @@ public:
 private:
   /* Cache key value pairs from acf files to avoid reading the files. */
   QCache<QString, QHash<QString, QString> > acfFileValues;
+
+  void loadAcf(atools::fs::sc::SimConnectAircraft& aircraft, quint32 objId);
 
 };
 

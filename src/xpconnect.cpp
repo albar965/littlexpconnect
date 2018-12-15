@@ -321,12 +321,13 @@ bool XpConnect::fillSimConnectData(atools::fs::sc::SimConnectData& data, bool fe
   userAircraft.fuelFlowGPH = userAircraft.fuelFlowPPH / fuelMassToVolDivider;
 
   userAircraft.numberOfEngines = static_cast<quint8>(dr::numberOfEngines.valueInt());
+  loadAcf(userAircraft, 0L);
 
   data.aiAircraft.clear();
   if(fetchAi)
   {
     // Get AI or multiplayer aircraft ===============================
-    quint32 objId = 0;
+    quint32 objId = 1;
     for(const dr::MultiplayerDataRefs& ref : dr::multiplayerDataRefs)
     {
       // Check the OpenGL coordinates if the aircraft is valid
@@ -357,53 +358,7 @@ bool XpConnect::fillSimConnectData(atools::fs::sc::SimConnectData& data, bool fe
         aircraft.category = atools::fs::sc::AIRPLANE;
         aircraft.engineType = atools::fs::sc::UNSUPPORTED;
 
-        // Read values from .acf file which are not available by the API ====================================
-        QString aircraftModelFilepath = getAircraftModelFilepath(static_cast<int>(objId + 1));
-        QHash<QString, QString> *keyValuePairs = acfFileValues.object(aircraftModelFilepath);
-        if(keyValuePairs == nullptr)
-        {
-          // Read and cache the values
-          keyValuePairs = new QHash<QString, QString>();
-          // "acf/_is_airliner",  "acf/_is_general_aviation","acf/_callsign", "acf/_name"
-          readValuesFromAcfFile(*keyValuePairs, aircraftModelFilepath, {"acf/_descrip",
-                                                                        "acf/_ICAO",
-                                                                        "acf/_tailnum",
-                                                                        "acf/_is_helicopter",
-                                                                        "_engn/0/_type"});
-          acfFileValues.insert(aircraftModelFilepath, keyValuePairs);
-        }
-
-        // Use attributes from the acf file ======================================
-        aircraft.airplaneTitle = keyValuePairs->value("acf/_descrip"); // Cessna 172 SP Skyhawk - 180HP
-        aircraft.airplaneModel = keyValuePairs->value("acf/_ICAO"); // C172
-        aircraft.airplaneReg = keyValuePairs->value("acf/_tailnum"); // Registration N172SP
-
-        // Engine type - use first engine only ======================
-        // PISTON = 0, JET = 1, NO_ENGINE = 2, HELO_TURBINE = 3, UNSUPPORTED = 4, TURBOPROP = 5
-        aircraft.engineType = atools::fs::sc::UNSUPPORTED;
-        const QString engineType = keyValuePairs->value("_engn/0/_type");
-        if(engineType.startsWith("JET") || engineType.startsWith("ROC"))
-          aircraft.engineType = atools::fs::sc::JET;
-        else if(engineType.startsWith("RCP"))
-          aircraft.engineType = atools::fs::sc::PISTON;
-        else if(engineType.startsWith("TRB"))
-          aircraft.engineType = atools::fs::sc::TURBOPROP;
-
-        // Extra Aircraft/B-52G NASA/B-52G NASA.acf:P _engn/0/_type JET
-        // Extra Aircraft/B747-100 NASA/B747-100 NASA.acf:P _engn/0/_type JET_HIB
-        // Extra Aircraft/C-130/C-130.acf:P _engn/0/_type TRB_FIX
-        // Extra Aircraft/X-15/X-15.acf:P _engn/0/_type ROC
-        // Laminar Research/Aerolite 103/Aerolite_103.acf:P _engn/0/_type RCP_CRB
-        // Laminar Research/Baron B58/Baron_58.acf:P _engn/0/_type RCP_INJ
-        // Laminar Research/Boeing B747-400/747-400.acf:P _engn/0/_type JET
-        // Laminar Research/KingAir C90B/C90B.acf:P _engn/0/_type TRB_FRE
-
-        // Category ======================
-        // AIRPLANE, HELICOPTER, BOAT, GROUNDVEHICLE, CONTROLTOWER, SIMPLEOBJECT, VIEWER, UNKNOWN
-        if(keyValuePairs->value("acf/_is_helicopter").toInt() == 1)
-          aircraft.category = atools::fs::sc::HELICOPTER;
-        else
-          aircraft.category = atools::fs::sc::AIRPLANE;
+        loadAcf(aircraft, objId);
 
         data.aiAircraft.append(aircraft);
 
@@ -413,6 +368,57 @@ bool XpConnect::fillSimConnectData(atools::fs::sc::SimConnectData& data, bool fe
   }
 
   return true;
+}
+
+void XpConnect::loadAcf(atools::fs::sc::SimConnectAircraft& aircraft, quint32 objId)
+{
+  // Read values from .acf file which are not available by the API ====================================
+  QString aircraftModelFilepath = getAircraftModelFilepath(static_cast<int>(objId));
+  QHash<QString, QString> *keyValuePairs = acfFileValues.object(aircraftModelFilepath);
+  if(keyValuePairs == nullptr)
+  {
+    // Read and cache the values
+    keyValuePairs = new QHash<QString, QString>();
+    // "acf/_is_airliner",  "acf/_is_general_aviation","acf/_callsign", "acf/_name"
+    readValuesFromAcfFile(*keyValuePairs, aircraftModelFilepath, {"acf/_descrip",
+                                                                  "acf/_ICAO",
+                                                                  "acf/_tailnum",
+                                                                  "acf/_is_helicopter",
+                                                                  "_engn/0/_type"});
+    acfFileValues.insert(aircraftModelFilepath, keyValuePairs);
+  }
+
+  // Use attributes from the acf file ======================================
+  aircraft.airplaneTitle = keyValuePairs->value("acf/_descrip"); // Cessna 172 SP Skyhawk - 180HP
+  aircraft.airplaneModel = keyValuePairs->value("acf/_ICAO"); // C172
+  aircraft.airplaneReg = keyValuePairs->value("acf/_tailnum"); // Registration N172SP
+
+  // Engine type - use first engine only ======================
+  // PISTON = 0, JET = 1, NO_ENGINE = 2, HELO_TURBINE = 3, UNSUPPORTED = 4, TURBOPROP = 5
+  aircraft.engineType = atools::fs::sc::UNSUPPORTED;
+  const QString engineType = keyValuePairs->value("_engn/0/_type");
+  if(engineType.startsWith("JET") || engineType.startsWith("ROC"))
+    aircraft.engineType = atools::fs::sc::JET;
+  else if(engineType.startsWith("RCP"))
+    aircraft.engineType = atools::fs::sc::PISTON;
+  else if(engineType.startsWith("TRB"))
+    aircraft.engineType = atools::fs::sc::TURBOPROP;
+
+  // Extra Aircraft/B-52G NASA/B-52G NASA.acf:P _engn/0/_type JET
+  // Extra Aircraft/B747-100 NASA/B747-100 NASA.acf:P _engn/0/_type JET_HIB
+  // Extra Aircraft/C-130/C-130.acf:P _engn/0/_type TRB_FIX
+  // Extra Aircraft/X-15/X-15.acf:P _engn/0/_type ROC
+  // Laminar Research/Aerolite 103/Aerolite_103.acf:P _engn/0/_type RCP_CRB
+  // Laminar Research/Baron B58/Baron_58.acf:P _engn/0/_type RCP_INJ
+  // Laminar Research/Boeing B747-400/747-400.acf:P _engn/0/_type JET
+  // Laminar Research/KingAir C90B/C90B.acf:P _engn/0/_type TRB_FRE
+
+  // Category ======================
+  // AIRPLANE, HELICOPTER, BOAT, GROUNDVEHICLE, CONTROLTOWER, SIMPLEOBJECT, VIEWER, UNKNOWN
+  if(keyValuePairs->value("acf/_is_helicopter").toInt() == 1)
+    aircraft.category = atools::fs::sc::HELICOPTER;
+  else
+    aircraft.category = atools::fs::sc::AIRPLANE;
 }
 
 void XpConnect::initDataRefs()

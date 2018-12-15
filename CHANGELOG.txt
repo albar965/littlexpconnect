@@ -1,8 +1,7 @@
+
+Fixed issue where acf files was not read for the user aircraft.
+
 Version 1.0.11
-
-No changes except version.
-
-Version 1.0.10.beta
 
 * Log file is now rotated if the file size of 1 MB is exceeded. This avoid overwriting on startup and eases error reporting.
   albar965/littlenavmap#275
