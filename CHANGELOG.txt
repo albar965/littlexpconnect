@@ -1,5 +1,6 @@
+Version 1.0.12
 
-Fixed issue where acf files was not read for the user aircraft.
+* Acf files of user aircraft is now read for more attributes like e.g. identifying helicopter vessels.
 
 Version 1.0.11
 
