@@ -38,6 +38,8 @@ QString getAircraftModelFilepath(int index);
  * it can read up to 100000 lines of text. */
 void readValuesFromAcfFile(QHash<QString, QString>& keyValuePairs, const QString& filepath, const QStringList& keys);
 
+int getNumActiveAircraft();
+
 /*
  * Hides the XPLM data ref accessor methods and provides methods for easier access than the C interface.
  * The class allows only reading of datarefs.

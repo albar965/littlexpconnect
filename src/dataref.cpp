@@ -95,7 +95,7 @@ bool DataRef::find()
 {
   qDebug() << Q_FUNC_INFO << name;
   dataRef = XPLMFindDataRef(name.toLatin1().constData());
-  if(dataRef == NULL)
+  if(dataRef == nullptr)
     qWarning() << Q_FUNC_INFO << "Cannot find" << name;
   else
   {
@@ -204,4 +204,13 @@ float DataRef::valueFloatArrSum() const
   for(float val : valueFloatArr())
     sumValue += val;
   return sumValue;
+}
+
+int getNumActiveAircraft()
+{
+  int outTotalAircraft, outActiveAircraft;
+  XPLMPluginID outController;
+
+  XPLMCountAircraft(&outTotalAircraft, &outActiveAircraft, &outController);
+  return outActiveAircraft;
 }

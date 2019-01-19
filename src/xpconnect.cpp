@@ -146,8 +146,6 @@ struct MultiplayerDataRefs
   DataRef latPositionDegAi;
   DataRef lonPositionDegAi;
   DataRef actualAltitudeMeterAi;
-  DataRef x;
-  DataRef y;
 };
 
 static QVector<MultiplayerDataRefs> multiplayerDataRefs;
@@ -157,8 +155,6 @@ static const QLatin1Literal HEADING_DEG_TRUE_AI("sim/multiplayer/position/plane%
 static const QLatin1Literal LAT_POSITION_DEG_AI("sim/multiplayer/position/plane%1_lat");
 static const QLatin1Literal LON_POSITION_DEG_AI("sim/multiplayer/position/plane%1_lon");
 static const QLatin1Literal ACTUAL_ALTITUDE_METER_AI("sim/multiplayer/position/plane%1_el");
-static const QLatin1Literal POS_X("sim/multiplayer/position/plane%1_x");
-static const QLatin1Literal POS_Y("sim/multiplayer/position/plane%1_y");
 
 }
 
@@ -326,13 +322,15 @@ bool XpConnect::fillSimConnectData(atools::fs::sc::SimConnectData& data, bool fe
   data.aiAircraft.clear();
   if(fetchAi)
   {
+    // Includes user aircraft
+    int numAi = getNumActiveAircraft() - 1;
+
     // Get AI or multiplayer aircraft ===============================
     quint32 objId = 1;
-    for(const dr::MultiplayerDataRefs& ref : dr::multiplayerDataRefs)
+
+    for(int i = 0; i < numAi; i++)
     {
-      // Check the OpenGL coordinates if the aircraft is valid
-      if(atools::almostEqual(ref.x.valueDouble(), 0.) && atools::almostEqual(ref.y.valueDouble(), 0.))
-        continue;
+      const dr::MultiplayerDataRefs& ref = dr::multiplayerDataRefs.at(i);
 
       float actualAltAi = meterToFeet(ref.actualAltitudeMeterAi.valueFloat());
       Pos pos(ref.lonPositionDegAi.valueFloat(), ref.latPositionDegAi.valueFloat(), actualAltAi);
@@ -432,9 +430,6 @@ void XpConnect::initDataRefs()
     refs.lonPositionDegAi.setName(QString(dr::LON_POSITION_DEG_AI).arg(i));
     refs.actualAltitudeMeterAi.setName(QString(dr::ACTUAL_ALTITUDE_METER_AI).arg(i));
 
-    refs.x.setName(QString(dr::POS_X).arg(i));
-    refs.y.setName(QString(dr::POS_Y).arg(i));
-
     // Add to the list
     dr::multiplayerDataRefs.append(refs);
 
@@ -444,8 +439,6 @@ void XpConnect::initDataRefs()
     r.latPositionDegAi.find();
     r.lonPositionDegAi.find();
     r.actualAltitudeMeterAi.find();
-    r.x.find();
-    r.y.find();
   }
 
   // Find remaining datarefs of user aircraft
