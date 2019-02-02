@@ -46,7 +46,6 @@ win32 {
 
 # Linux ==================
 unix:!macx {
-  QT_HOME=/home/alex/Qt/5.9.5/gcc_64
   XPSDK_HOME=/home/alex/Programme/XPSDK
   XP_HOME=\"/home/alex/Daten/Programme/X-Plane 11\"
 }
@@ -154,14 +153,14 @@ unix:!macx {
   deploy.commands = rm -Rfv $${DEPLOY_DIR} &&
   deploy.commands += mkdir -pv $${DEPLOY_DIR}/64 &&
   deploy.commands += cp -av $${OUT_PWD}/liblittlexpconnect.so.1.0.0 $${DEPLOY_DIR}/64/lin.xpl &&
+  deploy.commands += cp -av /usr/lib/x86_64-linux-gnu/libicui18n.so.* $${DEPLOY_DIR}/64/ &&
+  deploy.commands += cp -av /usr/lib/x86_64-linux-gnu/libicuuc.so.* $${DEPLOY_DIR}/64/ &&
+  deploy.commands += cp -av /usr/lib/x86_64-linux-gnu/libicudata.so.* $${DEPLOY_DIR}/64/ &&
   deploy.commands += cp -vf $${PWD}/CHANGELOG.txt $${DEPLOY_DIR} &&
   deploy.commands += cp -vf $${PWD}/README.txt $${DEPLOY_DIR} &&
-  deploy.commands += cp -vf $${PWD}/LICENSE.txt $${DEPLOY_DIR} &&
-  deploy.commands += cp -vfa $${QT_HOME}/lib/libicudata.so*  $${DEPLOY_DIR}/64 &&
-  deploy.commands += cp -vfa $${QT_HOME}/lib/libicui18n.so*  $${DEPLOY_DIR}/64 &&
-  deploy.commands += cp -vfa $${QT_HOME}/lib/libicuuc.so*  $${DEPLOY_DIR}/64 &&
-  deploy.commands += cp -vfa $${QT_HOME}/lib/libQt5Core.so*  $${DEPLOY_DIR}/64
+  deploy.commands += cp -vf $${PWD}/LICENSE.txt $${DEPLOY_DIR}
 }
+
 
 # MacOS specific deploy target
 macx {
