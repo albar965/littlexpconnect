@@ -1,5 +1,5 @@
 /*****************************************************************************
-* Copyright 2015-2019 Alexander Barthel albar965@mailbox.org
+* Copyright 2015-2019 Alexander Barthel alex@littlenavmap.org
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -86,7 +86,7 @@ PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc)
   app = new atools::gui::ConsoleApplication(argc, nullptr);
   app->setApplicationName("Little Xpconnect");
   app->setOrganizationName("ABarthel");
-  app->setOrganizationDomain("abarthel.org");
+  app->setOrganizationDomain("littlenavmap.org");
 
   app->setApplicationVersion("1.0.13"); // VERSION_NUMBER - Little Xpconnect
 
