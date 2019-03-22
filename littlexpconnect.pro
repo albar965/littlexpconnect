@@ -77,6 +77,7 @@ CONFIG(release, debug|release) : CONF_TYPE=release
 
 isEmpty(DEPLOY_BASE) : DEPLOY_BASE=$$PWD/../deploy
 
+isEmpty(XPSDK_BASE) : XPSDK_BASE="$$PWD/../X-Plane SDK"
 isEmpty(ATOOLS_INC_PATH) : ATOOLS_INC_PATH=$$PWD/../atools/src
 isEmpty(ATOOLS_LIB_PATH) : ATOOLS_LIB_PATH=$$PWD/../build-atools-$$CONF_TYPE
 
