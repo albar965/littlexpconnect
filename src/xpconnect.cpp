@@ -89,7 +89,7 @@ static DataRef localTimeSec(dataRefs, "sim/time/local_time_sec");
 static DataRef zuluTimeSec(dataRefs, "sim/time/zulu_time_sec");
 
 // SimConnectAircraft
-static DataRef airplaneReg(dataRefs, "sim/aircraft/view/acf_tailnum");
+static DataRef airplaneTailnum(dataRefs, "sim/aircraft/view/acf_tailnum");
 static DataRef airplaneTitle(dataRefs, "sim/aircraft/view/acf_descrip");
 static DataRef airplaneType(dataRefs, "sim/aircraft/view/acf_ICAO");
 
@@ -223,7 +223,7 @@ bool XpConnect::fillSimConnectData(atools::fs::sc::SimConnectData& data, bool fe
   // SimConnectAircraft
   userAircraft.airplaneTitle = dr::airplaneTitle.valueString();
   userAircraft.airplaneModel = dr::airplaneType.valueString();
-  userAircraft.airplaneReg = dr::airplaneReg.valueString();
+  userAircraft.airplaneReg = dr::airplaneTailnum.valueString();
   // userAircraft.airplaneType;           // not available - use model ICAO code in client
   // not available:
   // userAircraft.airplaneAirline; userAircraft.airplaneFlightnumber; userAircraft.fromIdent; userAircraft.toIdent;
@@ -389,7 +389,9 @@ void XpConnect::loadAcf(atools::fs::sc::SimConnectAircraft& aircraft, quint32 ob
   // Use attributes from the acf file ======================================
   aircraft.airplaneTitle = keyValuePairs->value("acf/_descrip"); // Cessna 172 SP Skyhawk - 180HP
   aircraft.airplaneModel = keyValuePairs->value("acf/_ICAO"); // C172
-  aircraft.airplaneReg = keyValuePairs->value("acf/_tailnum"); // Registration N172SP
+
+  if(aircraft.airplaneReg.isEmpty())
+    aircraft.airplaneReg = keyValuePairs->value("acf/_tailnum"); // Registration N172SP
 
   // Engine type - use first engine only ======================
   // PISTON = 0, JET = 1, NO_ENGINE = 2, HELO_TURBINE = 3, UNSUPPORTED = 4, TURBOPROP = 5
@@ -444,7 +446,7 @@ void XpConnect::initDataRefs()
   // Find remaining datarefs of user aircraft
   for(DataRef *ref : dr::dataRefs)
   {
-    qDebug() << ref->getName();
+    // qDebug() << ref->getName();
 
     if(!ref->isValid())
       ref->find();
