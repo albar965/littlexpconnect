@@ -136,7 +136,11 @@ enum XpEngineType
   HI_BYPASS_JET = 5,
   ROCKET = 6,
   TIP_ROCKETS = 7,
-  FIXED_TURBINE = 8
+  FIXED_TURBINE = 8,
+
+  /* New values since 11.30 */
+  NEW_FREE_TURBINE = 9,
+  NEW_FIXED_TURBINE = 10
 };
 
 // Datarefs for one AI or multiplayer aircraft
@@ -295,6 +299,8 @@ bool XpConnect::fillSimConnectData(atools::fs::sc::SimConnectData& data, bool fe
 
       case xpc::dr::FREE_TURBINE:
       case xpc::dr::FIXED_TURBINE:
+      case xpc::dr::NEW_FREE_TURBINE:
+      case xpc::dr::NEW_FIXED_TURBINE:
         fuelMassToVolDivider = 6.7f; // JetA lbs to gallons at standard temp
         userAircraft.engineType = atools::fs::sc::TURBOPROP;
         break;
