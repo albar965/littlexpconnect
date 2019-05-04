@@ -21,7 +21,6 @@
 #include "fs/sc/simconnectuseraircraft.h"
 #include "fs/sc/simconnectdata.h"
 #include "fs/sc/simconnecttypes.h"
-#include "fs/util/fsutil.h"
 #include "geo/calculations.h"
 
 using atools::geo::kgToLbs;

@@ -161,27 +161,29 @@ message(-----------------------------------)
 # Files
 
 SOURCES += \
-    src/dataref.cpp \
-    src/main.cpp \
-    src/sharedmemorywriter.cpp \
-    src/xpconnect.cpp
+  src/dataref.cpp \
+  src/main.cpp \
+  src/sharedmemorywriter.cpp \
+  src/xpconnect.cpp
 
 HEADERS += \
-    src/dataref.h \
-    src/littlexpconnect_global.h \
-    src/sharedmemorywriter.h \
-    src/xpconnect.h
+  src/dataref.h \
+  src/littlexpconnect_global.h \
+  src/sharedmemorywriter.h \
+  src/xpconnect.h
 
 RESOURCES += \
     littlexpconnect.qrc
 
 OTHER_FILES += \
-    BUILD.txt \
-    CHANGELOG.txt \
-    LICENSE.txt \
-    README.txt \
-    htmltidy.cfg \
-    uncrustify.cfg
+  .travis.yml \
+  .gitignore \
+  BUILD.txt \
+  CHANGELOG.txt \
+  LICENSE.txt \
+  README.txt \
+  htmltidy.cfg \
+  uncrustify.cfg
 
 # =====================================================================
 # Deployment commands
