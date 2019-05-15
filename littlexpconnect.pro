@@ -59,11 +59,10 @@ TEMPLATE = lib
 TARGET_NAME=Little Xpconnect
 
 # =======================================================================
-# Copy ennvironment variables into qmake variables
+# Copy environment variables into qmake variables
 
 ATOOLS_INC_PATH=$$(ATOOLS_INC_PATH)
 ATOOLS_LIB_PATH=$$(ATOOLS_LIB_PATH)
-OPENSSL_PATH=$$(OPENSSL_PATH)
 GIT_PATH=$$(ATOOLS_GIT_PATH)
 XPSDK_BASE=$$(XPSDK_BASE)
 DEPLOY_BASE=$$(DEPLOY_BASE)
