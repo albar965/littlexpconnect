@@ -1,3 +1,7 @@
+Version 1.0.15
+
+* Updated for new turboprop definitions in X-Plane.
+
 Version 1.0.14
 
 * Now linking Xpconnect statically to Qt for Linux to avoid plugin conflicts with libaries.
