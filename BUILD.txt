@@ -39,9 +39,6 @@ You can also build Little Xpconnect with the shared Qt but then you have to copy
 Install MSYS2, update and then install the additonal packages:
 `pacman -S mingw-w64-x86_64-toolchain mingw-w64-i686-qt mingw-w64-i686-qt5 mingw-w64-x86_64-qt mingw-w64-x86_64-qt5`
 
-- Get the latest `Win32 OpenSSL v1.0.1` from https://slproweb.com/products/Win32OpenSSL.html and install it.
-  Versions later than v1.0.1 will not work with Qt 5.6.
-- Install SimConnect if needed (optional). The FSX SP2 is the preferred version.
 - Clone littlexpconnect from GIT (`git clone https://github.com/albar965/littlexpconnect.git`)
   to e.g.: `C:\Projects\littlexpconnect`
 - For littlexpconnect use the build directory of e.g.: `C:\Projects\build-littlexpconnect-release`. Otherwise
@@ -63,7 +60,6 @@ You can build the program on Linux or macOS similar to the Windows instructions 
 the Qt Creator GUI or the command line.
 
 SimConnect is not available on these platforms.
-OpenSSL will be detected automatically by the build scripts.
 
 The following assumes that atools was already installed and built.
 
