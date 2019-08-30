@@ -1,6 +1,22 @@
+Numbers (#) refer to Github issues.
+For example: albar965/littlenavmap#3 is https://github.com/albar965/littlenavmap/issues/3.
+
 Version 1.0.15
 
-* Updated for new turboprop definitions in X-Plane.
+* Added new X-Plane turboprop definitions used since 11.30 to better recognize aircraft and fuel type.
+* Now using tail number from aircraft ".acf" file only if the tail number from the dataref is not set.
+  This helps to get the right tail number if add-on aircraft inject this manually using a script.
+* Limited logging output.
+
+Build and Deployment for Developers: albar965/littlenavmap#387
+* Updated for Qt 5.12.4.
+* Linux compilation now based on Ubuntu 18.04.
+* Complete update of project files to allow configuration with environment variables. Removed all hardcoded paths.
+* Added documentation about environment variables to configure build and updated build instructions
+  in "BUILD.txt" and "littlexpconnect.pro" files.
+
+related from atools version 3.4.0.beta
+See CHANGELOG.txt in atools project for more technical details. Relevant comments were added to list above.
 
 Version 1.0.14
 
