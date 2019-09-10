@@ -216,7 +216,13 @@ macx {
   deploy.commands += rm -fv $${DEPLOY_DIR}/QtCore.framework/QtCore_debug &&
   deploy.commands += rm -fv $${DEPLOY_DIR}/QtCore.framework/QtCore_debug.prl &&
   deploy.commands += rm -Rfv $${DEPLOY_DIR}/QtCore.framework/Versions/*/Headers &&
-  deploy.commands += rm -fv $${DEPLOY_DIR}/QtCore.framework/Versions/*/QtCore_debug
+  deploy.commands += rm -fv $${DEPLOY_DIR}/QtCore.framework/Versions/*/QtCore_debug &&
+  deploy.commands += cp -vfa $$[QT_INSTALL_LIBS]/QtGui.framework  $${DEPLOY_DIR} &&
+  deploy.commands += rm -Rfv $${DEPLOY_DIR}/QtGui.framework/Headers &&
+  deploy.commands += rm -fv $${DEPLOY_DIR}/QtGui.framework/QtGui_debug &&
+  deploy.commands += rm -fv $${DEPLOY_DIR}/QtGui.framework/QtGui_debug.prl &&
+  deploy.commands += rm -Rfv $${DEPLOY_DIR}/QtGui.framework/Versions/*/Headers &&
+  deploy.commands += rm -fv $${DEPLOY_DIR}/QtGui.framework/Versions/*/QtGui_debug
 }
 
 # Windows specific deploy target
