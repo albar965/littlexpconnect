@@ -1,6 +1,7 @@
 Numbers (#) refer to Github issues.
 For example: albar965/littlenavmap#3 is https://github.com/albar965/littlenavmap/issues/3.
 
+Version 1.0.18
 Version 1.0.17.rc1
 
 * No changes
