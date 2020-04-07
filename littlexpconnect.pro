@@ -133,6 +133,21 @@ DEFINES += XPLM200=1 APL=0 IBM=0 LIN=1
 DEFINES += LITTLEXPCONNECT_LIBRARY
 
 # =======================================================================
+# Include build_options.pro with additional variables
+
+exists($$PWD/../build_options.pro) {
+   include($$PWD/../build_options.pro)
+
+   !isEqual(QUIET, "true") {
+     message($$PWD/../build_options.pro found.)
+   }
+} else {
+   !isEqual(QUIET, "true") {
+     message($$PWD/../build_options.pro not found.)
+   }
+}
+
+# =======================================================================
 # Print values when running qmake
 
 !isEqual(QUIET, "true") {
