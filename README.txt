@@ -93,5 +93,5 @@ https://github.com/albar965/littlexpconnect
 The source code for Little Xpconnect is available at Github too:
 https://github.com/albar965/littlexpconnect
 
-Copyright 2015-2019 Alexander Barthel (alex@littlenavmap.org).
+Copyright 2015-2020 Alexander Barthel (alex@littlenavmap.org).
 
