@@ -327,8 +327,8 @@ bool XpConnect::fillSimConnectData(atools::fs::sc::SimConnectData& data, bool fe
   data.aiAircraft.clear();
   if(fetchAi)
   {
-    // Includes user aircraft
-    int numAi = getNumActiveAircraft() - 1;
+    // Includes user aircraft - can return more than 20 despite providing only datarefs 1-19 (minus user)
+    int numAi = std::min(getNumActiveAircraft(), 20) - 1;
 
     // Get AI or multiplayer aircraft ===============================
     quint32 objId = 1;
