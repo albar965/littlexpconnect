@@ -63,6 +63,13 @@ static DataRef seaLevelPressurePascal(dataRefs, "sim/physics/earth_pressure_p");
 static DataRef pitotIcePercent(dataRefs, "sim/flightmodel/failures/pitot_ice");
 static DataRef structuralIcePercent(dataRefs, "sim/flightmodel/failures/frm_ice");
 static DataRef structuralIcePercent2(dataRefs, "sim/flightmodel/failures/frm_ice2");
+static DataRef aoaIcePercent(dataRefs, "sim/flightmodel/failures/aoa_ice");
+static DataRef aoaIcePercent2(dataRefs, "sim/flightmodel/failures/aoa_ice2");
+static DataRef inletIcePercent(dataRefs, "sim/flightmodel/failures/inlet_ice");
+static DataRef propIcePercent(dataRefs, "sim/flightmodel/failures/prop_ice");
+static DataRef statIcePercent(dataRefs, "sim/flightmodel/failures/stat_ice");
+static DataRef statIcePercent2(dataRefs, "sim/flightmodel/failures/stat_ice2");
+static DataRef windowIcePercent(dataRefs, "sim/flightmodel/failures/window_ice");
 
 // Weight
 static DataRef airplaneTotalWeightKgs(dataRefs, "sim/flightmodel/weight/m_total");
@@ -195,6 +202,13 @@ bool XpConnect::fillSimConnectData(atools::fs::sc::SimConnectData& data, bool fe
   userAircraft.pitotIcePercent = dr::pitotIcePercent.valueFloat() * 100.f;
   userAircraft.structuralIcePercent = std::max(dr::structuralIcePercent.valueFloat(),
                                                dr::structuralIcePercent2.valueFloat()) * 100.f;
+  userAircraft.aoaIcePercent = std::max(dr::aoaIcePercent.valueFloat(),
+                                        dr::aoaIcePercent2.valueFloat()) * 100.f;
+  userAircraft.inletIcePercent = dr::inletIcePercent.valueFloat() * 100.f;
+  userAircraft.propIcePercent = dr::propIcePercent.valueFloat() * 100.f;
+  userAircraft.statIcePercent = std::max(dr::statIcePercent.valueFloat(),
+                                         dr::statIcePercent2.valueFloat()) * 100.f;
+  userAircraft.windowIcePercent = dr::windowIcePercent.valueFloat() * 100.f;
 
   // Weight
   userAircraft.airplaneTotalWeightLbs = kgToLbs(dr::airplaneTotalWeightKgs.valueFloat());

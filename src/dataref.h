@@ -113,7 +113,7 @@ public:
   int valueIntArrSum() const;
   float valueFloatArrSum() const;
 
-  /* Get arrays. The length of the array is check before  retrieving the values.*/
+  /* Get arrays. The length of the array is checked before  retrieving the values.*/
   IntVector valueIntArr() const;
   FloatVector valueFloatArr() const;
   QByteArray valueByteArr() const;

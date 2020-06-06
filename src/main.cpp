@@ -24,6 +24,7 @@
 #include "gui/consoleapplication.h"
 #include "sharedmemorywriter.h"
 #include "xpconnect.h"
+#include "util/version.h"
 
 #include <QDebug>
 
@@ -88,7 +89,7 @@ PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc)
   app->setOrganizationName("ABarthel");
   app->setOrganizationDomain("littlenavmap.org");
 
-  app->setApplicationVersion("1.0.18"); // VERSION_NUMBER - Little Xpconnect
+  app->setApplicationVersion("1.0.19.develop"); // VERSION_NUMBER - Little Xpconnect
 
   // Initialize logging and force logfiles into the system or user temp directory
   LoggingHandler::initializeForTemp(Settings::getOverloadedPath(":/littlexpconnect/resources/config/logging.cfg"));
@@ -97,6 +98,16 @@ PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc)
 
   // Pass plugin information to X-Plane
   QString info = QString("%1 %2").arg(app->applicationName()).arg(app->applicationVersion());
+  atools::util::Version version(app->applicationVersion());
+
+  // Program version and revision ==========================================
+  if(version.isReleaseCandidate() || version.isBeta() || version.isDevelop())
+    info += QString(" (%1)").arg(GIT_REVISION);
+
+#ifndef QT_NO_DEBUG
+  info += " - DEBUG";
+#endif
+
   strcpy(outName, info.toLatin1().constData());
   strcpy(outSig, "ABarthel.LittleXpconnect.Connect");
   strcpy(outDesc, "Connects Little Navmap and Little Navconnect to X-Plane.");
