@@ -18,12 +18,14 @@
 #include "dataref.h"
 
 #include "atools.h"
+#include "geo/pos.h"
 
 #include <QDebug>
 #include <QDir>
 
 extern "C" {
 #include "XPLMPlanes.h"
+#include "XPLMGraphics.h"
 }
 
 QString getAircraftModelFilepath(int index)
@@ -72,6 +74,18 @@ void readValuesFromAcfFile(QHash<QString, QString>& keyValuePairs, const QString
   }
   else
     qWarning() << Q_FUNC_INFO << "Cannot open file" << filepath << "error" << file.errorString();
+}
+
+atools::geo::Pos localToWorld(double x, double y, double z)
+{
+  double lat, lon, alt;
+  XPLMLocalToWorld(x, y, z, &lat, &lon, &alt);
+  return atools::geo::Pos(lon, lat, alt);
+}
+
+void worldToLocal(double& x, double& y, double& z, const atools::geo::Pos& pos)
+{
+  XPLMWorldToLocal(pos.getLatY(), pos.getLonX(), pos.getAltitude(), &x, &y, &z);
 }
 
 // ==========================================================================================
