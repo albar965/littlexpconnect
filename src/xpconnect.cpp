@@ -70,6 +70,7 @@ static DataRef propIcePercent(dataRefs, "sim/flightmodel/failures/prop_ice");
 static DataRef statIcePercent(dataRefs, "sim/flightmodel/failures/stat_ice");
 static DataRef statIcePercent2(dataRefs, "sim/flightmodel/failures/stat_ice2");
 static DataRef windowIcePercent(dataRefs, "sim/flightmodel/failures/window_ice");
+static DataRef carbIcePercent(dataRefs, "sim/flightmodel/engine/ENGN_crbice");
 
 // Weight
 static DataRef airplaneTotalWeightKgs(dataRefs, "sim/flightmodel/weight/m_total");
@@ -209,6 +210,8 @@ bool XpConnect::fillSimConnectData(atools::fs::sc::SimConnectData& data, bool fe
 
   userAircraft.magVarDeg = -dr::magVarDeg.valueFloat();
 
+  userAircraft.numberOfEngines = static_cast<quint8>(dr::numberOfEngines.valueInt());
+
   // Wind and ambient parameters
   userAircraft.windSpeedKts = dr::windSpeedKts.valueFloat();
   userAircraft.windDirectionDegT = dr::windDirectionDegMag.valueFloat() + userAircraft.magVarDeg;
@@ -227,6 +230,12 @@ bool XpConnect::fillSimConnectData(atools::fs::sc::SimConnectData& data, bool fe
   userAircraft.statIcePercent = std::max(dr::statIcePercent.valueFloat(),
                                          dr::statIcePercent2.valueFloat()) * 100.f;
   userAircraft.windowIcePercent = dr::windowIcePercent.valueFloat() * 100.f;
+
+  userAircraft.carbIcePercent = 0.f;
+  FloatVector carbIce = dr::carbIcePercent.valueFloatArr();
+  for(int i = 0; i < carbIce.size() && i < userAircraft.numberOfEngines; i++)
+    userAircraft.carbIcePercent = std::max(carbIce.value(i, 0.f) * 100.f,
+                                           static_cast<float>(userAircraft.carbIcePercent));
 
   // Weight
   userAircraft.airplaneTotalWeightLbs = kgToLbs(dr::airplaneTotalWeightKgs.valueFloat());
@@ -316,9 +325,9 @@ bool XpConnect::fillSimConnectData(atools::fs::sc::SimConnectData& data, bool fe
   // PISTON = 0, JET = 1, NO_ENGINE = 2, HELO_TURBINE = 3, UNSUPPORTED = 4, TURBOPROP = 5
 
   // Get engine type
-  for(int engine : engines)
+  for(int i = 0; i < engines.size() && i < userAircraft.numberOfEngines; i++)
   {
-    dr::XpEngineType type = static_cast<dr::XpEngineType>(engine);
+    dr::XpEngineType type = static_cast<dr::XpEngineType>(engines.value(i, xpc::dr::RECIP_CARB));
     switch(type)
     {
       case xpc::dr::ELECTRIC:
@@ -353,7 +362,6 @@ bool XpConnect::fillSimConnectData(atools::fs::sc::SimConnectData& data, bool fe
   userAircraft.fuelTotalQuantityGallons = userAircraft.fuelTotalWeightLbs / fuelMassToVolDivider;
   userAircraft.fuelFlowGPH = userAircraft.fuelFlowPPH / fuelMassToVolDivider;
 
-  userAircraft.numberOfEngines = static_cast<quint8>(dr::numberOfEngines.valueInt());
   loadAcf(userAircraft, 0L);
 
   data.aiAircraft.clear();
