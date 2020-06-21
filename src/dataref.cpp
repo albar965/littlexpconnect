@@ -40,6 +40,9 @@ QString getAircraftModelFilepath(int index)
 
 void readValuesFromAcfFile(QHash<QString, QString>& keyValuePairs, const QString& filepath, const QStringList& keys)
 {
+  static const QLatin1String PROPERTIES_END("PROPERTIES_END");
+  static const QLatin1String PREFIX("P ");
+
   QFile file(filepath);
 
   if(file.open(QIODevice::ReadOnly | QIODevice::Text))
@@ -54,10 +57,10 @@ void readValuesFromAcfFile(QHash<QString, QString>& keyValuePairs, const QString
     {
       QString line = stream.readLine().trimmed();
 
-      if(line == "PROPERTIES_END")
+      if(line == PROPERTIES_END)
         break;
 
-      if(!line.startsWith("P "))
+      if(!line.startsWith(PREFIX))
         continue;
 
       QString key = line.section(' ', 1, 1);

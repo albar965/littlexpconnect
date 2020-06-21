@@ -362,6 +362,7 @@ bool XpConnect::fillSimConnectData(atools::fs::sc::SimConnectData& data, bool fe
   userAircraft.fuelTotalQuantityGallons = userAircraft.fuelTotalWeightLbs / fuelMassToVolDivider;
   userAircraft.fuelFlowGPH = userAircraft.fuelFlowPPH / fuelMassToVolDivider;
 
+  // Load certain values from .acf file overriding dataref values
   loadAcf(userAircraft, 0L);
 
   data.aiAircraft.clear();
@@ -506,8 +507,8 @@ void XpConnect::loadAcf(atools::fs::sc::SimConnectAircraft& aircraft, quint32 ob
   {
     // Read and cache the values
     keyValuePairs = new QHash<QString, QString>();
-    // "acf/_is_airliner",  "acf/_is_general_aviation","acf/_callsign", "acf/_name"
-    readValuesFromAcfFile(*keyValuePairs, aircraftModelFilepath, {"acf/_descrip",
+    // "acf/_is_airliner",  "acf/_is_general_aviation","acf/_callsign", "acf/_name", "acf/_descrip"
+    readValuesFromAcfFile(*keyValuePairs, aircraftModelFilepath, {"acf/_name",
                                                                   "acf/_ICAO",
                                                                   "acf/_tailnum",
                                                                   "acf/_is_helicopter",
@@ -516,7 +517,14 @@ void XpConnect::loadAcf(atools::fs::sc::SimConnectAircraft& aircraft, quint32 ob
   }
 
   // Use attributes from the acf file ======================================
-  aircraft.airplaneTitle = keyValuePairs->value("acf/_descrip"); // Cessna 172 SP Skyhawk - 180HP
+  // Cessna_172SP_seaplane.acf:P acf/_descrip Cessna 172 SP Skyhawk - 180HP
+  // Cessna_172SP_seaplane.acf:P acf/_name Cessna Skyhawk (Floats)
+  // L5_Sentinel.acf:P acf/_descrip Stinson L5 Sentinel - L5G with uprated engine to 235hp
+  // L5_Sentinel.acf:P acf/_name Stinson L5 Sentinel
+  // MD80.acf:P acf/_descrip MAD DOG
+  // MD80.acf:P acf/_name MD-82  aircraft.airplaneTitle = keyValuePairs->value("acf/_name"); // Cessna 172 SP Skyhawk - 180HP
+  aircraft.airplaneTitle = keyValuePairs->value("acf/_name");
+
   aircraft.airplaneModel = keyValuePairs->value("acf/_ICAO"); // C172
 
   if(aircraft.airplaneReg.isEmpty())
