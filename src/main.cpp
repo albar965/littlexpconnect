@@ -25,6 +25,7 @@
 #include "sharedmemorywriter.h"
 #include "xpconnect.h"
 #include "util/version.h"
+#include "geo/calculations.h"
 
 #include <QDebug>
 
@@ -79,8 +80,8 @@ PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc)
   qDebug() << "LittleXpconnect" << Q_FUNC_INFO;
 
   // Register atools types so we can stream them
-  qRegisterMetaType<atools::fs::sc::SimConnectData>();
-  qRegisterMetaTypeStreamOperators<atools::geo::Pos>();
+  atools::geo::registerMetaTypes();
+  atools::fs::sc::registerMetaTypes();
 
   // Create application object which is needed for the server thread event queue
   int argc = 0;
