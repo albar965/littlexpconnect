@@ -59,6 +59,7 @@ namespace lxc {
 /* key names for atools::settings */
 static const QLatin1Literal SETTINGS_OPTIONS_FETCH_RATE_MS("Options/FetchRate");
 static const QLatin1Literal SETTINGS_OPTIONS_FETCH_AI_AIRCRAFT("Options/FetchAiAircraft");
+static const QLatin1Literal SETTINGS_OPTIONS_VERBOSE("Options/Verbose");
 }
 
 float flightLoopCallback(float inElapsedSinceLastCall, float inElapsedTimeSinceLastFlightLoop, int inCounter,
@@ -69,6 +70,7 @@ static atools::gui::ConsoleApplication *app = nullptr;
 
 static bool fetchAi = true;
 static float fetchRateSecs = 0.2f;
+static bool verbose = false;
 
 // Use a background thread to write the data to the shared memory to avoid simulator stutters due to
 // locking
@@ -90,7 +92,7 @@ PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc)
   app->setOrganizationName("ABarthel");
   app->setOrganizationDomain("littlenavmap.org");
 
-  app->setApplicationVersion("1.0.19.develop"); // VERSION_NUMBER - Little Xpconnect
+  app->setApplicationVersion("1.0.20.develop"); // VERSION_NUMBER - Little Xpconnect
 
   // Initialize logging and force logfiles into the system or user temp directory
   LoggingHandler::initializeForTemp(Settings::getOverloadedPath(":/littlexpconnect/resources/config/logging.cfg"));
@@ -119,6 +121,7 @@ PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc)
   Settings& settings = Settings::instance();
   fetchAi = settings.getAndStoreValue(lxc::SETTINGS_OPTIONS_FETCH_AI_AIRCRAFT, true).toBool();
   fetchRateSecs = settings.getAndStoreValue(lxc::SETTINGS_OPTIONS_FETCH_RATE_MS, 200).toFloat() / 1000.f;
+  verbose = settings.getAndStoreValue(lxc::SETTINGS_OPTIONS_VERBOSE, false).toBool();
 
   // Always successfull
   return 1;
@@ -142,7 +145,7 @@ PLUGIN_API int XPluginEnable(void)
   qDebug() << "LittleXpconnect" << Q_FUNC_INFO;
 
   // Start the backgound writer
-  thread = new SharedMemoryWriter();
+  thread = new SharedMemoryWriter(verbose);
   thread->start();
 
   // Register callback into method - first call in five seconds

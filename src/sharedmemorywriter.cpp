@@ -23,7 +23,8 @@
 #include <QBuffer>
 #include <QDataStream>
 
-SharedMemoryWriter::SharedMemoryWriter()
+SharedMemoryWriter::SharedMemoryWriter(bool verboseParam)
+  : verbose(verboseParam)
 {
   qDebug() << Q_FUNC_INFO;
   xpConnect = new xpc::XpConnect();
@@ -45,6 +46,39 @@ void SharedMemoryWriter::fetchAndWriteData(bool fetchAi)
   }
 
   waitCondition.wakeAll();
+
+  if(verbose)
+  {
+    qint64 now = QDateTime::currentSecsSinceEpoch();
+    if(now > lastReport + 10)
+    {
+      lastReport = now;
+      const atools::fs::sc::SimConnectUserAircraft& ac = data.getUserAircraftConst();
+
+      if(ac.isValid())
+        qDebug() << Q_FUNC_INFO << "User id" << ac.getObjectId()
+                 << "type" << ac.getAirplaneType()
+                 << "model" << ac.getAirplaneModel()
+                 << "reg" << ac.getAirplaneRegistration()
+                 << ac.getPosition();
+      else
+        qDebug() << Q_FUNC_INFO << "User not valid";
+
+      if(!data.getAiAircraftConst().isEmpty())
+      {
+        for(const atools::fs::sc::SimConnectAircraft& ac : data.getAiAircraftConst())
+        {
+          qDebug() << Q_FUNC_INFO << "AI id" << ac.getObjectId()
+                   << "type" << ac.getAirplaneType()
+                   << "model" << ac.getAirplaneModel()
+                   << "reg" << ac.getAirplaneRegistration()
+                   << ac.getPosition();
+        }
+      }
+      else
+        qDebug() << Q_FUNC_INFO << "AI list empty";
+    }
+  }
 }
 
 void SharedMemoryWriter::terminateThread()

@@ -141,7 +141,7 @@ static DataRef boatFrigateDeckHeightMtr(dataRefs, "sim/world/boat/frigate_deck_h
 // Deck height of the carrier (in coordinates of the OBJ model)
 static DataRef boatCarrierDeckHeightMtr(dataRefs, "sim/world/boat/carrier_deck_height_mtr");
 
-// Velocity of the boat in meters per second in its current direction.
+// Velocity of the boat in meters per second in its current direction (value is always null in 11.41 and 11.50)
 static DataRef boatVelocityMsc(dataRefs, "sim/world/boat/velocity_msc");
 
 // Position of the boat in meters in the local coordinate OpenGL coordinate system.
@@ -405,8 +405,7 @@ bool XpConnect::fillSimConnectData(atools::fs::sc::SimConnectData& data, bool fe
       carrier.position.setAltitude(atools::fs::sc::SC_INVALID_FLOAT);
 
       bool ok = true;
-      ok &= carrier.position.isValidRange();
-      ok &= atools::inRange(0.f, 50.f, carrier.groundSpeedKts);
+      ok &= carrier.position.isValidRange() && !carrier.position.isNull(0.01f);
       ok &= atools::inRange(0.f, 360.f, carrier.headingTrueDeg);
       ok &= atools::inRange(0, 100, int(carrier.deckHeight));
 
@@ -486,7 +485,7 @@ bool XpConnect::fillSimConnectData(atools::fs::sc::SimConnectData& data, bool fe
         aircraft.category = atools::fs::sc::AIRPLANE;
         aircraft.engineType = atools::fs::sc::UNSUPPORTED;
 
-        loadAcf(aircraft, objId);
+        loadAcf(aircraft, i + 1);
 
         data.aiAircraft.append(aircraft);
 
