@@ -33,7 +33,7 @@ class SharedMemoryWriter :
   public QThread
 {
 public:
-  SharedMemoryWriter();
+  SharedMemoryWriter(bool verboseParam);
   virtual ~SharedMemoryWriter();
 
   /* Fetch data from the datarefs (main thread context) and pass it over to the
@@ -62,6 +62,9 @@ private:
 
   xpc::XpConnect *xpConnect = nullptr;
 
+  // Logging - dump AI and user positions every ten seconds
+  bool verbose = false;
+  qint64 lastReport = 0L;
 };
 
 #endif // SHAREDMEMORYWRITERTHREAD_H

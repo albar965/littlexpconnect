@@ -63,6 +63,14 @@ static DataRef seaLevelPressurePascal(dataRefs, "sim/physics/earth_pressure_p");
 static DataRef pitotIcePercent(dataRefs, "sim/flightmodel/failures/pitot_ice");
 static DataRef structuralIcePercent(dataRefs, "sim/flightmodel/failures/frm_ice");
 static DataRef structuralIcePercent2(dataRefs, "sim/flightmodel/failures/frm_ice2");
+static DataRef aoaIcePercent(dataRefs, "sim/flightmodel/failures/aoa_ice");
+static DataRef aoaIcePercent2(dataRefs, "sim/flightmodel/failures/aoa_ice2");
+static DataRef inletIcePercent(dataRefs, "sim/flightmodel/failures/inlet_ice");
+static DataRef propIcePercent(dataRefs, "sim/flightmodel/failures/prop_ice");
+static DataRef statIcePercent(dataRefs, "sim/flightmodel/failures/stat_ice");
+static DataRef statIcePercent2(dataRefs, "sim/flightmodel/failures/stat_ice2");
+static DataRef windowIcePercent(dataRefs, "sim/flightmodel/failures/window_ice");
+static DataRef carbIcePercent(dataRefs, "sim/flightmodel/engine/ENGN_crbice");
 
 // Weight
 static DataRef airplaneTotalWeightKgs(dataRefs, "sim/flightmodel/weight/m_total");
@@ -122,6 +130,24 @@ static DataRef rainPercentage(dataRefs, "sim/weather/rain_percent");
 static DataRef aircraftSizeX(dataRefs, "sim/aircraft/view/acf_size_x");
 // points to the tail of the aircraft
 static DataRef aircraftSizeZ(dataRefs, "sim/aircraft/view/acf_size_z");
+
+// The two X-Plane ships - Index 0=carrier,1=frigate ===========================
+// Heading of the boat in degrees from true north
+static DataRef boatHeadingDeg(dataRefs, "sim/world/boat/heading_deg");
+
+// Deck height of the frigate (in coordinates of the OBJ model)
+static DataRef boatFrigateDeckHeightMtr(dataRefs, "sim/world/boat/frigate_deck_height_mtr");
+
+// Deck height of the carrier (in coordinates of the OBJ model)
+static DataRef boatCarrierDeckHeightMtr(dataRefs, "sim/world/boat/carrier_deck_height_mtr");
+
+// Velocity of the boat in meters per second in its current direction (value is always null in 11.41 and 11.50)
+static DataRef boatVelocityMsc(dataRefs, "sim/world/boat/velocity_msc");
+
+// Position of the boat in meters in the local coordinate OpenGL coordinate system.
+static DataRef boatXMtr(dataRefs, "sim/world/boat/x_mtr");
+static DataRef boatYMtr(dataRefs, "sim/world/boat/y_mtr");
+static DataRef boatZMtr(dataRefs, "sim/world/boat/z_mtr");
 
 static DataRef engineType8(dataRefs, "sim/aircraft/prop/acf_en_type");
 // 0 = recip carb, 1 = recip injected, 2 = free turbine, 3 = electric, 4 = lo bypass jet, 5 = hi bypass jet, 6 = rocket, 7 = tip rockets, 8 = fixed turbine
@@ -184,6 +210,8 @@ bool XpConnect::fillSimConnectData(atools::fs::sc::SimConnectData& data, bool fe
 
   userAircraft.magVarDeg = -dr::magVarDeg.valueFloat();
 
+  userAircraft.numberOfEngines = static_cast<quint8>(dr::numberOfEngines.valueInt());
+
   // Wind and ambient parameters
   userAircraft.windSpeedKts = dr::windSpeedKts.valueFloat();
   userAircraft.windDirectionDegT = dr::windDirectionDegMag.valueFloat() + userAircraft.magVarDeg;
@@ -195,6 +223,19 @@ bool XpConnect::fillSimConnectData(atools::fs::sc::SimConnectData& data, bool fe
   userAircraft.pitotIcePercent = dr::pitotIcePercent.valueFloat() * 100.f;
   userAircraft.structuralIcePercent = std::max(dr::structuralIcePercent.valueFloat(),
                                                dr::structuralIcePercent2.valueFloat()) * 100.f;
+  userAircraft.aoaIcePercent = std::max(dr::aoaIcePercent.valueFloat(),
+                                        dr::aoaIcePercent2.valueFloat()) * 100.f;
+  userAircraft.inletIcePercent = dr::inletIcePercent.valueFloat() * 100.f;
+  userAircraft.propIcePercent = dr::propIcePercent.valueFloat() * 100.f;
+  userAircraft.statIcePercent = std::max(dr::statIcePercent.valueFloat(),
+                                         dr::statIcePercent2.valueFloat()) * 100.f;
+  userAircraft.windowIcePercent = dr::windowIcePercent.valueFloat() * 100.f;
+
+  userAircraft.carbIcePercent = 0.f;
+  FloatVector carbIce = dr::carbIcePercent.valueFloatArr();
+  for(int i = 0; i < carbIce.size() && i < userAircraft.numberOfEngines; i++)
+    userAircraft.carbIcePercent = std::max(carbIce.value(i, 0.f) * 100.f,
+                                           static_cast<float>(userAircraft.carbIcePercent));
 
   // Weight
   userAircraft.airplaneTotalWeightLbs = kgToLbs(dr::airplaneTotalWeightKgs.valueFloat());
@@ -284,9 +325,9 @@ bool XpConnect::fillSimConnectData(atools::fs::sc::SimConnectData& data, bool fe
   // PISTON = 0, JET = 1, NO_ENGINE = 2, HELO_TURBINE = 3, UNSUPPORTED = 4, TURBOPROP = 5
 
   // Get engine type
-  for(int engine : engines)
+  for(int i = 0; i < engines.size() && i < userAircraft.numberOfEngines; i++)
   {
-    dr::XpEngineType type = static_cast<dr::XpEngineType>(engine);
+    dr::XpEngineType type = static_cast<dr::XpEngineType>(engines.value(i, xpc::dr::RECIP_CARB));
     switch(type)
     {
       case xpc::dr::ELECTRIC:
@@ -321,17 +362,100 @@ bool XpConnect::fillSimConnectData(atools::fs::sc::SimConnectData& data, bool fe
   userAircraft.fuelTotalQuantityGallons = userAircraft.fuelTotalWeightLbs / fuelMassToVolDivider;
   userAircraft.fuelFlowGPH = userAircraft.fuelFlowPPH / fuelMassToVolDivider;
 
-  userAircraft.numberOfEngines = static_cast<quint8>(dr::numberOfEngines.valueInt());
+  // Load certain values from .acf file overriding dataref values
   loadAcf(userAircraft, 0L);
 
   data.aiAircraft.clear();
   if(fetchAi)
   {
-    // Includes user aircraft - can return more than 20 despite providing only datarefs 1-19 (minus user)
-    int numAi = std::min(getNumActiveAircraft(), 20) - 1;
+    quint32 objId = 1;
+
+    // Carrier on first and frigate on second index in arrays
+    FloatVector headings = dr::boatHeadingDeg.valueFloatArr();
+    FloatVector velocity = dr::boatVelocityMsc.valueFloatArr();
+    FloatVector x = dr::boatXMtr.valueFloatArr();
+    FloatVector y = dr::boatYMtr.valueFloatArr();
+    FloatVector z = dr::boatZMtr.valueFloatArr();
+
+    // Add aircraft carrier =============================================================
+    if(headings.size() > 0 && velocity.size() > 0 && x.size() > 0 && y.size() > 0 && z.size() > 0)
+    {
+      const static int CARRIER_IDX = 0;
+      atools::fs::sc::SimConnectAircraft carrier;
+      carrier.deckHeight = atools::geo::meterToFeet(dr::boatCarrierDeckHeightMtr.valueFloat());
+      carrier.headingMagDeg = atools::fs::sc::SC_INVALID_FLOAT;
+      carrier.indicatedAltitudeFt = atools::fs::sc::SC_INVALID_FLOAT;
+      carrier.indicatedSpeedKts = atools::fs::sc::SC_INVALID_FLOAT;
+      carrier.trueAirspeedKts = atools::fs::sc::SC_INVALID_FLOAT;
+      carrier.machSpeed = atools::fs::sc::SC_INVALID_FLOAT;
+      carrier.verticalSpeedFeetPerMin = atools::fs::sc::SC_INVALID_FLOAT;
+
+      carrier.flags = atools::fs::sc::SIM_XPLANE;
+
+      // Ground speed is null
+      carrier.groundSpeedKts = atools::geo::meterPerSecToKnots(std::max(velocity.at(CARRIER_IDX), 0.f));
+      if(!atools::inRange(0.1f, 70.f, carrier.groundSpeedKts))
+        carrier.groundSpeedKts = atools::fs::sc::SC_INVALID_FLOAT;
+
+      carrier.headingTrueDeg = headings.at(CARRIER_IDX);
+      carrier.objectId = objId;
+      carrier.category = atools::fs::sc::CARRIER;
+      carrier.engineType = atools::fs::sc::UNSUPPORTED;
+      carrier.position = localToWorld(x.at(CARRIER_IDX), y.at(CARRIER_IDX), z.at(CARRIER_IDX));
+      carrier.position.setAltitude(atools::fs::sc::SC_INVALID_FLOAT);
+
+      bool ok = true;
+      ok &= carrier.position.isValidRange() && !carrier.position.isNull(0.01f);
+      ok &= atools::inRange(0.f, 360.f, carrier.headingTrueDeg);
+      ok &= atools::inRange(0, 100, int(carrier.deckHeight));
+
+      if(ok)
+      {
+        data.aiAircraft.append(carrier);
+        objId++;
+      }
+    }
+
+    // Add frigate =============================================================
+    if(headings.size() > 1 && velocity.size() > 1 && x.size() > 1 && y.size() > 1 && z.size() > 1)
+    {
+      const static int FRIGATE_IDX = 1;
+      atools::fs::sc::SimConnectAircraft frigate;
+      frigate.deckHeight = atools::geo::meterToFeet(dr::boatFrigateDeckHeightMtr.valueFloat());
+      frigate.headingMagDeg = atools::fs::sc::SC_INVALID_FLOAT;
+      frigate.indicatedAltitudeFt = atools::fs::sc::SC_INVALID_FLOAT;
+      frigate.indicatedSpeedKts = atools::fs::sc::SC_INVALID_FLOAT;
+      frigate.trueAirspeedKts = atools::fs::sc::SC_INVALID_FLOAT;
+      frigate.machSpeed = atools::fs::sc::SC_INVALID_FLOAT;
+      frigate.verticalSpeedFeetPerMin = atools::fs::sc::SC_INVALID_FLOAT;
+
+      frigate.flags = atools::fs::sc::SIM_XPLANE;
+      frigate.groundSpeedKts = atools::geo::meterPerSecToKnots(std::max(velocity.at(FRIGATE_IDX), 0.f));
+      if(!atools::inRange(0.1f, 70.f, frigate.groundSpeedKts))
+        frigate.groundSpeedKts = atools::fs::sc::SC_INVALID_FLOAT;
+      frigate.headingTrueDeg = headings.at(FRIGATE_IDX);
+      frigate.objectId = objId;
+      frigate.category = atools::fs::sc::FRIGATE;
+      frigate.engineType = atools::fs::sc::UNSUPPORTED;
+      frigate.position = localToWorld(x.at(FRIGATE_IDX), y.at(FRIGATE_IDX), z.at(FRIGATE_IDX));
+      frigate.position.setAltitude(atools::fs::sc::SC_INVALID_FLOAT);
+
+      bool ok = true;
+      ok &= frigate.position.isValidRange() && !frigate.position.isNull(0.01f);
+      ok &= atools::inRange(0.f, 360.f, frigate.headingTrueDeg);
+      ok &= atools::inRange(0, 100, int(frigate.deckHeight));
+
+      if(ok)
+      {
+        data.aiAircraft.append(frigate);
+        objId++;
+      }
+    }
 
     // Get AI or multiplayer aircraft ===============================
-    quint32 objId = 1;
+
+    // Includes user aircraft - can return more than 20 despite providing only datarefs 1-19 (minus user)
+    int numAi = std::min(getNumActiveAircraft(), 20) - 1;
 
     for(int i = 0; i < numAi; i++)
     {
@@ -361,7 +485,7 @@ bool XpConnect::fillSimConnectData(atools::fs::sc::SimConnectData& data, bool fe
         aircraft.category = atools::fs::sc::AIRPLANE;
         aircraft.engineType = atools::fs::sc::UNSUPPORTED;
 
-        loadAcf(aircraft, objId);
+        loadAcf(aircraft, i + 1);
 
         data.aiAircraft.append(aircraft);
 
@@ -382,8 +506,8 @@ void XpConnect::loadAcf(atools::fs::sc::SimConnectAircraft& aircraft, quint32 ob
   {
     // Read and cache the values
     keyValuePairs = new QHash<QString, QString>();
-    // "acf/_is_airliner",  "acf/_is_general_aviation","acf/_callsign", "acf/_name"
-    readValuesFromAcfFile(*keyValuePairs, aircraftModelFilepath, {"acf/_descrip",
+    // "acf/_is_airliner",  "acf/_is_general_aviation","acf/_callsign", "acf/_name", "acf/_descrip"
+    readValuesFromAcfFile(*keyValuePairs, aircraftModelFilepath, {"acf/_name",
                                                                   "acf/_ICAO",
                                                                   "acf/_tailnum",
                                                                   "acf/_is_helicopter",
@@ -392,7 +516,14 @@ void XpConnect::loadAcf(atools::fs::sc::SimConnectAircraft& aircraft, quint32 ob
   }
 
   // Use attributes from the acf file ======================================
-  aircraft.airplaneTitle = keyValuePairs->value("acf/_descrip"); // Cessna 172 SP Skyhawk - 180HP
+  // Cessna_172SP_seaplane.acf:P acf/_descrip Cessna 172 SP Skyhawk - 180HP
+  // Cessna_172SP_seaplane.acf:P acf/_name Cessna Skyhawk (Floats)
+  // L5_Sentinel.acf:P acf/_descrip Stinson L5 Sentinel - L5G with uprated engine to 235hp
+  // L5_Sentinel.acf:P acf/_name Stinson L5 Sentinel
+  // MD80.acf:P acf/_descrip MAD DOG
+  // MD80.acf:P acf/_name MD-82  aircraft.airplaneTitle = keyValuePairs->value("acf/_name"); // Cessna 172 SP Skyhawk - 180HP
+  aircraft.airplaneTitle = keyValuePairs->value("acf/_name");
+
   aircraft.airplaneModel = keyValuePairs->value("acf/_ICAO"); // C172
 
   if(aircraft.airplaneReg.isEmpty())

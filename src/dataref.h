@@ -25,6 +25,12 @@ extern "C" {
 #include "XPLMDataAccess.h"
 }
 
+namespace atools {
+namespace geo {
+class Pos;
+}
+}
+
 class DataRef;
 
 typedef QVector<float> FloatVector;
@@ -39,6 +45,11 @@ QString getAircraftModelFilepath(int index);
 void readValuesFromAcfFile(QHash<QString, QString>& keyValuePairs, const QString& filepath, const QStringList& keys);
 
 int getNumActiveAircraft();
+
+/* The XYZ coordinates are in meters in the local OpenGL coordinate system.
+ * Latitude and longitude are in decimal degrees and altitude is in meters MSL */
+atools::geo::Pos localToWorld(double x, double y, double z);
+void worldToLocal(double& x, double& y, double& z, const atools::geo::Pos& pos);
 
 /*
  * Hides the XPLM data ref accessor methods and provides methods for easier access than the C interface.
@@ -113,7 +124,7 @@ public:
   int valueIntArrSum() const;
   float valueFloatArrSum() const;
 
-  /* Get arrays. The length of the array is check before  retrieving the values.*/
+  /* Get arrays. The length of the array is checked before  retrieving the values.*/
   IntVector valueIntArr() const;
   FloatVector valueFloatArr() const;
   QByteArray valueByteArr() const;

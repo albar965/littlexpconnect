@@ -24,6 +24,8 @@
 #include "gui/consoleapplication.h"
 #include "sharedmemorywriter.h"
 #include "xpconnect.h"
+#include "util/version.h"
+#include "geo/calculations.h"
 
 #include <QDebug>
 
@@ -57,6 +59,7 @@ namespace lxc {
 /* key names for atools::settings */
 static const QLatin1Literal SETTINGS_OPTIONS_FETCH_RATE_MS("Options/FetchRate");
 static const QLatin1Literal SETTINGS_OPTIONS_FETCH_AI_AIRCRAFT("Options/FetchAiAircraft");
+static const QLatin1Literal SETTINGS_OPTIONS_VERBOSE("Options/Verbose");
 }
 
 float flightLoopCallback(float inElapsedSinceLastCall, float inElapsedTimeSinceLastFlightLoop, int inCounter,
@@ -67,6 +70,7 @@ static atools::gui::ConsoleApplication *app = nullptr;
 
 static bool fetchAi = true;
 static float fetchRateSecs = 0.2f;
+static bool verbose = false;
 
 // Use a background thread to write the data to the shared memory to avoid simulator stutters due to
 // locking
@@ -78,8 +82,8 @@ PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc)
   qDebug() << "LittleXpconnect" << Q_FUNC_INFO;
 
   // Register atools types so we can stream them
-  qRegisterMetaType<atools::fs::sc::SimConnectData>();
-  qRegisterMetaTypeStreamOperators<atools::geo::Pos>();
+  atools::geo::registerMetaTypes();
+  atools::fs::sc::registerMetaTypes();
 
   // Create application object which is needed for the server thread event queue
   int argc = 0;
@@ -88,7 +92,7 @@ PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc)
   app->setOrganizationName("ABarthel");
   app->setOrganizationDomain("littlenavmap.org");
 
-  app->setApplicationVersion("1.0.19"); // VERSION_NUMBER - Little Xpconnect
+  app->setApplicationVersion("1.0.20.develop"); // VERSION_NUMBER - Little Xpconnect
 
   // Initialize logging and force logfiles into the system or user temp directory
   LoggingHandler::initializeForTemp(Settings::getOverloadedPath(":/littlexpconnect/resources/config/logging.cfg"));
@@ -97,6 +101,16 @@ PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc)
 
   // Pass plugin information to X-Plane
   QString info = QString("%1 %2").arg(app->applicationName()).arg(app->applicationVersion());
+  atools::util::Version version(app->applicationVersion());
+
+  // Program version and revision ==========================================
+  if(version.isReleaseCandidate() || version.isBeta() || version.isDevelop())
+    info += QString(" (%1)").arg(GIT_REVISION);
+
+#ifndef QT_NO_DEBUG
+  info += " - DEBUG";
+#endif
+
   strcpy(outName, info.toLatin1().constData());
   strcpy(outSig, "ABarthel.LittleXpconnect.Connect");
   strcpy(outDesc, "Connects Little Navmap and Little Navconnect to X-Plane.");
@@ -107,6 +121,7 @@ PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc)
   Settings& settings = Settings::instance();
   fetchAi = settings.getAndStoreValue(lxc::SETTINGS_OPTIONS_FETCH_AI_AIRCRAFT, true).toBool();
   fetchRateSecs = settings.getAndStoreValue(lxc::SETTINGS_OPTIONS_FETCH_RATE_MS, 200).toFloat() / 1000.f;
+  verbose = settings.getAndStoreValue(lxc::SETTINGS_OPTIONS_VERBOSE, false).toBool();
 
   // Always successfull
   return 1;
@@ -130,7 +145,7 @@ PLUGIN_API int XPluginEnable(void)
   qDebug() << "LittleXpconnect" << Q_FUNC_INFO;
 
   // Start the backgound writer
-  thread = new SharedMemoryWriter();
+  thread = new SharedMemoryWriter(verbose);
   thread->start();
 
   // Register callback into method - first call in five seconds
