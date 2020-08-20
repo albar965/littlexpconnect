@@ -1,9 +1,30 @@
-Numbers (#) refer to Github issues.
-For example: albar965/littlenavmap#3 is https://github.com/albar965/littlenavmap/issues/3.
+﻿Numbers (#) refer to GitHub issues in project `littlenavmap`.
+For example: #3 is `https://github.com/albar965/littlenavmap/issues/3`.
+
+Version 1.0.20.beta
+
+Notes:
+
+* The data exchange protocol has changed. You have to update Little Navconnect (if using remote/network connections)
+  and Little Xpconnect (if using X-Plane) too.
+
+Changes:
+
+* Added frigate and carrier as boat AI for X-Plane. #531
+* Added new X-Plane icing options: AOA, inlet, prop, static and window ice given in percent maximum if multiple sources.
+* Using more appropriate `acf/_name` instead of `acf/_descrip` from .acf file for airplane title now.
+  Dataref `sim/aircraft/view/acf_descrip` is now only used as a fallback if .acf cannot be loaded.
+
+Build and development:
+
+* Added revision to plugin description.
+* Adapted logging configuration for narrow output and separate debug message pattern.
+* Added verbose logging option and dumping of user and AI positions every ten seconds if verbose is enabled.
+* Added option to include common `../build_options.pro` file with defines for qmake.
 
 Version 1.0.19
 
-* Fix for potential crash with new X-Plane multiplayer/tcas implementation as of 11.50.
+* Fix for potential crash with new X-Plane multiplayer/tcas implementation as of 11.50. #520
 
 Version 1.0.18
 Version 1.0.17.rc1
@@ -19,23 +40,23 @@ Version 1.0.16.beta
 Version 1.0.15.beta
 
 * Added new X-Plane turboprop definitions used since 11.30 to better recognize aircraft and fuel type.
-* Now using tail number from aircraft ".acf" file only if the tail number from the dataref is not set.
+* Now using tail number from aircraft `.acf` file only if the tail number from the dataref is not set.
   This helps to get the right tail number if add-on aircraft inject this manually using a script.
 * Limited logging output.
 
-Build and Deployment for Developers: albar965/littlenavmap#387
+Build and Deployment for Developers: #387
 * Updated for Qt 5.12.4.
 * Linux compilation now based on Ubuntu 18.04.
-* Complete update of project files to allow configuration with environment variables. Removed all hardcoded paths.
+* Complete update of project files to allow configuration with environment variables. Removed all hard-coded paths.
 * Added documentation about environment variables to configure build and updated build instructions
-  in "BUILD.txt" and "littlexpconnect.pro" files.
+  in `BUILD.txt` and `littlexpconnect.pro` files.
 
 related from atools version 3.4.0.beta
 See CHANGELOG.txt in atools project for more technical details. Relevant comments were added to list above.
 
 Version 1.0.14
 
-* Now linking Xpconnect statically to Qt for Linux to avoid plugin conflicts with libaries.
+* Now linking Xpconnect statically to Qt for Linux to avoid plugin conflicts with libraries.
 
 Version 1.0.13
 
@@ -49,10 +70,10 @@ Version 1.0.12
 Version 1.0.11
 
 * Log file is now rotated if the file size of 1 MB is exceeded. This avoid overwriting on startup and eases error reporting.
-  albar965/littlenavmap#275
-* Added airplane model and registration. Now using description for title. albar965/littlenavmap#271
+  #275
+* Added airplane model and registration. Now using description for title. #271
 * Now reading X-Plane acf files once to get aircraft name and engine type for a better classification in Navmap.
-  Allows to show helicopter and jet AI symbols in Navmap. albar965/littlenavmap#271
+  Allows to show helicopter and jet AI symbols in Navmap. #271
 
 Version 1.0.9
 
@@ -70,7 +91,7 @@ Version 1.0.6
 
 Version 1.0.5
 
-* Updated readme with important note about update.
+* Updated README.txt with important note about update.
 * Logging now omits unknown:0 for release builds.
 
 Version 1.0.4
