@@ -103,8 +103,8 @@ macx {
 
   QMAKE_RPATHDIR=.
 
-  # Compatibility down to OS X 10.10
-  QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.10
+  # Compatibility down to OS X Sierra 10.12 inclusive
+  QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.12
 
   LIBS += -F$${XPSDK_BASE}/Libraries/Mac -framework XPLM -framework XPWidgets
 }
