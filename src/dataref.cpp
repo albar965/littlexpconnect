@@ -30,12 +30,14 @@ extern "C" {
 
 QString getAircraftModelFilepath(int index)
 {
-  char outFileName[1024]; // Filename only
-  char outPath[1024]; // Full filepath including filename
+  char outFileName[2048]; // Filename only
+  char outPath[2048]; // Full filepath including filename
+  memset(outFileName, 0, 2048);
+  memset(outPath, 0, 2048);
 
   XPLMGetNthAircraftModel(index, outFileName, outPath);
 
-  return QString(outPath) /* + QDir::separator() + QString(outFileName)*/;
+  return QDir::toNativeSeparators(QString(outPath));
 }
 
 void readValuesFromAcfFile(QHash<QString, QString>& keyValuePairs, const QString& filepath, const QStringList& keys)
@@ -50,6 +52,7 @@ void readValuesFromAcfFile(QHash<QString, QString>& keyValuePairs, const QString
     qDebug() << Q_FUNC_INFO << "Reading from" << filepath << "keys" << keys;
 
     QTextStream stream(&file);
+    stream.setCodec("UTF-8");
 
     int lines = 0;
     // Read until all keys are found or at end of file

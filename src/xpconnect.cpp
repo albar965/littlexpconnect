@@ -501,7 +501,7 @@ void XpConnect::loadAcf(atools::fs::sc::SimConnectAircraft& aircraft, quint32 ob
 {
   // Read values from .acf file which are not available by the API ====================================
   QString aircraftModelFilepath = getAircraftModelFilepath(static_cast<int>(objId));
-  QHash<QString, QString> *keyValuePairs = acfFileValues.object(aircraftModelFilepath);
+  QHash<QString, QString> *keyValuePairs = acfFileValues.object(aircraftModelFilepath.toLower());
   if(keyValuePairs == nullptr)
   {
     // Read and cache the values
@@ -512,7 +512,7 @@ void XpConnect::loadAcf(atools::fs::sc::SimConnectAircraft& aircraft, quint32 ob
                                                                   "acf/_tailnum",
                                                                   "acf/_is_helicopter",
                                                                   "_engn/0/_type"});
-    acfFileValues.insert(aircraftModelFilepath, keyValuePairs);
+    acfFileValues.insert(aircraftModelFilepath.toLower(), keyValuePairs);
   }
 
   // Use attributes from the acf file ======================================
