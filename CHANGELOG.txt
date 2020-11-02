@@ -1,6 +1,10 @@
 ﻿Numbers (#) refer to GitHub issues in project `littlenavmap`.
 For example: #3 is `https://github.com/albar965/littlenavmap/issues/3`.
 
+Version 1.0.21.beta
+
+* Fixed issues where the wrong UTC time might be sent in some cases.
+
 Version 1.0.20.beta
 
 Notes:

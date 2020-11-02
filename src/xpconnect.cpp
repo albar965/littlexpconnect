@@ -250,19 +250,10 @@ bool XpConnect::fillSimConnectData(atools::fs::sc::SimConnectData& data, bool fe
 
   // Build local time and use timezone offset from simulator
   // X-Plane does not allow to set the year
-  QDate localDate = QDate::currentDate();
-  localDate.setDate(localDate.year(), 1, 1);
-  localDate = localDate.addDays(dr::localDateDays.valueInt());
-  int localTimeSec = static_cast<int>(dr::localTimeSec.valueFloat());
-  int zuluTimeSec = static_cast<int>(dr::zuluTimeSec.valueFloat());
-  int offsetSeconds = zuluTimeSec - localTimeSec;
-
-  QTime localTime = QTime::fromMSecsSinceStartOfDay(localTimeSec * 1000);
-  QDateTime localDateTime(localDate, localTime, Qt::OffsetFromUTC, -offsetSeconds);
-  userAircraft.localDateTime = localDateTime;
-
-  QTime zuluTime = QTime::fromMSecsSinceStartOfDay(zuluTimeSec * 1000);
-  userAircraft.zuluDateTime = QDateTime(localDate, zuluTime, Qt::UTC);
+  userAircraft.localDateTime = atools::correctDateLocal(dr::localDateDays.valueInt(),
+                                                      atools::roundToInt(dr::localTimeSec.valueFloat()),
+                                                      atools::roundToInt(dr::zuluTimeSec.valueFloat()));
+  userAircraft.zuluDateTime = userAircraft.localDateTime.toUTC();
 
   // SimConnectAircraft
   userAircraft.airplaneTitle = dr::airplaneTitle.valueString();
