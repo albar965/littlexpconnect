@@ -51,6 +51,9 @@ Note that "Little Xpconnect" does not add menu items in the X-Plane "Plugins" me
 When connecting with Little Navmap choose the "Connect directly to a local
 X-Plane simulator" option. See the Little Navmap manual for more information.
 
+See online manual for installation instructions:
+https://www.littlenavmap.org/manuals/littlenavmap/release/2.6/en/INSTALLATION.html
+
 ------------------------------------------------------------------------------
 -- FILES ---------------------------------------------------------------------
 ------------------------------------------------------------------------------
