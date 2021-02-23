@@ -31,6 +31,12 @@ X-Plane <-> Little XpConnect <-> Little Navonnect <- (Network) -> Little Navmap 
 -- INSTALLATION --------------------------------------------------------------
 ------------------------------------------------------------------------------
 
+Please refer to the Little Navmap installation instructions for a more detailed description:
+
+https://www.littlenavmap.org/manuals/littlenavmap/release/2.6/en/INSTALLATION.html
+
+------------------------------------------------------------------------------
+
 Download the correct archive for your operating system. The program is bundled
 with Little Navmap and can be downloaded separately too.
 
