@@ -49,9 +49,6 @@ public:
   void initDataRefs();
 
 private:
-  /* Converts decimals from transponder to integer.
-   * Returns decimal 4095/ octal 07777 / hex 0xFFF for 7777 */
-  qint16 decodeTransponderCode(int code) const;
 
   AircraftFileLoader *fileLoader;
 };

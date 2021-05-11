@@ -22,6 +22,7 @@
 #include "fs/sc/simconnectdata.h"
 #include "fs/sc/simconnecttypes.h"
 #include "geo/calculations.h"
+#include "fs/util/fsutil.h"
 #include "aircraftfileloader.h"
 
 using atools::geo::kgToLbs;
@@ -316,7 +317,7 @@ bool XpConnect::fillSimConnectData(atools::fs::sc::SimConnectData& data, bool fe
   userAircraft.groundSpeedKts = meterToNm(dr::groundSpeedMs.valueFloat() * 3600.f);
 
   // Get transponder code and Convert decimals to octal code
-  userAircraft.transponderCode = decodeTransponderCode(dr::transponderCode.valueInt());
+  userAircraft.transponderCode = atools::fs::util::decodeTransponderCode(dr::transponderCode.valueInt());
 
   // Model
   // points to the tail of the aircraft
@@ -515,7 +516,7 @@ bool XpConnect::fillSimConnectData(atools::fs::sc::SimConnectData& data, bool fe
           aircraft.verticalSpeedFeetPerMin = dr::tcas::verticalSpeed.valueFloatArr(i);
 
           // Get transponder code and Convert decimals to octal code
-          aircraft.transponderCode = decodeTransponderCode(dr::tcas::modeC_code.valueIntArr(i));
+          aircraft.transponderCode = atools::fs::util::decodeTransponderCode(dr::tcas::modeC_code.valueIntArr(i));
 
           aircraft.objectId = objId;
           // aircraft.objectId = static_cast<quint32>(dr::tcas::modeSId.valueIntArr(i));
@@ -609,18 +610,6 @@ void XpConnect::initDataRefs()
     if(!ref->isValid())
       ref->find();
   }
-}
-
-qint16 XpConnect::decodeTransponderCode(int code) const
-{
-  // Extract decimal digits
-  int d1 = code / 1000;
-  int d2 = code / 100 - d1 * 10;
-  int d3 = code / 10 - d1 * 100 - d2 * 10;
-  int d4 = code - d1 * 1000 - d2 * 100 - d3 * 10;
-
-  // Convert decimals to octal code
-  return static_cast<qint16>((d1 << 9) | (d2 << 6) | (d3 << 3) | d4);
 }
 
 } // namespace xpc
