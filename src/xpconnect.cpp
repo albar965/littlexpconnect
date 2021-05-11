@@ -22,6 +22,7 @@
 #include "fs/sc/simconnectdata.h"
 #include "fs/sc/simconnecttypes.h"
 #include "geo/calculations.h"
+#include "aircraftfileloader.h"
 
 using atools::geo::kgToLbs;
 using atools::geo::meterToFeet;
@@ -99,6 +100,7 @@ static DataRef zuluTimeSec(dataRefs, "sim/time/zulu_time_sec");
 static DataRef airplaneTailnum(dataRefs, "sim/aircraft/view/acf_tailnum");
 static DataRef airplaneTitle(dataRefs, "sim/aircraft/view/acf_descrip");
 static DataRef airplaneType(dataRefs, "sim/aircraft/view/acf_ICAO");
+static DataRef transponderCode(dataRefs, "sim/cockpit/radios/transponder_code");
 
 // Position
 static DataRef latPositionDeg(dataRefs, "sim/flightmodel/position/latitude");
@@ -185,16 +187,49 @@ static const QLatin1Literal LAT_POSITION_DEG_AI("sim/multiplayer/position/plane%
 static const QLatin1Literal LON_POSITION_DEG_AI("sim/multiplayer/position/plane%1_lon");
 static const QLatin1Literal ACTUAL_ALTITUDE_METER_AI("sim/multiplayer/position/plane%1_el");
 
+// ============================================================
+// New TCAS AI/multiplayer interface
+namespace tcas {
+// int integer If TCAS is not overriden by plgugin, returns the number of planes in X-Plane, which might be under plugin control or X-Plane control. If TCAS is overriden, returns how many targets are actually being written to with the override. These are not necessarily consecutive entries in the TCAS arrays.
+static DataRef tcasNumAcf(dataRefs, "sim/cockpit2/tcas/indicators/tcas_num_acf");
+
+// int[64] integer 24bit (0-16777215 or 0 - 0xFFFFFF) unique ID of the airframe. This is also known as the ADS-B "hexcode".
+// static DataRef modeSId(dataRefs, "sim/cockpit2/tcas/targets/modeS_id");
+
+// int[64] integer Mode C transponder code 0000 to 7777. This is not really an integer, this is an octal number.
+static DataRef modeC_code(dataRefs, "sim/cockpit2/tcas/targets/modeC_code");
+
+// float[64] degrees global coordinate, degrees.
+static DataRef lat(dataRefs, "sim/cockpit2/tcas/targets/position/lat");
+
+// float[64] degrees global coordinate, degrees.
+static DataRef lon(dataRefs, "sim/cockpit2/tcas/targets/position/lon");
+
+// float[64] meter global coordinate, meter.
+static DataRef ele(dataRefs, "sim/cockpit2/tcas/targets/position/ele");
+
+// float[64] feet/min absolute vertical speed feet per minute.
+static DataRef verticalSpeed(dataRefs, "sim/cockpit2/tcas/targets/position/vertical_speed");
+
+// float[64] meter/s total true speed, norm of local velocity vector. That means it includes vertical speed
+static DataRef vMsc(dataRefs, "sim/cockpit2/tcas/targets/position/V_msc");
+
+// float[64] degrees true heading orientation.
+static DataRef psi(dataRefs, "sim/cockpit2/tcas/targets/position/psi");
+}
 }
 
 XpConnect::XpConnect()
 {
   qDebug() << Q_FUNC_INFO;
+  fileLoader = new AircraftFileLoader;
+  fileLoader->setAcfKeys({"acf/_name", "acf/_ICAO", "acf/_tailnum", "acf/_is_helicopter", "_engn/0/_type"});
 }
 
 XpConnect::~XpConnect()
 {
   qDebug() << Q_FUNC_INFO;
+  delete fileLoader;
 }
 
 bool XpConnect::fillSimConnectData(atools::fs::sc::SimConnectData& data, bool fetchAi)
@@ -220,22 +255,22 @@ bool XpConnect::fillSimConnectData(atools::fs::sc::SimConnectData& data, bool fe
   userAircraft.seaLevelPressureMbar = dr::seaLevelPressurePascal.valueFloat() / 100.f;
 
   // Ice
-  userAircraft.pitotIcePercent = dr::pitotIcePercent.valueFloat() * 100.f;
-  userAircraft.structuralIcePercent = std::max(dr::structuralIcePercent.valueFloat(),
-                                               dr::structuralIcePercent2.valueFloat()) * 100.f;
-  userAircraft.aoaIcePercent = std::max(dr::aoaIcePercent.valueFloat(),
-                                        dr::aoaIcePercent2.valueFloat()) * 100.f;
-  userAircraft.inletIcePercent = dr::inletIcePercent.valueFloat() * 100.f;
-  userAircraft.propIcePercent = dr::propIcePercent.valueFloat() * 100.f;
-  userAircraft.statIcePercent = std::max(dr::statIcePercent.valueFloat(),
-                                         dr::statIcePercent2.valueFloat()) * 100.f;
-  userAircraft.windowIcePercent = dr::windowIcePercent.valueFloat() * 100.f;
+  userAircraft.pitotIcePercent = static_cast<quint8>(dr::pitotIcePercent.valueFloat() * 100.f);
+  userAircraft.structuralIcePercent = static_cast<quint8>(std::max(dr::structuralIcePercent.valueFloat(),
+                                                                   dr::structuralIcePercent2.valueFloat()) * 100.f);
+  userAircraft.aoaIcePercent = static_cast<quint8>(std::max(dr::aoaIcePercent.valueFloat(),
+                                                            dr::aoaIcePercent2.valueFloat()) * 100.f);
+  userAircraft.inletIcePercent = static_cast<quint8>(dr::inletIcePercent.valueFloat() * 100.f);
+  userAircraft.propIcePercent = static_cast<quint8>(dr::propIcePercent.valueFloat() * 100.f);
+  userAircraft.statIcePercent = static_cast<quint8>(std::max(dr::statIcePercent.valueFloat(),
+                                                             dr::statIcePercent2.valueFloat()) * 100.f);
+  userAircraft.windowIcePercent = static_cast<quint8>(dr::windowIcePercent.valueFloat() * 100.f);
 
   userAircraft.carbIcePercent = 0.f;
   FloatVector carbIce = dr::carbIcePercent.valueFloatArr();
   for(int i = 0; i < carbIce.size() && i < userAircraft.numberOfEngines; i++)
-    userAircraft.carbIcePercent = std::max(carbIce.value(i, 0.f) * 100.f,
-                                           static_cast<float>(userAircraft.carbIcePercent));
+    userAircraft.carbIcePercent = static_cast<quint8>(std::max(carbIce.value(i, 0.f) * 100.f,
+                                                               static_cast<float>(userAircraft.carbIcePercent)));
 
   // Weight
   userAircraft.airplaneTotalWeightLbs = kgToLbs(dr::airplaneTotalWeightKgs.valueFloat());
@@ -251,8 +286,8 @@ bool XpConnect::fillSimConnectData(atools::fs::sc::SimConnectData& data, bool fe
   // Build local time and use timezone offset from simulator
   // X-Plane does not allow to set the year
   userAircraft.localDateTime = atools::correctDateLocal(dr::localDateDays.valueInt(),
-                                                      atools::roundToInt(dr::localTimeSec.valueFloat()),
-                                                      atools::roundToInt(dr::zuluTimeSec.valueFloat()));
+                                                        atools::roundToInt(dr::localTimeSec.valueFloat()),
+                                                        atools::roundToInt(dr::zuluTimeSec.valueFloat()));
   userAircraft.zuluDateTime = userAircraft.localDateTime.toUTC();
 
   // SimConnectAircraft
@@ -279,6 +314,9 @@ bool XpConnect::fillSimConnectData(atools::fs::sc::SimConnectData& data, bool fe
   userAircraft.machSpeed = dr::machSpeed.valueFloat();
   userAircraft.verticalSpeedFeetPerMin = dr::verticalSpeedFpm.valueFloat();
   userAircraft.groundSpeedKts = meterToNm(dr::groundSpeedMs.valueFloat() * 3600.f);
+
+  // Get transponder code and Convert decimals to octal code
+  userAircraft.transponderCode = decodeTransponderCode(dr::transponderCode.valueInt());
 
   // Model
   // points to the tail of the aircraft
@@ -354,7 +392,7 @@ bool XpConnect::fillSimConnectData(atools::fs::sc::SimConnectData& data, bool fe
   userAircraft.fuelFlowGPH = userAircraft.fuelFlowPPH / fuelMassToVolDivider;
 
   // Load certain values from .acf file overriding dataref values
-  loadAcf(userAircraft, 0L);
+  fileLoader->loadAcf(userAircraft, 0L);
 
   data.aiAircraft.clear();
   if(fetchAi)
@@ -373,7 +411,7 @@ bool XpConnect::fillSimConnectData(atools::fs::sc::SimConnectData& data, bool fe
     {
       const static int CARRIER_IDX = 0;
       atools::fs::sc::SimConnectAircraft carrier;
-      carrier.deckHeight = atools::geo::meterToFeet(dr::boatCarrierDeckHeightMtr.valueFloat());
+      carrier.deckHeight = static_cast<quint16>(atools::geo::meterToFeet(dr::boatCarrierDeckHeightMtr.valueFloat()));
       carrier.headingMagDeg = atools::fs::sc::SC_INVALID_FLOAT;
       carrier.indicatedAltitudeFt = atools::fs::sc::SC_INVALID_FLOAT;
       carrier.indicatedSpeedKts = atools::fs::sc::SC_INVALID_FLOAT;
@@ -412,7 +450,7 @@ bool XpConnect::fillSimConnectData(atools::fs::sc::SimConnectData& data, bool fe
     {
       const static int FRIGATE_IDX = 1;
       atools::fs::sc::SimConnectAircraft frigate;
-      frigate.deckHeight = atools::geo::meterToFeet(dr::boatFrigateDeckHeightMtr.valueFloat());
+      frigate.deckHeight = static_cast<quint16>(atools::geo::meterToFeet(dr::boatFrigateDeckHeightMtr.valueFloat()));
       frigate.headingMagDeg = atools::fs::sc::SC_INVALID_FLOAT;
       frigate.indicatedAltitudeFt = atools::fs::sc::SC_INVALID_FLOAT;
       frigate.indicatedSpeedKts = atools::fs::sc::SC_INVALID_FLOAT;
@@ -443,109 +481,102 @@ bool XpConnect::fillSimConnectData(atools::fs::sc::SimConnectData& data, bool fe
       }
     }
 
+    // Count includes user aircraft
+    int numTcasAircraft = dr::tcas::tcasNumAcf.valueInt();
+    bool hasTcasScheme = dr::tcas::modeC_code.isValid();
+
     // Get AI or multiplayer aircraft ===============================
-
-    // Includes user aircraft - can return more than 20 despite providing only datarefs 1-19 (minus user)
-    int numAi = std::min(getNumActiveAircraft(), 20) - 1;
-
-    for(int i = 0; i < numAi; i++)
+    if(hasTcasScheme && numTcasAircraft > 0)
     {
-      const dr::MultiplayerDataRefs& ref = dr::multiplayerDataRefs.at(i);
-
-      float actualAltAi = meterToFeet(ref.actualAltitudeMeterAi.valueFloat());
-      Pos pos(ref.lonPositionDegAi.valueFloat(), ref.latPositionDegAi.valueFloat(), actualAltAi);
-
-      if(pos.isValid() && !pos.isNull())
+      // Use new TCAS scheme - index 0 is user ======================
+      for(int i = 1; i < numTcasAircraft; i++)
       {
-        // Coordinates are ok too - must be an AI aircraft
-        atools::fs::sc::SimConnectAircraft aircraft;
-        aircraft.flags = atools::fs::sc::SIM_XPLANE;
-        aircraft.position = pos;
-        aircraft.headingTrueDeg = ref.headingTrueDegAi.valueFloat();
+        Pos pos(dr::tcas::lon.valueFloatArr(i), dr::tcas::lat.valueFloatArr(i),
+                meterToFeet(dr::tcas::ele.valueFloatArr(i)));
+        if(pos.isValid() && !pos.isNull())
+        {
+          // Coordinates are ok too - must be an AI aircraft
+          atools::fs::sc::SimConnectAircraft aircraft;
+          aircraft.flags = atools::fs::sc::SIM_XPLANE;
+          aircraft.position = pos;
+          aircraft.headingTrueDeg = dr::tcas::psi.valueFloatArr(i);
 
-        // Mark fields as unavailable
-        aircraft.headingMagDeg = atools::fs::sc::SC_INVALID_FLOAT;
-        aircraft.groundSpeedKts = atools::fs::sc::SC_INVALID_FLOAT;
-        aircraft.indicatedAltitudeFt = atools::fs::sc::SC_INVALID_FLOAT;
-        aircraft.indicatedSpeedKts = atools::fs::sc::SC_INVALID_FLOAT;
-        aircraft.trueAirspeedKts = atools::fs::sc::SC_INVALID_FLOAT;
-        aircraft.machSpeed = atools::fs::sc::SC_INVALID_FLOAT;
-        aircraft.verticalSpeedFeetPerMin = atools::fs::sc::SC_INVALID_FLOAT;
+          // Mark fields as unavailable
+          aircraft.headingMagDeg = atools::fs::sc::SC_INVALID_FLOAT;
+          aircraft.groundSpeedKts = atools::fs::sc::SC_INVALID_FLOAT;
+          aircraft.indicatedAltitudeFt = atools::fs::sc::SC_INVALID_FLOAT;
+          aircraft.indicatedSpeedKts = atools::fs::sc::SC_INVALID_FLOAT;
 
-        aircraft.objectId = objId;
-        aircraft.category = atools::fs::sc::AIRPLANE;
-        aircraft.engineType = atools::fs::sc::UNSUPPORTED;
+          // Ignore the vertical component
+          aircraft.trueAirspeedKts = atools::geo::meterPerSecToKnots(dr::tcas::vMsc.valueFloatArr(i));
 
-        loadAcf(aircraft, i + 1);
+          aircraft.machSpeed = atools::fs::sc::SC_INVALID_FLOAT;
 
-        data.aiAircraft.append(aircraft);
+          aircraft.verticalSpeedFeetPerMin = dr::tcas::verticalSpeed.valueFloatArr(i);
 
-        objId++;
+          // Get transponder code and Convert decimals to octal code
+          aircraft.transponderCode = decodeTransponderCode(dr::tcas::modeC_code.valueIntArr(i));
+
+          aircraft.objectId = objId;
+          // aircraft.objectId = static_cast<quint32>(dr::tcas::modeSId.valueIntArr(i));
+
+          aircraft.category = atools::fs::sc::AIRPLANE;
+          aircraft.engineType = atools::fs::sc::UNSUPPORTED;
+
+          fileLoader->loadAcf(aircraft, static_cast<quint32>(i + 1));
+
+          data.aiAircraft.append(aircraft);
+
+          objId++;
+        }
       }
     }
-  }
+    else
+    {
+      // Use old multplayer scheme ======================
+
+      // Includes user aircraft - can return more than 20 despite providing only datarefs 1-19 (minus user)
+      int numAi = std::min(getNumActiveAircraft(), 20) - 1;
+
+      for(int i = 0; i < numAi; i++)
+      {
+        const dr::MultiplayerDataRefs& ref = dr::multiplayerDataRefs.at(i);
+
+        Pos pos(ref.lonPositionDegAi.valueFloat(), ref.latPositionDegAi.valueFloat(),
+                meterToFeet(ref.actualAltitudeMeterAi.valueFloat()));
+
+        if(pos.isValid() && !pos.isNull())
+        {
+          // Coordinates are ok too - must be an AI aircraft
+          atools::fs::sc::SimConnectAircraft aircraft;
+          aircraft.flags = atools::fs::sc::SIM_XPLANE;
+          aircraft.position = pos;
+          aircraft.headingTrueDeg = ref.headingTrueDegAi.valueFloat();
+
+          // Mark fields as unavailable
+          aircraft.headingMagDeg = atools::fs::sc::SC_INVALID_FLOAT;
+          aircraft.groundSpeedKts = atools::fs::sc::SC_INVALID_FLOAT;
+          aircraft.indicatedAltitudeFt = atools::fs::sc::SC_INVALID_FLOAT;
+          aircraft.indicatedSpeedKts = atools::fs::sc::SC_INVALID_FLOAT;
+          aircraft.trueAirspeedKts = atools::fs::sc::SC_INVALID_FLOAT;
+          aircraft.machSpeed = atools::fs::sc::SC_INVALID_FLOAT;
+          aircraft.verticalSpeedFeetPerMin = atools::fs::sc::SC_INVALID_FLOAT;
+
+          aircraft.objectId = objId;
+          aircraft.category = atools::fs::sc::AIRPLANE;
+          aircraft.engineType = atools::fs::sc::UNSUPPORTED;
+
+          fileLoader->loadAcf(aircraft, static_cast<quint32>(i + 1));
+
+          data.aiAircraft.append(aircraft);
+
+          objId++;
+        }
+      } // for(int i = 0; i < numAi; i++)
+    } // if(numTcasAircraft > 0) ... else
+  } // if(fetchAi)
 
   return true;
-}
-
-void XpConnect::loadAcf(atools::fs::sc::SimConnectAircraft& aircraft, quint32 objId)
-{
-  // Read values from .acf file which are not available by the API ====================================
-  QString aircraftModelFilepath = getAircraftModelFilepath(static_cast<int>(objId));
-  QHash<QString, QString> *keyValuePairs = acfFileValues.object(aircraftModelFilepath.toLower());
-  if(keyValuePairs == nullptr)
-  {
-    // Read and cache the values
-    keyValuePairs = new QHash<QString, QString>();
-    // "acf/_is_airliner",  "acf/_is_general_aviation","acf/_callsign", "acf/_name", "acf/_descrip"
-    readValuesFromAcfFile(*keyValuePairs, aircraftModelFilepath, {"acf/_name",
-                                                                  "acf/_ICAO",
-                                                                  "acf/_tailnum",
-                                                                  "acf/_is_helicopter",
-                                                                  "_engn/0/_type"});
-    acfFileValues.insert(aircraftModelFilepath.toLower(), keyValuePairs);
-  }
-
-  // Use attributes from the acf file ======================================
-  // Cessna_172SP_seaplane.acf:P acf/_descrip Cessna 172 SP Skyhawk - 180HP
-  // Cessna_172SP_seaplane.acf:P acf/_name Cessna Skyhawk (Floats)
-  // L5_Sentinel.acf:P acf/_descrip Stinson L5 Sentinel - L5G with uprated engine to 235hp
-  // L5_Sentinel.acf:P acf/_name Stinson L5 Sentinel
-  // MD80.acf:P acf/_descrip MAD DOG
-  // MD80.acf:P acf/_name MD-82  aircraft.airplaneTitle = keyValuePairs->value("acf/_name"); // Cessna 172 SP Skyhawk - 180HP
-  aircraft.airplaneTitle = keyValuePairs->value("acf/_name");
-
-  aircraft.airplaneModel = keyValuePairs->value("acf/_ICAO"); // C172
-
-  if(aircraft.airplaneReg.isEmpty())
-    aircraft.airplaneReg = keyValuePairs->value("acf/_tailnum"); // Registration N172SP
-
-  // Engine type - use first engine only ======================
-  // PISTON = 0, JET = 1, NO_ENGINE = 2, HELO_TURBINE = 3, UNSUPPORTED = 4, TURBOPROP = 5
-  aircraft.engineType = atools::fs::sc::UNSUPPORTED;
-  const QString engineType = keyValuePairs->value("_engn/0/_type");
-  if(engineType.startsWith("JET") || engineType.startsWith("ROC"))
-    aircraft.engineType = atools::fs::sc::JET;
-  else if(engineType.startsWith("RCP"))
-    aircraft.engineType = atools::fs::sc::PISTON;
-  else if(engineType.startsWith("TRB"))
-    aircraft.engineType = atools::fs::sc::TURBOPROP;
-
-  // Extra Aircraft/B-52G NASA/B-52G NASA.acf:P _engn/0/_type JET
-  // Extra Aircraft/B747-100 NASA/B747-100 NASA.acf:P _engn/0/_type JET_HIB
-  // Extra Aircraft/C-130/C-130.acf:P _engn/0/_type TRB_FIX
-  // Extra Aircraft/X-15/X-15.acf:P _engn/0/_type ROC
-  // Laminar Research/Aerolite 103/Aerolite_103.acf:P _engn/0/_type RCP_CRB
-  // Laminar Research/Baron B58/Baron_58.acf:P _engn/0/_type RCP_INJ
-  // Laminar Research/Boeing B747-400/747-400.acf:P _engn/0/_type JET
-  // Laminar Research/KingAir C90B/C90B.acf:P _engn/0/_type TRB_FRE
-
-  // Category ======================
-  // AIRPLANE, HELICOPTER, BOAT, GROUNDVEHICLE, CONTROLTOWER, SIMPLEOBJECT, VIEWER, UNKNOWN
-  if(keyValuePairs->value("acf/_is_helicopter").toInt() == 1)
-    aircraft.category = atools::fs::sc::HELICOPTER;
-  else
-    aircraft.category = atools::fs::sc::AIRPLANE;
 }
 
 void XpConnect::initDataRefs()
@@ -578,6 +609,18 @@ void XpConnect::initDataRefs()
     if(!ref->isValid())
       ref->find();
   }
+}
+
+qint16 XpConnect::decodeTransponderCode(int code) const
+{
+  // Extract decimal digits
+  int d1 = code / 1000;
+  int d2 = code / 100 - d1 * 10;
+  int d3 = code / 10 - d1 * 100 - d2 * 10;
+  int d4 = code - d1 * 1000 - d2 * 100 - d3 * 10;
+
+  // Convert decimals to octal code
+  return static_cast<qint16>((d1 << 9) | (d2 << 6) | (d3 << 3) | d4);
 }
 
 } // namespace xpc

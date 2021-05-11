@@ -40,10 +40,6 @@ typedef QVector<DataRef *> DataRefPtrVector;
 /* Get full path to the acf file for the aircraft at the given index. 0 is the user aircraft. */
 QString getAircraftModelFilepath(int index);
 
-/* Read keys from acf file. Reading stops if all keys are found. Use rarely and cache values since
- * it can read up to 100000 lines of text. */
-void readValuesFromAcfFile(QHash<QString, QString>& keyValuePairs, const QString& filepath, const QStringList& keys);
-
 int getNumActiveAircraft();
 
 /* The XYZ coordinates are in meters in the local OpenGL coordinate system.
@@ -124,14 +120,23 @@ public:
   int valueIntArrSum() const;
   float valueFloatArrSum() const;
 
-  /* Get arrays. The length of the array is checked before  retrieving the values.*/
+  /* Get arrays. The length of the array is checked beforeretrieving the values.*/
   IntVector valueIntArr() const;
   FloatVector valueFloatArr() const;
   QByteArray valueByteArr() const;
-
   void valueIntArr(IntVector& array) const;
   void valueFloatArr(FloatVector& array) const;
   void valueByteArr(QByteArray& bytes) const;
+
+  /* Get array length */
+  int sizeIntArr() const;
+  int sizeFloatArr() const;
+  int sizeByteArr() const;
+
+  /* Get a single value from an array. Length and index are not checked. */
+  int valueIntArr(int index) const;
+  float valueFloatArr(int index) const;
+  int valueByteArr(int index) const;
 
   /* Get the type of the dataref after calling find */
   XPLMDataTypeID getDataRefType() const

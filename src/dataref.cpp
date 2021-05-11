@@ -40,48 +40,6 @@ QString getAircraftModelFilepath(int index)
   return QDir::toNativeSeparators(QString(outPath));
 }
 
-void readValuesFromAcfFile(QHash<QString, QString>& keyValuePairs, const QString& filepath, const QStringList& keys)
-{
-  static const QLatin1String PROPERTIES_END("PROPERTIES_END");
-  static const QLatin1String PREFIX("P ");
-
-  QFile file(filepath);
-
-  if(file.open(QIODevice::ReadOnly | QIODevice::Text))
-  {
-    qDebug() << Q_FUNC_INFO << "Reading from" << filepath << "keys" << keys;
-
-    QTextStream stream(&file);
-    stream.setCodec("UTF-8");
-
-    int lines = 0;
-    // Read until all keys are found or at end of file
-    while(!stream.atEnd() && keyValuePairs.size() < keys.size())
-    {
-      QString line = stream.readLine().trimmed();
-
-      if(line == PROPERTIES_END)
-        break;
-
-      if(!line.startsWith(PREFIX))
-        continue;
-
-      QString key = line.section(' ', 1, 1);
-
-      if(keys.contains(key))
-        // Found a required key
-        keyValuePairs.insert(key, line.section(' ', 2).trimmed());
-      lines++;
-    }
-
-    file.close();
-    qDebug() << Q_FUNC_INFO << "Reading from" << filepath << "done read" << lines << "lines"
-             << "Key/values found" << keyValuePairs;
-  }
-  else
-    qWarning() << Q_FUNC_INFO << "Cannot open file" << filepath << "error" << file.errorString();
-}
-
 atools::geo::Pos localToWorld(double x, double y, double z)
 {
   double lat, lon, alt;
@@ -169,6 +127,63 @@ QByteArray DataRef::valueByteArr() const
   // Get the array contents
   QByteArray retval(size, 0);
   XPLMGetDatab(dataRef, retval.data(), 0, size);
+  return retval;
+}
+
+int DataRef::sizeIntArr() const
+{
+#ifdef DATAREF_VALIDATION
+  checkType(xplmType_IntArray);
+#endif
+  return XPLMGetDatavi(dataRef, nullptr, 0, 0);
+}
+
+int DataRef::sizeFloatArr() const
+{
+#ifdef DATAREF_VALIDATION
+  checkType(xplmType_FloatArray);
+#endif
+  return XPLMGetDatavf(dataRef, nullptr, 0, 0);
+}
+
+int DataRef::sizeByteArr() const
+{
+#ifdef DATAREF_VALIDATION
+  checkType(xplmType_Data);
+#endif
+  return XPLMGetDatab(dataRef, nullptr, 0, 0);
+}
+
+int DataRef::valueIntArr(int index) const
+{
+#ifdef DATAREF_VALIDATION
+  checkType(xplmType_IntArray);
+#endif
+
+  int retval = 0;
+  XPLMGetDatavi(dataRef, &retval, index, 1);
+  return retval;
+}
+
+float DataRef::valueFloatArr(int index) const
+{
+#ifdef DATAREF_VALIDATION
+  checkType(xplmType_FloatArray);
+#endif
+
+  float retval = 0;
+  XPLMGetDatavf(dataRef, &retval, index, 1);
+  return retval;
+}
+
+int DataRef::valueByteArr(int index) const
+{
+#ifdef DATAREF_VALIDATION
+  checkType(xplmType_FloatArray);
+#endif
+
+  char retval = 0;
+  XPLMGetDatab(dataRef, &retval, index, 1);
   return retval;
 }
 

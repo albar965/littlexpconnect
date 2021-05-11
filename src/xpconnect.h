@@ -18,7 +18,7 @@
 #ifndef LITTLEXPC_XPCONNECT_H
 #define LITTLEXPC_XPCONNECT_H
 
-#include <QCache>
+#include <QtGlobal>
 
 namespace atools {
 namespace fs {
@@ -30,6 +30,8 @@ class SimConnectAircraft;
 }
 
 namespace xpc {
+
+class AircraftFileLoader;
 
 /*
  * Class that has full access to SimConnectData.
@@ -47,11 +49,11 @@ public:
   void initDataRefs();
 
 private:
-  /* Cache key value pairs from acf files to avoid reading the files. */
-  QCache<QString, QHash<QString, QString> > acfFileValues;
+  /* Converts decimals from transponder to integer.
+   * Returns decimal 4095/ octal 07777 / hex 0xFFF for 7777 */
+  qint16 decodeTransponderCode(int code) const;
 
-  void loadAcf(atools::fs::sc::SimConnectAircraft& aircraft, quint32 objId);
-
+  AircraftFileLoader *fileLoader;
 };
 
 } // namespace xpc
