@@ -220,11 +220,12 @@ static DataRef psi(dataRefs, "sim/cockpit2/tcas/targets/position/psi");
 }
 }
 
-XpConnect::XpConnect()
+XpConnect::XpConnect(bool verboseLogging)
+  : verbose(verboseLogging)
 {
   qDebug() << Q_FUNC_INFO;
-  fileLoader = new AircraftFileLoader;
-  fileLoader->setAcfKeys({"acf/_name", "acf/_ICAO", "acf/_tailnum", "acf/_is_helicopter", "_engn/0/_type"});
+  fileLoader = new AircraftFileLoader(verbose);
+  fileLoader->setAircraftKeys({"acf/_name", "acf/_ICAO", "acf/_tailnum", "acf/_is_helicopter", "_engn/0/_type"});
 }
 
 XpConnect::~XpConnect()
@@ -393,7 +394,7 @@ bool XpConnect::fillSimConnectData(atools::fs::sc::SimConnectData& data, bool fe
   userAircraft.fuelFlowGPH = userAircraft.fuelFlowPPH / fuelMassToVolDivider;
 
   // Load certain values from .acf file overriding dataref values
-  fileLoader->loadAcf(userAircraft, 0L);
+  fileLoader->loadAircraftFile(userAircraft, 0L);
 
   data.aiAircraft.clear();
   if(fetchAi)
@@ -524,7 +525,7 @@ bool XpConnect::fillSimConnectData(atools::fs::sc::SimConnectData& data, bool fe
           aircraft.category = atools::fs::sc::AIRPLANE;
           aircraft.engineType = atools::fs::sc::UNSUPPORTED;
 
-          fileLoader->loadAcf(aircraft, static_cast<quint32>(i + 1));
+          fileLoader->loadAircraftFile(aircraft, static_cast<quint32>(i + 1));
 
           data.aiAircraft.append(aircraft);
 
@@ -567,7 +568,7 @@ bool XpConnect::fillSimConnectData(atools::fs::sc::SimConnectData& data, bool fe
           aircraft.category = atools::fs::sc::AIRPLANE;
           aircraft.engineType = atools::fs::sc::UNSUPPORTED;
 
-          fileLoader->loadAcf(aircraft, static_cast<quint32>(i + 1));
+          fileLoader->loadAircraftFile(aircraft, static_cast<quint32>(i + 1));
 
           data.aiAircraft.append(aircraft);
 

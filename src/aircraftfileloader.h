@@ -20,12 +20,14 @@
 
 #include "fs/sc/simconnectaircraft.h"
 
-#include <QCache>
+class QThreadPool;
+class QMutex;
 
 namespace xpc {
 
 /*
  * Loads and caches required key entries from acf files to get information missing in the datarefs.
+ * Read values from .acf file which are not available by the API.
  */
 class AircraftFileLoader :
   public QObject
@@ -33,38 +35,51 @@ class AircraftFileLoader :
   Q_OBJECT
 
 public:
-  AircraftFileLoader();
+  AircraftFileLoader(bool verboseLogging);
   virtual ~AircraftFileLoader() override;
 
   /* Load and cache required entries from acf file for given aircraft id. Result is stored in aircraft */
-  void loadAcf(atools::fs::sc::SimConnectAircraft& aircraft, quint32 objId);
-
-  const QStringList& getAcfKeys() const
-  {
-    return acfKeys;
-  }
+  void loadAircraftFile(atools::fs::sc::SimConnectAircraft& aircraft, quint32 objId);
 
   /* Set keys to read from files.
    * Keys minus prefix "P " like "acf/_name", "acf/_ICAO" */
-  void setAcfKeys(const QStringList& value)
+  void setAircraftKeys(const QStringList& value)
   {
-    acfKeys = value;
+    aircraftKeys = value;
+  }
+
+  const QStringList& getAircraftKeys() const
+  {
+    return aircraftKeys;
   }
 
 private:
-  typedef QHash<QString, QString> AcfEntryType;
+  typedef QHash<QString, QString> AircraftEntryType;
 
   /* Read keys from acf file. Reading stops if all keys are found. Use rarely and cache values since
-   * it can read up to 100000 lines of text. */
-  void readValuesFromAcfFile(AcfEntryType& keyValuePairs, const QString& filepath, const QStringList& keys) const;
+   * it can read up to 100000 lines of text.
+   * Runs in thread context.*/
+  static void readValuesFromAircraftFile(AircraftEntryType& keyValuePairs, const QString& filepath,
+                                         const QStringList& keys, bool verboseLogging);
 
-  void fillAircraftValues(atools::fs::sc::SimConnectAircraft& aircraft, const AcfEntryType *keyValuePairs) const;
+  /* Fill and decode keys into aircraft */
+  static void fillAircraftValues(atools::fs::sc::SimConnectAircraft& aircraft, const AircraftEntryType *keyValuePairs);
+
+  /* Started by QtConcurrent::run() in a separate thread and accesses the cache. Runs in thread context. */
+  void loadKeysRunner(QString aircraftModelFilepath, QStringList keys);
 
   /* Cache key value pairs from acf files to avoid reading the files. Empty entries indicate file not found. */
-  QCache<QString, AcfEntryType> acfFileValues;
+  QCache<QString, AircraftEntryType> *aircraftFileCache;
+  QMutex *aircraftFileValuesMutex;
 
-  QStringList acfKeys;
+  /* List of acf files currently loading. Key is lower case filepath. */
+  QSet<QString> aircraftFileKeysLoading;
+  QMutex *aircraftFileKeysLoadingMutex;
 
+  QThreadPool *threadPool;
+
+  QStringList aircraftKeys;
+  bool verbose = false;
 };
 
 } // namespace xpc

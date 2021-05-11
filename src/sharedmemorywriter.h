@@ -33,7 +33,7 @@ class SharedMemoryWriter :
   public QThread
 {
 public:
-  SharedMemoryWriter(bool verboseParam);
+  SharedMemoryWriter(bool verboseLogging);
   virtual ~SharedMemoryWriter();
 
   /* Fetch data from the datarefs (main thread context) and pass it over to the

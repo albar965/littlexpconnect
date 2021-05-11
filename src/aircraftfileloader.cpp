@@ -17,54 +17,130 @@
 
 #include "aircraftfileloader.h"
 #include "dataref.h"
+#include "atools.h"
 
 #include <QFile>
+#include <QThreadPool>
+#include <QtConcurrent/QtConcurrent>
 
 namespace xpc {
 
-AircraftFileLoader::AircraftFileLoader()
+AircraftFileLoader::AircraftFileLoader(bool verboseLogging)
+  : verbose(verboseLogging)
 {
+  aircraftFileCache = new QCache<QString, AircraftEntryType>;
+
+  // Use a thread pool limited to one thread to avoid putting too much load on the simulator
+  threadPool = new QThreadPool(this);
+  threadPool->setMaxThreadCount(1);
+
+  // Protect fields accessed by thread
+  aircraftFileValuesMutex = new QMutex;
+  aircraftFileKeysLoadingMutex = new QMutex;
 }
 
 AircraftFileLoader::~AircraftFileLoader()
 {
+  // Destroys the QThreadPool. This function will block until all runnables have been completed.
+  delete threadPool;
 
+  delete aircraftFileCache;
+
+  delete aircraftFileValuesMutex;
+  delete aircraftFileKeysLoadingMutex;
 }
 
-void AircraftFileLoader::loadAcf(atools::fs::sc::SimConnectAircraft& aircraft, quint32 objId)
+void AircraftFileLoader::loadKeysRunner(QString aircraftModelFilepath, QStringList keys)
 {
-  // Read values from .acf file which are not available by the API ====================================
-  QString aircraftModelFilepath = getAircraftModelFilepath(static_cast<int>(objId));
-  AcfEntryType *keyValuePairs = acfFileValues.object(aircraftModelFilepath.toLower());
-  if(keyValuePairs == nullptr)
+  // Runs in separate thread
+  if(verbose)
+    qDebug() << Q_FUNC_INFO << "Entry" << aircraftModelFilepath;
+
+  // Read and cache the values
+  AircraftEntryType *keyValuePairs = new QHash<QString, QString>();
+  QString aircraftModelKey = aircraftModelFilepath.toLower();
+
+  // "acf/_is_airliner",  "acf/_is_general_aviation","acf/_callsign", "acf/_name", "acf/_descrip"
+  readValuesFromAircraftFile(*keyValuePairs, aircraftModelFilepath, keys, verbose);
+
   {
-    // Read and cache the values
-    keyValuePairs = new QHash<QString, QString>();
-
-    // "acf/_is_airliner",  "acf/_is_general_aviation","acf/_callsign", "acf/_name", "acf/_descrip"
-    readValuesFromAcfFile(*keyValuePairs, aircraftModelFilepath, acfKeys);
-
-    acfFileValues.insert(aircraftModelFilepath.toLower(), keyValuePairs);
+    // Add to cache
+    QMutexLocker locker(aircraftFileValuesMutex);
+    aircraftFileCache->insert(aircraftModelKey, keyValuePairs);
   }
 
-  // Use attributes from the acf file ======================================
-  // Cessna_172SP_seaplane.acf:P acf/_descrip Cessna 172 SP Skyhawk - 180HP
-  // Cessna_172SP_seaplane.acf:P acf/_name Cessna Skyhawk (Floats)
-  // L5_Sentinel.acf:P acf/_descrip Stinson L5 Sentinel - L5G with uprated engine to 235hp
-  // L5_Sentinel.acf:P acf/_name Stinson L5 Sentinel
-  // MD80.acf:P acf/_descrip MAD DOG
-  // MD80.acf:P acf/_name MD-82  aircraft.airplaneTitle = keyValuePairs->value("acf/_name"); // Cessna 172 SP Skyhawk - 180HP
-  fillAircraftValues(aircraft, keyValuePairs);
+  {
+    // Not loading anymore - remove from set
+    QMutexLocker locker(aircraftFileKeysLoadingMutex);
+    aircraftFileKeysLoading.remove(aircraftModelKey);
+  }
+
+  if(verbose)
+    qDebug() << Q_FUNC_INFO << "Exit" << aircraftModelFilepath;
 }
 
-void AircraftFileLoader::readValuesFromAcfFile(AcfEntryType& keyValuePairs, const QString& filepath,
-                                               const QStringList& keys) const
+void AircraftFileLoader::loadAircraftFile(atools::fs::sc::SimConnectAircraft& aircraft, quint32 objId)
+{
+  QString aircraftModelFilepath = getAircraftModelFilepath(static_cast<int>(objId));
+  QString aircraftModelKey = aircraftModelFilepath.toLower();
+
+  AircraftEntryType keyValuePairs;
+  bool found = false;
+
+  {
+    // Look for entry in cache
+    QMutexLocker locker(aircraftFileValuesMutex);
+    AircraftEntryType *keyValuePairsPtr = aircraftFileCache->object(aircraftModelKey);
+    if(keyValuePairsPtr != nullptr)
+    {
+      // Found - create a copy
+      keyValuePairs = *keyValuePairsPtr;
+      found = true;
+    }
+  }
+
+  if(found)
+    // Use attributes from the acf file ======================================
+    // Cessna_172SP_seaplane.acf:P acf/_descrip Cessna 172 SP Skyhawk - 180HP
+    // Cessna_172SP_seaplane.acf:P acf/_name Cessna Skyhawk (Floats)
+    // L5_Sentinel.acf:P acf/_descrip Stinson L5 Sentinel - L5G with uprated engine to 235hp
+    // L5_Sentinel.acf:P acf/_name Stinson L5 Sentinel
+    // MD80.acf:P acf/_descrip MAD DOG
+    // MD80.acf:P acf/_name MD-82  aircraft.airplaneTitle = keyValuePairs->value("acf/_name"); // Cessna 172 SP Skyhawk - 180HP
+    fillAircraftValues(aircraft, &keyValuePairs);
+  else
+  {
+    // Not found
+    bool currentlyLoading = false;
+    {
+      QMutexLocker locker(aircraftFileKeysLoadingMutex);
+
+      // Is this already loading in background thread?
+      currentlyLoading = aircraftFileKeysLoading.contains(aircraftModelKey);
+
+      if(!currentlyLoading)
+      {
+        // Remember key which is loading now - thread will remove this key on completion
+        aircraftFileKeysLoading.insert(aircraftModelKey);
+
+        // Threadpool will wait until a free thread is available
+        QtConcurrent::run(threadPool, this, &AircraftFileLoader::loadKeysRunner, aircraftModelFilepath, aircraftKeys);
+      }
+    }
+  }
+}
+
+void AircraftFileLoader::readValuesFromAircraftFile(AircraftEntryType& keyValuePairs, const QString& filepath,
+                                                    const QStringList& keys, bool verboseLogging)
 {
   static const QLatin1String PROPERTIES_END("PROPERTIES_END");
   static const QLatin1String PREFIX("P ");
 
-  QFile file(filepath);
+  // Check if file is valid, readable, has size > 0, etc.
+  if(!atools::checkFile(QFileInfo(filepath), verboseLogging))
+    return;
 
+  QFile file(filepath);
   if(file.open(QIODevice::ReadOnly | QIODevice::Text))
   {
     qDebug() << Q_FUNC_INFO << "Reading from" << filepath << "keys" << keys;
@@ -101,7 +177,7 @@ void AircraftFileLoader::readValuesFromAcfFile(AcfEntryType& keyValuePairs, cons
 }
 
 void AircraftFileLoader::fillAircraftValues(atools::fs::sc::SimConnectAircraft& aircraft,
-                                            const AcfEntryType *keyValuePairs) const
+                                            const AircraftEntryType *keyValuePairs)
 {
   aircraft.airplaneTitle = keyValuePairs->value("acf/_name");
 

@@ -39,7 +39,7 @@ class AircraftFileLoader;
 class XpConnect
 {
 public:
-  XpConnect();
+  XpConnect(bool verboseLogging);
   ~XpConnect();
 
   /* Fill SimConnectData from X-Plane datarefs. Returns true if data was found */
@@ -49,8 +49,8 @@ public:
   void initDataRefs();
 
 private:
-
   AircraftFileLoader *fileLoader;
+  bool verbose = false;
 };
 
 } // namespace xpc
