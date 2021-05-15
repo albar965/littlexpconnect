@@ -119,6 +119,8 @@ static DataRef indicatedAltitudeFt(dataRefs, "sim/cockpit2/gauges/indicators/alt
 static DataRef actualAltitudeMeter(dataRefs, "sim/flightmodel/position/elevation");
 static DataRef aglAltitudeFt(dataRefs, "sim/cockpit2/gauges/indicators/radio_altimeter_height_ft_pilot");
 
+static DataRef autopilotAltitudeFt(dataRefs, "sim/cockpit/autopilot/altitude");
+
 // Heading
 static DataRef headingTrueDeg(dataRefs, "sim/flightmodel/position/true_psi");
 static DataRef headingMagDeg(dataRefs, "sim/flightmodel/position/mag_psi");
@@ -302,6 +304,7 @@ bool XpConnect::fillSimConnectData(atools::fs::sc::SimConnectData& data, bool fe
 
   userAircraft.altitudeAboveGroundFt = dr::aglAltitudeFt.valueFloat();
   userAircraft.groundAltitudeFt = actualAlt - userAircraft.altitudeAboveGroundFt;
+  userAircraft.altitudeAutopilotFt = dr::autopilotAltitudeFt.valueFloat();
   userAircraft.indicatedAltitudeFt = dr::indicatedAltitudeFt.valueFloat();
 
   // Heading and track
