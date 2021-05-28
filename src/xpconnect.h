@@ -42,6 +42,9 @@ public:
   XpConnect(bool verboseLogging);
   ~XpConnect();
 
+  XpConnect(const XpConnect& other) = delete;
+  XpConnect& operator=(const XpConnect& other) = delete;
+
   /* Fill SimConnectData from X-Plane datarefs. Returns true if data was found */
   bool fillSimConnectData(atools::fs::sc::SimConnectData& data, bool fetchAi);
 

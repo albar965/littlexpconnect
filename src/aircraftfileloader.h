@@ -38,6 +38,9 @@ public:
   AircraftFileLoader(bool verboseLogging);
   virtual ~AircraftFileLoader() override;
 
+  AircraftFileLoader(const AircraftFileLoader& other) = delete;
+  AircraftFileLoader& operator=(const AircraftFileLoader& other) = delete;
+
   /* Load and cache required entries from acf file for given aircraft id. Result is stored in aircraft */
   void loadAircraftFile(atools::fs::sc::SimConnectAircraft& aircraft, quint32 objId);
 
