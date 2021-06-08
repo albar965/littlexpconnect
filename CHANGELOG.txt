@@ -1,8 +1,7 @@
 ﻿Numbers (#) refer to GitHub issues in project `littlenavmap`.
 For example: #3 is `https://github.com/albar965/littlenavmap/issues/3`.
 
-
-Version 1.0.23.beta
+Version 1.0.24
 
 * Offloaded loading of aircraft files and scanning for keys to separate thread to avoid blocking
   main queue.
@@ -10,6 +9,10 @@ Version 1.0.23.beta
 * Added transponder code to user and AI aircraft. Fetching transponder code now.
   Increased data version to 11 to force incompatibility. Added properties to avoid future
   incompatibilities when adding new value types. albar965/littlenavmap#525
+
+Version 1.0.23.beta
+
+Unofficial beta release.
 
 Version 1.0.22
 
