@@ -18,7 +18,7 @@
 #ifndef LITTLEXPC_XPCONNECT_H
 #define LITTLEXPC_XPCONNECT_H
 
-#include <QCache>
+#include <QtGlobal>
 
 namespace atools {
 namespace fs {
@@ -31,14 +31,19 @@ class SimConnectAircraft;
 
 namespace xpc {
 
+class AircraftFileLoader;
+
 /*
  * Class that has full access to SimConnectData.
  */
 class XpConnect
 {
 public:
-  XpConnect();
+  XpConnect(bool verboseLogging);
   ~XpConnect();
+
+  XpConnect(const XpConnect& other) = delete;
+  XpConnect& operator=(const XpConnect& other) = delete;
 
   /* Fill SimConnectData from X-Plane datarefs. Returns true if data was found */
   bool fillSimConnectData(atools::fs::sc::SimConnectData& data, bool fetchAi);
@@ -47,11 +52,8 @@ public:
   void initDataRefs();
 
 private:
-  /* Cache key value pairs from acf files to avoid reading the files. */
-  QCache<QString, QHash<QString, QString> > acfFileValues;
-
-  void loadAcf(atools::fs::sc::SimConnectAircraft& aircraft, quint32 objId);
-
+  AircraftFileLoader *fileLoader;
+  bool verbose = false;
 };
 
 } // namespace xpc

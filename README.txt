@@ -12,6 +12,8 @@ Prepar3D and X-Plane.
 This plugin is only useful for X-Plane and is available for Windows, macOS and
 Linux (all 64 bit only). Only tested on X-Plane 11.
 
+Issues can be submitted at https://github.com/albar965/littlenavmap/issues .
+
 Local connection scenario:
 
 |Windows, Linux or Mac Machine      |    Windows, Linux or Mac Machine  |

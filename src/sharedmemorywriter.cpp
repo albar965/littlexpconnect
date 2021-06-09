@@ -23,11 +23,11 @@
 #include <QBuffer>
 #include <QDataStream>
 
-SharedMemoryWriter::SharedMemoryWriter(bool verboseParam)
-  : verbose(verboseParam)
+SharedMemoryWriter::SharedMemoryWriter(bool verboseLogging)
+  : verbose(verboseLogging)
 {
   qDebug() << Q_FUNC_INFO;
-  xpConnect = new xpc::XpConnect();
+  xpConnect = new xpc::XpConnect(verbose);
   xpConnect->initDataRefs();
 }
 

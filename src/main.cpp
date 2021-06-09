@@ -92,7 +92,7 @@ PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc)
   app->setOrganizationName("ABarthel");
   app->setOrganizationDomain("littlenavmap.org");
 
-  app->setApplicationVersion("1.1.0.develop"); // VERSION_NUMBER - Little Xpconnect
+  app->setApplicationVersion("1.0.24"); // VERSION_NUMBER - Little Xpconnect
 
   // Initialize logging and force logfiles into the system or user temp directory
   LoggingHandler::initializeForTemp(Settings::getOverloadedPath(":/littlexpconnect/resources/config/logging.cfg"));

@@ -175,12 +175,14 @@ message(-----------------------------------)
 # Files
 
 SOURCES += \
+  src/aircraftfileloader.cpp \
   src/dataref.cpp \
   src/main.cpp \
   src/sharedmemorywriter.cpp \
   src/xpconnect.cpp
 
 HEADERS += \
+  src/aircraftfileloader.h \
   src/dataref.h \
   src/littlexpconnect_global.h \
   src/sharedmemorywriter.h \
