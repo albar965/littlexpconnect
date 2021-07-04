@@ -115,9 +115,9 @@ static DataRef machSpeed(dataRefs, "sim/flightmodel/misc/machno");
 static DataRef verticalSpeedFpm(dataRefs, "sim/flightmodel/position/vh_ind_fpm");
 
 // Altitude
-static DataRef indicatedAltitudeFt(dataRefs, "sim/cockpit2/gauges/indicators/altitude_ft_pilot");
+static DataRef indicatedAltitudeFt(dataRefs, "sim/flightmodel/misc/h_ind");
 static DataRef actualAltitudeMeter(dataRefs, "sim/flightmodel/position/elevation");
-static DataRef aglAltitudeFt(dataRefs, "sim/cockpit2/gauges/indicators/radio_altimeter_height_ft_pilot");
+static DataRef aglAltitudeMeter(dataRefs, "sim/flightmodel/position/y_agl");
 
 static DataRef autopilotAltitudeFt(dataRefs, "sim/cockpit/autopilot/altitude");
 
@@ -302,7 +302,7 @@ bool XpConnect::fillSimConnectData(atools::fs::sc::SimConnectData& data, bool fe
   // not available:
   // userAircraft.airplaneAirline; userAircraft.airplaneFlightnumber; userAircraft.fromIdent; userAircraft.toIdent;
 
-  userAircraft.altitudeAboveGroundFt = dr::aglAltitudeFt.valueFloat();
+  userAircraft.altitudeAboveGroundFt = meterToFeet(dr::aglAltitudeMeter.valueFloat());
   userAircraft.groundAltitudeFt = actualAlt - userAircraft.altitudeAboveGroundFt;
   userAircraft.altitudeAutopilotFt = dr::autopilotAltitudeFt.valueFloat();
   userAircraft.indicatedAltitudeFt = dr::indicatedAltitudeFt.valueFloat();
