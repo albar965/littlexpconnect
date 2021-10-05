@@ -185,10 +185,10 @@ struct MultiplayerDataRefs
 static QVector<MultiplayerDataRefs> multiplayerDataRefs;
 
 // AI values - will be updated with number
-static const QLatin1Literal HEADING_DEG_TRUE_AI("sim/multiplayer/position/plane%1_psi");
-static const QLatin1Literal LAT_POSITION_DEG_AI("sim/multiplayer/position/plane%1_lat");
-static const QLatin1Literal LON_POSITION_DEG_AI("sim/multiplayer/position/plane%1_lon");
-static const QLatin1Literal ACTUAL_ALTITUDE_METER_AI("sim/multiplayer/position/plane%1_el");
+static const QLatin1String HEADING_DEG_TRUE_AI("sim/multiplayer/position/plane%1_psi");
+static const QLatin1String LAT_POSITION_DEG_AI("sim/multiplayer/position/plane%1_lat");
+static const QLatin1String LON_POSITION_DEG_AI("sim/multiplayer/position/plane%1_lon");
+static const QLatin1String ACTUAL_ALTITUDE_METER_AI("sim/multiplayer/position/plane%1_el");
 
 // ============================================================
 // New TCAS AI/multiplayer interface
