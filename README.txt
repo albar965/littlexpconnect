@@ -62,6 +62,23 @@ X-Plane simulator" option. See the Little Navmap manual for more information.
 See online manual for installation instructions:
 https://www.littlenavmap.org/manuals/littlenavmap/release/2.6/en/INSTALLATION.html
 
+-- Apple macOS ---------------------------------------------------------------
+
+You have to remove the quarantine flag from the plugin after downloading and extracting it.
+Otherwise X-Plane will silently not load the plugin.
+
+Right or Ctrl-Click in the Finder on the included script `Prepare Little Xpconnect.command`
+and select `Open With` and `Terminal`. Choose to run it.
+
+The script shows a few explantions and asks for your password which allows it to run a
+command as an administrator. You can look at the script which is a text file to see what
+commands are run.
+
+In some cases you have to run the script twice.
+
+You can see Little "Little Xpconnect" in the X-Plane plugin manager once it was
+unlocked and loaded successfully.
+
 ------------------------------------------------------------------------------
 -- FILES ---------------------------------------------------------------------
 ------------------------------------------------------------------------------

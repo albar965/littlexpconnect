@@ -20,24 +20,26 @@ if [ ! -f "mac.xpl" ]; then
   echo
 else
   echo
-  echo This script fixes the attributes of the Little Xpconnect X-Plane plugin 
+  echo This script fixes the attributes of the Little Xpconnect X-Plane plugin
   echo which is needed on macOS Catalina or newer.
   echo
   echo Run this after each update or installation of Little Xpconnect.
   echo
-  echo You have to enter your password in the next step since administrative 
+  echo You have to enter your password in the next step since administrative
   echo priviledges are required to fix the attributes.
   echo
+  echo In some cases you have to run this script twice.
   echo
-  sudo xattr -r -d com.apple.quarantine mac.xpl
-  if [ $? -eq 0 ]; 
-  then 
+  # Change attribute for whole folder including this script
+  sudo xattr -r -d com.apple.quarantine *
+  if [ $? -eq 0 ];
+  then
     echo
-    echo Done. You should now see the plugin in the X-Plane plugin manager and 
+    echo Done. You should now see the plugin in the X-Plane plugin manager and
     echo should also be able to connect Little Navmap with X-Plane.
-  else 
+  else
     echo
-    echo ERROR. Failed to change attributes. 
+    echo ERROR. Failed to change attributes.
   fi
   echo
   echo ========================================================================

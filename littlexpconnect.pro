@@ -192,6 +192,7 @@ RESOURCES += \
     littlexpconnect.qrc
 
 OTHER_FILES += \
+  $$files(etc/*, true) \
   .travis.yml \
   .gitignore \
   BUILD.txt \
