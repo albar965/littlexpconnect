@@ -28,8 +28,6 @@ else
   echo You have to enter your password in the next step since administrative
   echo priviledges are required to fix the attributes.
   echo
-  echo In some cases you have to run this script twice.
-  echo
   # Change attribute for whole folder including this script
   sudo xattr -r -d com.apple.quarantine *
   if [ $? -eq 0 ];
