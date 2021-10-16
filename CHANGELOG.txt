@@ -3,6 +3,12 @@ For example: #3 is `https://github.com/albar965/littlenavmap/issues/3`.
 
 ===============================================================================
 
+Version 1.0.26
+
+* Updated to Qt library version 5.15.2.
+
+===============================================================================
+
 Version 1.0.25
 
 * Now using datarefs from flightmodel which are not affected by failures instead of gauges. #693
