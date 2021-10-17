@@ -1,5 +1,12 @@
 #!/bin/bash
 
+# Used commands in this script
+#
+# "sudo" is a command that allows you to run other commands as
+# administrator. Therefore, it asks for your password. The command "xattr" changes
+# attributes. The flag "-r" instructs xattr to change all subfolders too and the flag
+# "-d com.apple.quarantine" tells it to delete the quarantine flag.
+
 echo
 echo
 echo ========================================================================

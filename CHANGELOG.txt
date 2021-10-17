@@ -5,6 +5,9 @@ For example: #3 is `https://github.com/albar965/littlenavmap/issues/3`.
 
 Version 1.0.26
 
+* Added script `Prepare Little Xpconnect.command` to ease installation on macOS Catalina
+  and Big Sur. See included README.txt or the Little Navmap user manual for installation
+  instructions.
 * Updated to Qt library version 5.15.2.
 
 ===============================================================================

@@ -67,7 +67,7 @@ https://www.littlenavmap.org/manuals/littlenavmap/release/2.6/en/INSTALLATION.ht
 You have to remove the quarantine flag from the plugin after downloading and extracting it.
 Otherwise X-Plane will silently not load the plugin.
 
-The procedure may be slightly different depending on whether you're using Big Sur or Calina.
+The procedure may be slightly different depending on whether you're using Big Sur or Catalina.
 
 1. Right or Ctrl-Click in the Finder on the included script `Prepare Little Xpconnect.command`
    and select `Open With` and `Terminal`.
@@ -81,7 +81,7 @@ The script shows a few explantions and asks for your password which allows it to
 command as an administrator. You can look at the script which is a text file to see what
 commands are executed.
 
-You can see Little "Little Xpconnect" in the X-Plane plugin manager once it was
+You can see "Little Xpconnect" in the X-Plane plugin manager once it was
 unlocked and loaded successfully.
 
 ------------------------------------------------------------------------------
