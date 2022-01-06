@@ -120,7 +120,7 @@ PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc)
 
   Settings& settings = Settings::instance();
   fetchAi = settings.getAndStoreValue(lxc::SETTINGS_OPTIONS_FETCH_AI_AIRCRAFT, true).toBool();
-  fetchRateSecs = settings.getAndStoreValue(lxc::SETTINGS_OPTIONS_FETCH_RATE_MS, 200).toFloat() / 1000.f;
+  fetchRateSecs = settings.getAndStoreValue(lxc::SETTINGS_OPTIONS_FETCH_RATE_MS, 100).toFloat() / 1000.f;
   verbose = settings.getAndStoreValue(lxc::SETTINGS_OPTIONS_VERBOSE, false).toBool();
 
   // Always successfull
@@ -172,18 +172,18 @@ PLUGIN_API void XPluginDisable()
 /* called on special messages like aircraft loaded, etc. */
 PLUGIN_API void XPluginReceiveMessage(XPLMPluginID inFromWho, long inMessage, void *inParam)
 {
-  Q_UNUSED(inFromWho);
-  Q_UNUSED(inMessage);
-  Q_UNUSED(inParam);
+  Q_UNUSED(inFromWho)
+  Q_UNUSED(inMessage)
+  Q_UNUSED(inParam)
 }
 
 float flightLoopCallback(float inElapsedSinceLastCall, float inElapsedTimeSinceLastFlightLoop, int inCounter,
                          void *inRefcon)
 {
-  Q_UNUSED(inElapsedSinceLastCall);
-  Q_UNUSED(inElapsedTimeSinceLastFlightLoop);
-  Q_UNUSED(inCounter);
-  Q_UNUSED(inRefcon);
+  Q_UNUSED(inElapsedSinceLastCall)
+  Q_UNUSED(inElapsedTimeSinceLastFlightLoop)
+  Q_UNUSED(inCounter)
+  Q_UNUSED(inRefcon)
 
   // Copy data from datarefs and pass it over to the thread for writing into the shared memory
   thread->fetchAndWriteData(fetchAi);
