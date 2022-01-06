@@ -53,26 +53,26 @@ void SharedMemoryWriter::fetchAndWriteData(bool fetchAi)
     if(now > lastReport + 10)
     {
       lastReport = now;
-      const atools::fs::sc::SimConnectUserAircraft& ac = data.getUserAircraftConst();
+      const atools::fs::sc::SimConnectUserAircraft& userAircraft = data.getUserAircraftConst();
 
-      if(ac.isValid())
-        qDebug() << Q_FUNC_INFO << "User id" << ac.getObjectId()
-                 << "type" << ac.getAirplaneType()
-                 << "model" << ac.getAirplaneModel()
-                 << "reg" << ac.getAirplaneRegistration()
-                 << ac.getPosition();
+      if(userAircraft.isValid())
+        qDebug() << Q_FUNC_INFO << "User id" << userAircraft.getObjectId()
+                 << "type" << userAircraft.getAirplaneType()
+                 << "model" << userAircraft.getAirplaneModel()
+                 << "reg" << userAircraft.getAirplaneRegistration()
+                 << userAircraft.getPosition();
       else
         qDebug() << Q_FUNC_INFO << "User not valid";
 
       if(!data.getAiAircraftConst().isEmpty())
       {
-        for(const atools::fs::sc::SimConnectAircraft& ac : data.getAiAircraftConst())
+        for(const atools::fs::sc::SimConnectAircraft& aircraft : data.getAiAircraftConst())
         {
-          qDebug() << Q_FUNC_INFO << "AI id" << ac.getObjectId()
-                   << "type" << ac.getAirplaneType()
-                   << "model" << ac.getAirplaneModel()
-                   << "reg" << ac.getAirplaneRegistration()
-                   << ac.getPosition();
+          qDebug() << Q_FUNC_INFO << "AI id" << aircraft.getObjectId()
+                   << "type" << aircraft.getAirplaneType()
+                   << "model" << aircraft.getAirplaneModel()
+                   << "reg" << aircraft.getAirplaneRegistration()
+                   << aircraft.getPosition();
         }
       }
       else
