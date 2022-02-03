@@ -44,6 +44,7 @@ extern "C" {
 #include <QBuffer>
 #include <QThread>
 #include <QWaitCondition>
+#include <QDir>
 
 /*
  * This file contains the C functions needed by the XPLM API.
@@ -64,6 +65,7 @@ static const QLatin1String SETTINGS_OPTIONS_VERBOSE("Options/Verbose");
 
 float flightLoopCallback(float inElapsedSinceLastCall, float inElapsedTimeSinceLastFlightLoop, int inCounter,
                          void *inRefcon);
+void checkPath();
 
 /* Application object for event queue in server thread */
 static atools::gui::ConsoleApplication *app = nullptr;
@@ -79,7 +81,7 @@ static SharedMemoryWriter *thread = nullptr;
 /* Called on simulator startup */
 PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc)
 {
-  qDebug() << "LittleXpconnect" << Q_FUNC_INFO;
+  qDebug() << Q_FUNC_INFO << "Little Xpconnect";
 
   // Register atools types so we can stream them
   atools::geo::registerMetaTypes();
@@ -130,19 +132,19 @@ PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc)
 /* Called when simulator terminates */
 PLUGIN_API void XPluginStop(void)
 {
-  qDebug() << "LittleXpconnect" << Q_FUNC_INFO << "sync settings";
+  qDebug() << Q_FUNC_INFO << "Little Xpconnect" << "sync settings";
   Settings::instance().syncSettings();
 
-  qDebug() << "LittleXpconnect" << Q_FUNC_INFO << "Logging shutdown";
+  qDebug() << Q_FUNC_INFO << "Little Xpconnect" << "Logging shutdown";
   LoggingHandler::shutdown();
 
-  qDebug() << "LittleXpconnect" << Q_FUNC_INFO << "Logging shutdown done";
+  qDebug() << Q_FUNC_INFO << "Little Xpconnect" << "Logging shutdown done";
 }
 
 /* Enable plugin - can be called more than once during a simulator session */
 PLUGIN_API int XPluginEnable(void)
 {
-  qDebug() << "LittleXpconnect" << Q_FUNC_INFO;
+  qDebug() << Q_FUNC_INFO << "Little Xpconnect";
 
   // Start the backgound writer
   thread = new SharedMemoryWriter(verbose);
@@ -151,22 +153,25 @@ PLUGIN_API int XPluginEnable(void)
   // Register callback into method - first call in five seconds
   XPLMRegisterFlightLoopCallback(flightLoopCallback, 5.f, nullptr);
 
+  // Check installation path and print a warning to Log.txt if invalid
+  checkPath();
+
   return 1;
 }
 
 /* Disable plugin - can be called more than once during a simulator session */
 PLUGIN_API void XPluginDisable()
 {
-  qDebug() << "LittleXpconnect" << Q_FUNC_INFO;
+  qDebug() << Q_FUNC_INFO << "Little Xpconnect";
 
   // Unregister call back
   XPLMUnregisterFlightLoopCallback(flightLoopCallback, nullptr);
 
-  qDebug() << "LittleXpconnect" << Q_FUNC_INFO << "Terminating thread";
+  qDebug() << Q_FUNC_INFO << "Little Xpconnect" << "Terminating thread";
   thread->terminateThread();
   delete thread;
   thread = nullptr;
-  qDebug() << "LittleXpconnect" << Q_FUNC_INFO << "Terminating thread done";
+  qDebug() << Q_FUNC_INFO << "Little Xpconnect" << "Terminating thread done";
 }
 
 /* called on special messages like aircraft loaded, etc. */
@@ -189,4 +194,44 @@ float flightLoopCallback(float inElapsedSinceLastCall, float inElapsedTimeSinceL
   thread->fetchAndWriteData(fetchAi);
 
   return fetchRateSecs;
+}
+
+void checkPath()
+{
+  // Get own id an plugin path of DLL/.so
+  XPLMPluginID id = XPLMGetMyID();
+
+  // Get path for xpl file
+  char path[1024];
+  memset(path, '\0', 1024);
+  XPLMGetPluginInfo(id, nullptr, path, nullptr, nullptr);
+
+  qDebug() << Q_FUNC_INFO << "Plugin id" << id << "application path" << qApp->applicationFilePath() << "plugin path" << path;
+  bool valid = true;
+
+  // Check file extension
+  QFileInfo pluginFile(path);
+  valid &= pluginFile.suffix().compare("xpl", Qt::CaseInsensitive) == 0;
+
+  // Installationp path
+  // X-Plane/Resources/plugins/Little Xpconnect/mac.xpl
+  // X-Plane/Resources/plugins/Little Xpconnect/64/win.xpl
+  // X-Plane/Resources/plugins/Little Xpconnect/64/lin.xpl
+  QDir pluginDir(pluginFile.absoluteDir());
+#if !defined(Q_OS_MACOS)
+  valid &= pluginDir.dirName() == "64";
+  pluginDir.cdUp(); // Skip "64"
+#endif
+  pluginDir.cdUp(); // Skip "Little Xpconnect" or other sub-folder
+  valid &= pluginDir.dirName().compare("plugins", Qt::CaseInsensitive) == 0;
+  pluginDir.cdUp(); // Skip "plugins"
+  valid &= pluginDir.dirName().compare("Resources", Qt::CaseInsensitive) == 0;
+
+  if(!valid)
+  {
+    QString message("*** Little Xpconnect error: Plugin installed in the wrong path: \"" + pluginFile.absolutePath() + "\"\n");
+    QByteArray utf8 = message.toUtf8();
+    XPLMDebugString(utf8.constData());
+    qWarning() << Q_FUNC_INFO << message;
+  }
 }
