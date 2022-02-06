@@ -1,5 +1,13 @@
 ﻿Numbers (#) refer to GitHub issues in project `littlenavmap`.
 For example: #3 is `https://github.com/albar965/littlenavmap/issues/3`.
+This text is partially Markdown, hence sometimes strange formatting.
+
+===============================================================================
+
+Version 1.1.1.develop
+
+* Now printing a warning to the X-Plane log.txt if installation path is not correct.
+* Lowered default data fetch rate to 100 ms. This will be overridden by configuration file. Change this manually if needed.
 
 ===============================================================================
 
