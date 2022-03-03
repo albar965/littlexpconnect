@@ -234,4 +234,6 @@ void checkPath()
     XPLMDebugString(utf8.constData());
     qWarning() << Q_FUNC_INFO << message;
   }
+  else
+    qInfo() << Q_FUNC_INFO << "Plugin path ok:" << pluginFile.absoluteFilePath();
 }
