@@ -46,6 +46,9 @@
 # End of configuration documentation
 # =============================================================================
 
+# Define program version here
+VERSION_NUMBER=1.1.1.develop
+
 QT += core
 
 CONFIG += c++14
@@ -110,9 +113,9 @@ macx {
 }
 
 isEmpty(GIT_PATH) {
-  GIT_REVISION='\\"UNKNOWN\\"'
+  GIT_REVISION=UNKNOWN
 } else {
-  GIT_REVISION='\\"$$system('$$GIT_PATH' rev-parse --short HEAD)\\"'
+  GIT_REVISION=$$system('$$GIT_PATH' rev-parse --short HEAD)
 }
 
 # Link all static in Windows to avoid DLL conflicts with other plugins
@@ -124,7 +127,8 @@ LIBS += -lz -L$$ATOOLS_LIB_PATH -latools
 PRE_TARGETDEPS += $$ATOOLS_LIB_PATH/libatools.a
 DEPENDPATH += $$ATOOLS_INC_PATH
 INCLUDEPATH += $$PWD/src $$ATOOLS_INC_PATH $${XPSDK_BASE}/CHeaders/XPLM $${XPSDK_BASE}/CHeaders/Widgets
-DEFINES += GIT_REVISION=$$GIT_REVISION
+DEFINES += VERSION_NUMBER_LITTLEXPCONNECT='\\"$$VERSION_NUMBER\\"'
+DEFINES += GIT_REVISION_LITTLEXPCONNECT='\\"$$GIT_REVISION\\"'
 DEFINES += QT_NO_CAST_FROM_BYTEARRAY
 DEFINES += QT_NO_CAST_TO_ASCII
 DEFINES += XPLM302=1 XPLM301=1 XPLM300=1 XPLM210=1 APL=0 IBM=0 LIN=1
@@ -152,8 +156,9 @@ exists($$PWD/../build_options.pro) {
 
 !isEqual(QUIET, "true") {
 message(-----------------------------------)
-message(GIT_PATH: $$GIT_PATH)
+message(VERSION_NUMBER: $$VERSION_NUMBER)
 message(GIT_REVISION: $$GIT_REVISION)
+message(GIT_PATH: $$GIT_PATH)
 message(XPSDK_BASE: $$XPSDK_BASE)
 message(ATOOLS_INC_PATH: $$ATOOLS_INC_PATH)
 message(ATOOLS_LIB_PATH: $$ATOOLS_LIB_PATH)
@@ -212,6 +217,8 @@ unix:!macx {
 
   deploy.commands = rm -Rfv $${DEPLOY_DIR} &&
   deploy.commands += mkdir -pv $${DEPLOY_DIR}/64 &&
+  deploy.commands += echo $$VERSION_NUMBER > $$DEPLOY_DIR/version.txt &&
+  deploy.commands += echo $$GIT_REVISION > $$DEPLOY_DIR/revision.txt &&
   deploy.commands += cp -av $${OUT_PWD}/liblittlexpconnect.so.1.0.0 $${DEPLOY_DIR}/64/lin.xpl &&
   deploy.commands += cp -vf $${PWD}/CHANGELOG.txt $${DEPLOY_DIR} &&
   deploy.commands += cp -vf $${PWD}/README.txt $${DEPLOY_DIR} &&
@@ -226,6 +233,8 @@ macx {
   deploy.commands = rm -Rfv $${DEPLOY_DIR} &&
   deploy.commands += mkdir -pv $${DEPLOY_DIR} &&
   deploy.commands += cp -av $${OUT_PWD}/liblittlexpconnect.1.0.0.dylib $${DEPLOY_DIR}/mac.xpl &&
+  deploy.commands += echo $$VERSION_NUMBER > $$DEPLOY_DIR/version.txt &&
+  deploy.commands += echo $$GIT_REVISION > $$DEPLOY_DIR/revision.txt &&
   deploy.commands += cp -vf $${PWD}/CHANGELOG.txt $${DEPLOY_DIR} &&
   deploy.commands += cp -vf $${PWD}/README.txt $${DEPLOY_DIR} &&
   deploy.commands += cp -vf $${PWD}/LICENSE.txt $${DEPLOY_DIR} &&
@@ -254,6 +263,8 @@ win32 {
   deploy.commands = rmdir /s /q $$p($$DEPLOY_BASE/$$TARGET_NAME) &
   deploy.commands += mkdir $$p($$DEPLOY_BASE/$$TARGET_NAME) &&
   deploy.commands += mkdir $$p($$DEPLOY_BASE/$$TARGET_NAME/64) &&
+  deploy.commands += echo $$VERSION_NUMBER > $$p($$DEPLOY_BASE/$$TARGET_NAME/version.txt) &&
+  deploy.commands += echo $$GIT_REVISION > $$p($$DEPLOY_BASE/$$TARGET_NAME/revision.txt) &&
   deploy.commands += copy $$p($${OUT_PWD}/littlexpconnect.dll) $$p($$DEPLOY_BASE/$$TARGET_NAME/64/win.xpl) &&
   deploy.commands += xcopy $$p($${PWD}/CHANGELOG.txt) $$p($$DEPLOY_BASE/$$TARGET_NAME) &&
   deploy.commands += xcopy $$p($${PWD}/README.txt) $$p($$DEPLOY_BASE/$$TARGET_NAME) &&

@@ -94,7 +94,7 @@ PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc)
   app->setOrganizationName("ABarthel");
   app->setOrganizationDomain("littlenavmap.org");
 
-  app->setApplicationVersion("1.1.1.develop"); // VERSION_NUMBER - Little Xpconnect
+  app->setApplicationVersion(VERSION_NUMBER_LITTLEXPCONNECT); // VERSION_NUMBER - Little Xpconnect
 
   // Initialize logging and force logfiles into the system or user temp directory
   LoggingHandler::initializeForTemp(Settings::getOverloadedPath(":/littlexpconnect/resources/config/logging.cfg"));
@@ -107,7 +107,7 @@ PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc)
 
   // Program version and revision ==========================================
   if(version.isReleaseCandidate() || version.isBeta() || version.isDevelop())
-    info += QString(" (%1)").arg(GIT_REVISION);
+    info += QString(" (%1)").arg(GIT_REVISION_LITTLEXPCONNECT);
 
 #ifndef QT_NO_DEBUG
   info += " - DEBUG";
