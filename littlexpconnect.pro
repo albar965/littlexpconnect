@@ -114,8 +114,10 @@ macx {
 
 isEmpty(GIT_PATH) {
   GIT_REVISION=UNKNOWN
+  GIT_REVISION_FULL=UNKNOWN
 } else {
   GIT_REVISION=$$system('$$GIT_PATH' rev-parse --short HEAD)
+  GIT_REVISION_FULL=$$system('$$GIT_PATH' rev-parse HEAD)
 }
 
 # Link all static in Windows to avoid DLL conflicts with other plugins
@@ -158,6 +160,7 @@ exists($$PWD/../build_options.pro) {
 message(-----------------------------------)
 message(VERSION_NUMBER: $$VERSION_NUMBER)
 message(GIT_REVISION: $$GIT_REVISION)
+message(GIT_REVISION_FULL: $$GIT_REVISION_FULL)
 message(GIT_PATH: $$GIT_PATH)
 message(XPSDK_BASE: $$XPSDK_BASE)
 message(ATOOLS_INC_PATH: $$ATOOLS_INC_PATH)
@@ -218,7 +221,7 @@ unix:!macx {
   deploy.commands = rm -Rfv $${DEPLOY_DIR} &&
   deploy.commands += mkdir -pv $${DEPLOY_DIR}/64 &&
   deploy.commands += echo $$VERSION_NUMBER > $$DEPLOY_DIR/version.txt &&
-  deploy.commands += echo $$GIT_REVISION > $$DEPLOY_DIR/revision.txt &&
+  deploy.commands += echo $$GIT_REVISION_FULL > $$DEPLOY_DIR/revision.txt &&
   deploy.commands += cp -av $${OUT_PWD}/liblittlexpconnect.so.1.0.0 $${DEPLOY_DIR}/64/lin.xpl &&
   deploy.commands += cp -vf $${PWD}/CHANGELOG.txt $${DEPLOY_DIR} &&
   deploy.commands += cp -vf $${PWD}/README.txt $${DEPLOY_DIR} &&
@@ -234,7 +237,7 @@ macx {
   deploy.commands += mkdir -pv $${DEPLOY_DIR} &&
   deploy.commands += cp -av $${OUT_PWD}/liblittlexpconnect.1.0.0.dylib $${DEPLOY_DIR}/mac.xpl &&
   deploy.commands += echo $$VERSION_NUMBER > $$DEPLOY_DIR/version.txt &&
-  deploy.commands += echo $$GIT_REVISION > $$DEPLOY_DIR/revision.txt &&
+  deploy.commands += echo $$GIT_REVISION_FULL > $$DEPLOY_DIR/revision.txt &&
   deploy.commands += cp -vf $${PWD}/CHANGELOG.txt $${DEPLOY_DIR} &&
   deploy.commands += cp -vf $${PWD}/README.txt $${DEPLOY_DIR} &&
   deploy.commands += cp -vf $${PWD}/LICENSE.txt $${DEPLOY_DIR} &&
@@ -264,7 +267,7 @@ win32 {
   deploy.commands += mkdir $$p($$DEPLOY_BASE/$$TARGET_NAME) &&
   deploy.commands += mkdir $$p($$DEPLOY_BASE/$$TARGET_NAME/64) &&
   deploy.commands += echo $$VERSION_NUMBER > $$p($$DEPLOY_BASE/$$TARGET_NAME/version.txt) &&
-  deploy.commands += echo $$GIT_REVISION > $$p($$DEPLOY_BASE/$$TARGET_NAME/revision.txt) &&
+  deploy.commands += echo $$GIT_REVISION_FULL > $$p($$DEPLOY_BASE/$$TARGET_NAME/revision.txt) &&
   deploy.commands += copy $$p($${OUT_PWD}/littlexpconnect.dll) $$p($$DEPLOY_BASE/$$TARGET_NAME/64/win.xpl) &&
   deploy.commands += xcopy $$p($${PWD}/CHANGELOG.txt) $$p($$DEPLOY_BASE/$$TARGET_NAME) &&
   deploy.commands += xcopy $$p($${PWD}/README.txt) $$p($$DEPLOY_BASE/$$TARGET_NAME) &&
