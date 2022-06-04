@@ -6,8 +6,18 @@ This text is partially Markdown, hence sometimes strange formatting.
 
 Version 1.1.1.develop
 
+## General
+
 * Now printing a warning to the X-Plane log.txt if installation path is not correct.
 * Lowered default data fetch rate to 100 ms. This will be overridden by configuration file. Change this manually if needed.
+
+## Build
+
+* Moved version number to variable `VERSION_NUMBER` in file `littlenavconnect.pro` instead of
+  coding it into sources.
+* Now writing files `version.txt` and `revision.txt` files into deployment folder allowing
+  deployment scripts to automatically name archives. These files can be used to identify
+  a version without opening the program.
 
 ===============================================================================
 
