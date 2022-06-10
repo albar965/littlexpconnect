@@ -3,6 +3,16 @@ For example: #3 is `https://github.com/albar965/littlenavmap/issues/3`.
 
 ===============================================================================
 
+Version 1.0.27
+
+* Moved version number to variable `VERSION_NUMBER` in file `littlexpconnect.pro` instead of
+  coding it into sources.
+* Now writing files `version.txt` and `revision.txt` files into install folder allowing
+  deployment scripts to automatically name archives. These files can be used to identify
+  a version without opening the program.
+
+===============================================================================
+
 Version 1.0.26
 
 * Added script `Prepare Little Xpconnect.command` to ease installation on macOS Catalina
