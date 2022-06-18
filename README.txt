@@ -22,12 +22,12 @@ X-Plane <-> Little Xpconnect  <- (Local) -> Little Navmap
 
 
 Network scenario for X-Plane using the Little Xpconnect plugin and the Little
-Navonnect agent:
+Navconnect agent:
 
 |Windows, Linux or Mac Machine                           |     Windows, Linux or Mac Machines  |
 ------------------------------------------------------------------------------------------------
-X-Plane <-> Little XpConnect <-> Little Navonnect <- (Network) -> Little Navmap on Computer 1
-                                                  <- (Network) -> Little Navmap on Computer 2
+X-Plane <-> Little XpConnect <-> Little Navconnect <- (Network) -> Little Navmap on Computer 1
+                                                   <- (Network) -> Little Navmap on Computer 2
 
 ------------------------------------------------------------------------------
 -- INSTALLATION --------------------------------------------------------------
