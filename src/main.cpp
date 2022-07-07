@@ -90,11 +90,11 @@ PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc)
   // Create application object which is needed for the server thread event queue
   int argc = 0;
   app = new atools::gui::ConsoleApplication(argc, nullptr);
-  app->setApplicationName("Little Xpconnect");
-  app->setOrganizationName("ABarthel");
-  app->setOrganizationDomain("littlenavmap.org");
+  QCoreApplication::setApplicationName("Little Xpconnect");
+  QCoreApplication::setOrganizationName("ABarthel");
+  QCoreApplication::setOrganizationDomain("littlenavmap.org");
 
-  app->setApplicationVersion(VERSION_NUMBER_LITTLEXPCONNECT); // VERSION_NUMBER - Little Xpconnect
+  QCoreApplication::setApplicationVersion(VERSION_NUMBER_LITTLEXPCONNECT); // VERSION_NUMBER - Little Xpconnect
 
   // Initialize logging and force logfiles into the system or user temp directory
   LoggingHandler::initializeForTemp(Settings::getOverloadedPath(":/littlexpconnect/resources/config/logging.cfg"));
@@ -102,8 +102,8 @@ PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc)
   LoggingUtil::logStandardPaths();
 
   // Pass plugin information to X-Plane
-  QString info = QString("%1 %2").arg(app->applicationName()).arg(app->applicationVersion());
-  atools::util::Version version(app->applicationVersion());
+  QString info = QString("%1 %2").arg(QCoreApplication::applicationName()).arg(QCoreApplication::applicationVersion());
+  atools::util::Version version(QCoreApplication::applicationVersion());
 
   // Program version and revision ==========================================
   if(version.isReleaseCandidate() || version.isBeta() || version.isDevelop())
@@ -133,7 +133,7 @@ PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc)
 PLUGIN_API void XPluginStop(void)
 {
   qDebug() << Q_FUNC_INFO << "Little Xpconnect" << "sync settings";
-  Settings::instance().syncSettings();
+  Settings::syncSettings();
 
   qDebug() << Q_FUNC_INFO << "Little Xpconnect" << "Logging shutdown";
   LoggingHandler::shutdown();
