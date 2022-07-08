@@ -27,8 +27,6 @@
 #include "util/version.h"
 #include "geo/calculations.h"
 
-#include <QDebug>
-
 extern "C" {
 #include "XPLMPlugin.h"
 #include "XPLMProcessing.h"
@@ -45,6 +43,7 @@ extern "C" {
 #include <QThread>
 #include <QWaitCondition>
 #include <QDir>
+#include <QStringBuilder>
 
 /*
  * This file contains the C functions needed by the XPLM API.
@@ -66,6 +65,8 @@ static const QLatin1String SETTINGS_OPTIONS_VERBOSE("Options/Verbose");
 float flightLoopCallback(float inElapsedSinceLastCall, float inElapsedTimeSinceLastFlightLoop, int inCounter,
                          void *inRefcon);
 void checkPath();
+void logXpInfo(QString message);
+void logXpErr(QString message);
 
 /* Application object for event queue in server thread */
 static atools::gui::ConsoleApplication *app = nullptr;
@@ -113,13 +114,12 @@ PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc)
   info += " - DEBUG";
 #endif
 
+  // Initialize plugin parameters passed in to this function
   strcpy(outName, info.toLatin1().constData());
   strcpy(outSig, "ABarthel.LittleXpconnect.Connect");
   strcpy(outDesc, "Connects Little Navmap and Little Navconnect to X-Plane.");
 
-  // Create an instance here since it will be accessed from the main server thread
-  Settings::instance();
-
+  // Need to create an instance here since it will be accessed from the main server thread
   Settings& settings = Settings::instance();
   fetchAi = settings.getAndStoreValue(lxc::SETTINGS_OPTIONS_FETCH_AI_AIRCRAFT, true).toBool();
   fetchRateSecs = settings.getAndStoreValue(lxc::SETTINGS_OPTIONS_FETCH_RATE_MS, 100).toFloat() / 1000.f;
@@ -198,15 +198,16 @@ float flightLoopCallback(float inElapsedSinceLastCall, float inElapsedTimeSinceL
 
 void checkPath()
 {
-  // Get own id an plugin path of DLL/.so
-  XPLMPluginID id = XPLMGetMyID();
+  // Get own id (int) and plugin path of DLL/.so
+  XPLMPluginID pluginId = XPLMGetMyID();
 
   // Get path for xpl file
   char path[1024];
   memset(path, '\0', 1024);
-  XPLMGetPluginInfo(id, nullptr, path, nullptr, nullptr);
+  XPLMGetPluginInfo(pluginId, nullptr, path, nullptr, nullptr);
 
-  qDebug() << Q_FUNC_INFO << "Plugin id" << id << "application path" << qApp->applicationFilePath() << "plugin path" << path;
+  logXpInfo(QString("Plugin id \"%1\" installed in path \"%2\", app path \"%3\"").
+            arg(pluginId).arg(path).arg(qApp->applicationFilePath()));
   bool valid = true;
 
   // Check file extension
@@ -228,12 +229,21 @@ void checkPath()
   valid &= pluginDir.dirName().compare("Resources", Qt::CaseInsensitive) == 0;
 
   if(!valid)
-  {
-    QString message("*** Little Xpconnect error: Plugin installed in the wrong path: \"" + pluginFile.absolutePath() + "\"\n");
-    QByteArray utf8 = message.toUtf8();
-    XPLMDebugString(utf8.constData());
-    qWarning() << Q_FUNC_INFO << message;
-  }
+    logXpErr(QString("Plugin installed in the wrong path: \"%1\"").arg(pluginFile.absolutePath()));
   else
-    qInfo() << Q_FUNC_INFO << "Plugin path ok:" << pluginFile.absoluteFilePath();
+    logXpInfo(QString("Plugin path \"%1\" is ok").arg(pluginFile.absolutePath()));
+}
+
+void logXpInfo(QString message)
+{
+  message = "Little Xpconnect: " % message % "\n";
+  XPLMDebugString(message.toUtf8().constData());
+  qInfo() << Q_FUNC_INFO << message;
+}
+
+void logXpErr(QString message)
+{
+  message = "*** Little Xpconnect error: " % message % "\n";
+  XPLMDebugString(message.toUtf8().constData());
+  qWarning() << Q_FUNC_INFO << message;
 }
