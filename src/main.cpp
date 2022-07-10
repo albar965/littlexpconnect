@@ -201,13 +201,22 @@ void checkPath()
   // Get own id (int) and plugin path of DLL/.so
   XPLMPluginID pluginId = XPLMGetMyID();
 
-  // Get path for xpl file
-  char path[1024];
-  memset(path, '\0', 1024);
-  XPLMGetPluginInfo(pluginId, nullptr, path, nullptr, nullptr);
+  // Get path for xpl file - returns a colon separated path on macOS
+  char xpPath[1024];
+  memset(xpPath, '\0', 1024);
+  XPLMGetPluginInfo(pluginId, nullptr, xpPath, nullptr, nullptr);
 
-  logXpInfo(QString("Plugin id \"%1\" installed in path \"%2\", app path \"%3\"").
-            arg(pluginId).arg(path).arg(qApp->applicationFilePath()));
+#if defined(Q_OS_MACOS)
+  // Convert the stone-age macOS path notation from X-Plane - replace colons and add volumes to get access to disk
+  // From "BigSur:Users:USER:Programme:X-Plane 11:Resources:plugins:Little Xpconnect:mac.xpl" to
+  // "/Volumes/BigSur/Users/USER/Programme/X-Plane 11/Resources/plugins/Little Xpconnect/mac.xpl"
+  QString path = "/Volumes/" + QString(xpPath).replace(':', '/');
+#else
+  QString path = QString(xpPath);
+#endif
+
+  logXpInfo(QString("Plugin id %1 installed in path \"%2\" (\"%3\"), app path \"%4\"").
+            arg(pluginId).arg(xpPath).arg(path).arg(qApp->applicationFilePath()));
   bool valid = true;
 
   // Check file extension
