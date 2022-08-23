@@ -47,7 +47,7 @@
 # =============================================================================
 
 # Define program version here
-VERSION_NUMBER=1.1.1.develop
+VERSION_NUMBER=1.1.2.develop
 
 QT += core
 
