@@ -4,6 +4,14 @@ This text is partially Markdown, hence sometimes strange formatting.
 
 ===============================================================================
 
+Version 1.1.2.develop
+
+* Fixed detection of wrong installation path on macOS which was confused by old path notation
+  from X-Plane. #899
+* Removed unneeded rounding of simulator time to allow millisecond accuracy. #907
+
+===============================================================================
+
 Version 1.1.1.develop
 
 ## General
