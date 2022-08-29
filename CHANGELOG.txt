@@ -3,6 +3,13 @@ For example: #3 is `https://github.com/albar965/littlenavmap/issues/3`.
 
 ===============================================================================
 
+Version 1.0.28
+
+* Added warning in X-Plane `Log.txt` if installation path is not correct.
+* Better logging to fix detection of wrong installation path. #899
+
+===============================================================================
+
 Version 1.0.27
 
 * Moved version number to variable `VERSION_NUMBER` in file `littlexpconnect.pro` instead of
