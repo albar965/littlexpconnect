@@ -47,7 +47,7 @@
 # =============================================================================
 
 # Define program version here
-VERSION_NUMBER=1.0.27
+VERSION_NUMBER=1.0.28
 
 QT += core
 
