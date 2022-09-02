@@ -137,7 +137,7 @@ void AircraftFileLoader::readValuesFromAircraftFile(AircraftEntryType& keyValueP
   static const QLatin1String PREFIX("P ");
 
   // Check if file is valid, readable, has size > 0, etc.
-  if(!atools::checkFile(QFileInfo(filepath), verboseLogging))
+  if(!atools::checkFile(Q_FUNC_INFO, QFileInfo(filepath), verboseLogging))
     return;
 
   QFile file(filepath);

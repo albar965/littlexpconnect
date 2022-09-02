@@ -1,5 +1,40 @@
 ﻿Numbers (#) refer to GitHub issues in project `littlenavmap`.
 For example: #3 is `https://github.com/albar965/littlenavmap/issues/3`.
+This text is partially Markdown, hence sometimes strange formatting.
+
+===============================================================================
+
+Version 1.1.2.develop
+
+* Fixed detection of wrong installation path on macOS which was confused by old path notation
+  from X-Plane. #899
+* Removed unneeded rounding of simulator time to allow millisecond accuracy. #907
+
+===============================================================================
+
+Version 1.1.1.develop
+
+## General
+
+* Now printing a warning to the X-Plane log.txt if installation path is not correct.
+* Lowered default data fetch rate to 100 ms. This will be overridden by configuration file. Change this manually if needed.
+
+## Build
+
+* Moved version number to variable `VERSION_NUMBER` in file `littlenavconnect.pro` instead of
+  coding it into sources.
+* Now writing files `version.txt` and `revision.txt` files into deployment folder allowing
+  deployment scripts to automatically name archives. These files can be used to identify
+  a version without opening the program.
+
+===============================================================================
+
+Version 1.0.26
+
+* Added script `Prepare Little Xpconnect.command` to ease installation on macOS Catalina
+  and Big Sur. See included README.txt or the Little Navmap user manual for installation
+  instructions.
+* Updated to Qt library version 5.15.2.
 
 ===============================================================================
 
