@@ -46,8 +46,8 @@
 # End of configuration documentation
 # =============================================================================
 
-# Define program version here
-VERSION_NUMBER=1.0.29
+# Define program version here VERSION_NUMBER_TODO
+VERSION_NUMBER=1.0.28
 
 QT += core
 
