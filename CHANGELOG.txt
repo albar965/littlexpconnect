@@ -4,20 +4,14 @@ This text is partially Markdown, hence sometimes strange formatting.
 
 ===============================================================================
 
-Version 1.1.2.develop
-
-* Fixed detection of wrong installation path on macOS which was confused by old path notation
-  from X-Plane. #899
-* Removed unneeded rounding of simulator time to allow millisecond accuracy. #907
-
-===============================================================================
-
-Version 1.1.1.develop
+Version 1.0.28
 
 ## General
 
-* Now printing a warning to the X-Plane log.txt if installation path is not correct.
-* Lowered default data fetch rate to 100 ms. This will be overridden by configuration file. Change this manually if needed.
+* Removed unneeded rounding of simulator time to allow millisecond accuracy. #907
+* Now printing a warning to the X-Plane `log.txt` if installation path is not correct.
+* Lowered default data fetch rate to 100 ms. This will be overridden by configuration file.
+  Change this manually if needed.
 
 ## Build
 
