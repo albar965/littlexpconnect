@@ -50,6 +50,7 @@
 VERSION_NUMBER=1.0.28
 
 QT += core
+versionAtLeast(QT_VERSION, 6.0.0): QT += core5compat
 
 CONFIG += c++14
 CONFIG += dll
@@ -106,8 +107,13 @@ macx {
 
   QMAKE_RPATHDIR=.
 
-  # Compatibility down to OS X Sierra 10.12 inclusive
-  QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.12
+  versionAtLeast(QT_VERSION, 6.0.0) {
+    # Compatibility down to OS X Mojave 10.14 inclusive
+    QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.14
+  } else {
+    # Compatibility down to OS X Sierra 10.12 inclusive
+    QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.12
+  }
 
   LIBS += -F$${XPSDK_BASE}/Libraries/Mac -framework XPLM -framework XPWidgets
 }
@@ -201,6 +207,7 @@ RESOURCES += \
 
 OTHER_FILES += \
   $$files(etc/*, true) \
+  $$files(build/*, true) \
   .travis.yml \
   .gitignore \
   BUILD.txt \
@@ -248,6 +255,14 @@ macx {
   deploy.commands += rm -fv $${DEPLOY_DIR}/QtCore.framework/QtCore_debug.prl &&
   deploy.commands += rm -Rfv $${DEPLOY_DIR}/QtCore.framework/Versions/*/Headers &&
   deploy.commands += rm -fv $${DEPLOY_DIR}/QtCore.framework/Versions/*/QtCore_debug &&
+versionAtLeast(QT_VERSION, 6.0.0) {
+  deploy.commands += cp -vfa $$[QT_INSTALL_LIBS]/QtCore5Compat.framework  $${DEPLOY_DIR} &&
+  deploy.commands += rm -Rfv $${DEPLOY_DIR}/QtCore5Compat.framework/Headers &&
+  deploy.commands += rm -fv $${DEPLOY_DIR}/QtCore5Compat.framework/QtCore_debug &&
+  deploy.commands += rm -fv $${DEPLOY_DIR}/QtCore5Compat.framework/QtCore_debug.prl &&
+  deploy.commands += rm -Rfv $${DEPLOY_DIR}/QtCore5Compat.framework/Versions/*/Headers &&
+  deploy.commands += rm -fv $${DEPLOY_DIR}/QtCore5Compat.framework/Versions/*/QtCore_debug &&
+}
   deploy.commands += cp -vfa $$[QT_INSTALL_LIBS]/QtGui.framework  $${DEPLOY_DIR} &&
   deploy.commands += rm -Rfv $${DEPLOY_DIR}/QtGui.framework/Headers &&
   deploy.commands += rm -fv $${DEPLOY_DIR}/QtGui.framework/QtGui_debug &&

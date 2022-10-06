@@ -124,7 +124,11 @@ void AircraftFileLoader::loadAircraftFile(atools::fs::sc::SimConnectAircraft& ai
         aircraftFileKeysLoading.insert(aircraftModelKey);
 
         // Threadpool will wait until a free thread is available
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+        QtConcurrent::run(threadPool, &AircraftFileLoader::loadKeysRunner, this, aircraftModelFilepath, aircraftKeys);
+#else
         QtConcurrent::run(threadPool, this, &AircraftFileLoader::loadKeysRunner, aircraftModelFilepath, aircraftKeys);
+#endif
       }
     }
   }
@@ -146,7 +150,9 @@ void AircraftFileLoader::readValuesFromAircraftFile(AircraftEntryType& keyValueP
     qDebug() << Q_FUNC_INFO << "Reading from" << filepath << "keys" << keys;
 
     QTextStream stream(&file);
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     stream.setCodec("UTF-8");
+#endif
 
     int lines = 0;
     // Read until all keys are found or at end of file
