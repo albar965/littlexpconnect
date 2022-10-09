@@ -2,6 +2,12 @@
 For example: #3 is `https://github.com/albar965/littlenavmap/issues/3`.
 This text is partially Markdown, hence sometimes strange formatting.
 
+Version 1.0.29
+
+## General
+
+* macOS: Apple Silicon / ARM 64 build now supported in universal binary.
+
 ===============================================================================
 
 Version 1.0.28
