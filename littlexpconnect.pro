@@ -47,7 +47,7 @@
 # =============================================================================
 
 # Define program version here VERSION_NUMBER_TODO
-VERSION_NUMBER=1.0.29
+VERSION_NUMBER=1.0.30
 
 QT += core
 versionAtLeast(QT_VERSION, 6.0.0): QT += core5compat
@@ -262,6 +262,12 @@ versionAtLeast(QT_VERSION, 6.0.0) {
   deploy.commands += rm -fv $${DEPLOY_DIR}/QtCore5Compat.framework/QtCore_debug.prl &&
   deploy.commands += rm -Rfv $${DEPLOY_DIR}/QtCore5Compat.framework/Versions/*/Headers &&
   deploy.commands += rm -fv $${DEPLOY_DIR}/QtCore5Compat.framework/Versions/*/QtCore_debug &&
+  deploy.commands += cp -vfa $$[QT_INSTALL_LIBS]/QtDBus.framework  $${DEPLOY_DIR} &&
+  deploy.commands += rm -Rfv $${DEPLOY_DIR}/QtDBus.framework/Headers &&
+  deploy.commands += rm -fv $${DEPLOY_DIR}/QtDBus.framework/QtCore_debug &&
+  deploy.commands += rm -fv $${DEPLOY_DIR}/QtDBus.framework/QtCore_debug.prl &&
+  deploy.commands += rm -Rfv $${DEPLOY_DIR}/QtDBus.framework/Versions/*/Headers &&
+  deploy.commands += rm -fv $${DEPLOY_DIR}/QtDBus.framework/Versions/*/QtCore_debug &&
 }
   deploy.commands += cp -vfa $$[QT_INSTALL_LIBS]/QtGui.framework  $${DEPLOY_DIR} &&
   deploy.commands += rm -Rfv $${DEPLOY_DIR}/QtGui.framework/Headers &&
