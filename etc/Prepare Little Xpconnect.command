@@ -35,6 +35,10 @@ else
   echo You have to enter your password in the next step since administrative
   echo priviledges are required to fix the attributes.
   echo
+  echo Note that the password is not echoed on the terminal and
+  echo the key does not move or change otherwise while entering the password.
+  echo This is normal.
+  echo
   # Change attribute for whole folder including this script
   sudo xattr -r -d com.apple.quarantine *
   if [ $? -eq 0 ];
