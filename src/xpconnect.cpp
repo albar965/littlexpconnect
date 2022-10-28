@@ -41,8 +41,10 @@ static DataRefPtrVector dataRefs;
 // Contains multiplayer aircraft datarefs
 static DataRefPtrVector aiDataRefs;
 
-static DataRef simBuild(dataRefs, "sim/version/sim_build_string");
-static DataRef xplmBuild(dataRefs, "sim/version/xplm_build_string");
+// This is the internal build number - it is a unique integer that always increases and is unique with each beta.
+// For example, 10.51b5 might be 105105.
+// There is no guarantee that the build number (last 2 digits) is in sync with the official beta number.
+static DataRef xplmVersion(dataRefs, "sim/version/xplane_internal_version");
 static DataRef simPaused(dataRefs, "sim/time/paused");
 static DataRef simReplay(dataRefs, "sim/operation/prefs/replay_mode");
 
@@ -329,8 +331,11 @@ bool XpConnect::fillSimConnectData(atools::fs::sc::SimConnectData& data, bool fe
   // points to the right side of the aircraft - wingspan will be used before model radius for painting
   userAircraft.wingSpanFt = static_cast<quint16>(roundToInt(meterToFeet(dr::aircraftSizeX.valueFloat() * 2.)));
 
+  atools::fs::sc::AircraftFlags simFlags = dr::xplmVersion.valueInt() >= 120000 ?
+                                           atools::fs::sc::SIM_XPLANE12 : atools::fs::sc::SIM_XPLANE11;
+
   // Set misc flags
-  userAircraft.flags = atools::fs::sc::IS_USER | atools::fs::sc::SIM_XPLANE;
+  userAircraft.flags = atools::fs::sc::IS_USER | simFlags;
   if(dr::onGround.valueInt() > 0)
     userAircraft.flags |= atools::fs::sc::ON_GROUND;
 
@@ -423,7 +428,7 @@ bool XpConnect::fillSimConnectData(atools::fs::sc::SimConnectData& data, bool fe
       carrier.machSpeed = atools::fs::sc::SC_INVALID_FLOAT;
       carrier.verticalSpeedFeetPerMin = atools::fs::sc::SC_INVALID_FLOAT;
 
-      carrier.flags = atools::fs::sc::SIM_XPLANE;
+      carrier.flags = simFlags;
 
       // Ground speed is null
       carrier.groundSpeedKts = atools::geo::meterPerSecToKnots(std::max(velocity.at(CARRIER_IDX), 0.f));
@@ -462,7 +467,7 @@ bool XpConnect::fillSimConnectData(atools::fs::sc::SimConnectData& data, bool fe
       frigate.machSpeed = atools::fs::sc::SC_INVALID_FLOAT;
       frigate.verticalSpeedFeetPerMin = atools::fs::sc::SC_INVALID_FLOAT;
 
-      frigate.flags = atools::fs::sc::SIM_XPLANE;
+      frigate.flags = simFlags;
       frigate.groundSpeedKts = atools::geo::meterPerSecToKnots(std::max(velocity.at(FRIGATE_IDX), 0.f));
       if(!atools::inRange(0.1f, 70.f, frigate.groundSpeedKts))
         frigate.groundSpeedKts = atools::fs::sc::SC_INVALID_FLOAT;
@@ -501,7 +506,7 @@ bool XpConnect::fillSimConnectData(atools::fs::sc::SimConnectData& data, bool fe
         {
           // Coordinates are ok too - must be an AI aircraft
           atools::fs::sc::SimConnectAircraft aircraft;
-          aircraft.flags = atools::fs::sc::SIM_XPLANE;
+          aircraft.flags = simFlags;
           aircraft.position = pos;
           aircraft.headingTrueDeg = dr::tcas::psi.valueFloatArr(i);
 
@@ -553,7 +558,7 @@ bool XpConnect::fillSimConnectData(atools::fs::sc::SimConnectData& data, bool fe
         {
           // Coordinates are ok too - must be an AI aircraft
           atools::fs::sc::SimConnectAircraft aircraft;
-          aircraft.flags = atools::fs::sc::SIM_XPLANE;
+          aircraft.flags = simFlags;
           aircraft.position = pos;
           aircraft.headingTrueDeg = ref.headingTrueDegAi.valueFloat();
 
