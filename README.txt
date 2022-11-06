@@ -54,7 +54,8 @@ should look like:
 You can check the X-Plane plugin manager to see if it is loaded  correctly.
 The installation was successful if "Little Xpconnect" shows up in the plugin manager.
 
-Note that "Little Xpconnect" does not add menu items in the X-Plane "Plugins" menu.
+Note that "Little Xpconnect" adds a sub-menu in the X-Plane "Plugins" menu.
+See CONFIGURATION below.
 
 When connecting with Little Navmap choose the "Connect directly to a local
 X-Plane simulator" option. See the Little Navmap manual for more information.
@@ -101,17 +102,28 @@ Additionally a small settings file is created which can be found in
 -- CONFIGURATION -------------------------------------------------------------
 ------------------------------------------------------------------------------
 
-Settings can only be changed using the configuration file
+The plugin adds a sub-menu "Little Xpconnect" to the X-Plane plugins menu which
+contains the following menu items:
+
+- "Fetch AI": Enable or disable the fetching of AI aircraft and
+  ships (carrier and frigate). Disable AI fetching if you see
+  stutters or performance degradation within X-Plane when using the plugin.
+- "Fetch Rate 50 ms" to "Fetch Rate 500 ms": Xpconnect will get all aircraft
+  parameters at this rate. Lower values result in smoother aircraft movement but
+  may induce stutters or decrease performance in X-Plane.
+
+The settings can also be changed using the configuration file
 "little_xpconnect.ini".
 
 [Options]
 FetchAiAircraft=true  : Also get AI aircraft. You can disable this if
                         you think the plugin causes performance problems.
-FetchRate=200         : Data will be fetched from X-Plane every 200
+FetchRateMs=200       : Data will be fetched from X-Plane every 200
                         milliseconds.
                         Lower this value to get a more fluid movement of the
                         aircraft symbol on the map. Increase this value if you
                         think the plugin causes performance problems.
+FetchRate=200         : Old obsolete value. Will be deleted on start.
 
 ------------------------------------------------------------------------------
 -- LICENSE -------------------------------------------------------------------

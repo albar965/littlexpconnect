@@ -15,9 +15,8 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *****************************************************************************/
 
-#include "dataref.h"
+#include "xpconnect/dataref.h"
 
-#include "atools.h"
 #include "geo/pos.h"
 
 #include <QDebug>

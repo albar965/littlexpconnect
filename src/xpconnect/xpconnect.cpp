@@ -15,8 +15,8 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *****************************************************************************/
 
-#include "xpconnect.h"
-#include "dataref.h"
+#include "xpconnect/xpconnect.h"
+#include "xpconnect/dataref.h"
 
 #include "fs/sc/simconnectuseraircraft.h"
 #include "fs/sc/simconnectdata.h"
@@ -500,8 +500,7 @@ bool XpConnect::fillSimConnectData(atools::fs::sc::SimConnectData& data, bool fe
       // Use new TCAS scheme - index 0 is user ======================
       for(int i = 1; i < numTcasAircraft; i++)
       {
-        Pos pos(dr::tcas::lon.valueFloatArr(i), dr::tcas::lat.valueFloatArr(i),
-                meterToFeet(dr::tcas::ele.valueFloatArr(i)));
+        Pos pos(dr::tcas::lon.valueFloatArr(i), dr::tcas::lat.valueFloatArr(i), meterToFeet(dr::tcas::ele.valueFloatArr(i)));
         if(pos.isValid() && !pos.isNull())
         {
           // Coordinates are ok too - must be an AI aircraft
@@ -613,8 +612,6 @@ void XpConnect::initDataRefs()
   // Find remaining datarefs of user aircraft
   for(DataRef *ref : dr::dataRefs)
   {
-    // qDebug() << ref->getName();
-
     if(!ref->isValid())
       ref->find();
   }

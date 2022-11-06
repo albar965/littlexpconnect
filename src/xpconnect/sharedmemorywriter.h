@@ -34,13 +34,13 @@ class SharedMemoryWriter :
 {
 public:
   SharedMemoryWriter(bool verboseLogging);
-  virtual ~SharedMemoryWriter();
+  virtual ~SharedMemoryWriter() override;
 
   SharedMemoryWriter(const SharedMemoryWriter& other) = delete;
   SharedMemoryWriter& operator=(const SharedMemoryWriter& other) = delete;
 
   /* Fetch data from the datarefs (main thread context) and pass it over to the
-   * shared memory writer (writing in this thread's context) */
+   * shared memory writer (context of "flightLoopCallback()") */
   void fetchAndWriteData(bool fetchAi);
 
   /* Send termination signal and wait for terminated */
@@ -53,7 +53,7 @@ private:
   bool terminate = false;
   atools::fs::sc::SimConnectData data;
 
-  /* Syncronize SimConnectData access */
+  /* Syncronize SimConnectData "data" access */
   QMutex dataMutex;
 
   /* Wakes thread up once new data has arrived */

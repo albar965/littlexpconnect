@@ -139,7 +139,7 @@ DEFINES += VERSION_NUMBER_LITTLEXPCONNECT='\\"$$VERSION_NUMBER\\"'
 DEFINES += GIT_REVISION_LITTLEXPCONNECT='\\"$$GIT_REVISION\\"'
 DEFINES += QT_NO_CAST_FROM_BYTEARRAY
 DEFINES += QT_NO_CAST_TO_ASCII
-DEFINES += XPLM302=1 XPLM301=1 XPLM300=1 XPLM210=1 APL=0 IBM=0 LIN=1
+DEFINES += XPLM302=1 XPLM301=1 XPLM300=1 XPLM210=1 XPLM200=1 APL=0 IBM=0 LIN=1
 
 # Compiling the DLL but not using it
 DEFINES += LITTLEXPCONNECT_LIBRARY
@@ -189,18 +189,22 @@ message(-----------------------------------)
 # Files
 
 SOURCES += \
-  src/aircraftfileloader.cpp \
-  src/dataref.cpp \
   src/main.cpp \
-  src/sharedmemorywriter.cpp \
-  src/xpconnect.cpp
+  src/xpconnect/aircraftfileloader.cpp \
+  src/xpconnect/dataref.cpp \
+  src/xpconnect/sharedmemorywriter.cpp \
+  src/xpconnect/xpconnect.cpp \
+  src/xpconnect/xplog.cpp \
+  src/xpconnect/xpmenu.cpp
 
 HEADERS += \
-  src/aircraftfileloader.h \
-  src/dataref.h \
   src/littlexpconnect_global.h \
-  src/sharedmemorywriter.h \
-  src/xpconnect.h
+  src/xpconnect/aircraftfileloader.h \
+  src/xpconnect/dataref.h \
+  src/xpconnect/sharedmemorywriter.h \
+  src/xpconnect/xpconnect.h \
+  src/xpconnect/xplog.h \
+  src/xpconnect/xpmenu.h
 
 RESOURCES += \
     littlexpconnect.qrc
