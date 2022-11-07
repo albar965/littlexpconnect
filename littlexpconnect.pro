@@ -47,7 +47,7 @@
 # =============================================================================
 
 # Define program version here VERSION_NUMBER_TODO
-VERSION_NUMBER=1.0.30
+VERSION_NUMBER=1.0.31
 
 QT += core
 versionAtLeast(QT_VERSION, 6.0.0): QT += core5compat
