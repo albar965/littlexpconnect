@@ -35,7 +35,8 @@ X-Plane <-> Little XpConnect <-> Little Navconnect <- (Network) -> Little Navmap
 
 Please refer to the Little Navmap installation instructions for a more detailed description:
 
-https://www.littlenavmap.org/manuals/littlenavmap/release/2.6/en/INSTALLATION.html
+https://www.littlenavmap.org/manuals/littlenavmap/release/2.8/en/INSTALLATION.html
+https://www.littlenavmap.org/manuals/littlenavmap/release/2.8/en/XPCONNECT.html
 
 ------------------------------------------------------------------------------
 
@@ -64,6 +65,22 @@ See online manual for installation instructions:
 https://www.littlenavmap.org/manuals/littlenavmap/release/2.6/en/INSTALLATION.html
 
 -- Apple macOS ---------------------------------------------------------------
+
+This X-Plane plugin comes in two separate folders for different architectures.
+
+"Little Xpconnect arm64":
+   This is for Apple computers having an Apple Silicon or an Intel CPU.
+   It supports only newer macOS releases from Mojave 10.14 and later.
+   Usable for X-Plane 11 and 12.
+
+"Little Xpconnect x86":
+   This is for Apple computers having an Intel CPU. This supports
+   older macOS releases from High Sierra 10.13.
+   Usable for X-Plane 11 and 12.
+
+Install "Little Xpconnect arm64" if in doubt. See the README.txt files in the
+Little Xpconnect folders or the Little Navmap user manual for installation instructions:
+https://www.littlenavmap.org/manuals/littlenavmap/release/2.8/en/INSTALLATION.html#macos
 
 You have to remove the quarantine flag from the plugin after downloading and extracting it.
 Otherwise X-Plane will silently not load the plugin.
