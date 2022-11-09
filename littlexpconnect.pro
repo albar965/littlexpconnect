@@ -277,10 +277,7 @@ versionAtLeast(QT_VERSION, 6.0.0) {
   deploy.commands += rm -fv $${DEPLOY_DIR}/QtGui.framework/QtGui_debug &&
   deploy.commands += rm -fv $${DEPLOY_DIR}/QtGui.framework/QtGui_debug.prl &&
   deploy.commands += rm -Rfv $${DEPLOY_DIR}/QtGui.framework/Versions/*/Headers &&
-  deploy.commands += rm -fv $${DEPLOY_DIR}/QtGui.framework/Versions/*/QtGui_debug &&
-  deploy.commands += cp -fv $$PWD/README.txt $$DEPLOY_DIR/README-LittleXpconnect.txt &&
-  deploy.commands += cp -fv $$PWD/CHANGELOG.txt $$DEPLOY_DIR/CHANGELOG-LittleXpconnect.txt
-
+  deploy.commands += rm -fv $${DEPLOY_DIR}/QtGui.framework/Versions/*/QtGui_debug
 }
 
 # Windows specific deploy target
