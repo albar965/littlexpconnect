@@ -53,6 +53,10 @@ QT += core
 QT -= gui
 versionAtLeast(QT_VERSION, 6.0.0): QT += core5compat
 
+macx {
+QT += widgets
+}
+
 CONFIG += c++14
 CONFIG += dll
 CONFIG += build_all c++14
