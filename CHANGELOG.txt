@@ -6,12 +6,12 @@ This text is partially Markdown, hence sometimes strange formatting.
 
 Version 1.0.30
 
-* Added menu items in X-Plane plugin menus to set AI fetch and performance options.
-  See README.txt or
+* Added menu items in X-Plane plugin menus to set AI fetch and performance options. See README.txt or
   [Little Navmap User Manual - Little Xpconnect](https://www.littlenavmap.org/manuals/littlenavmap/release/2.8/en/XPCONNECT.html).
 * Changed locking mechanism to mitigate probable simulator stutters.
 * Note about password in prepare command.
 * Added missing library for macOS builds.
+* Change build for Linux to use a minimum of dependencies to avoid issues with X-Plane 12.
 
 ===============================================================================
 

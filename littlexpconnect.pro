@@ -50,6 +50,7 @@
 VERSION_NUMBER=1.0.30
 
 QT += core
+QT -= gui
 versionAtLeast(QT_VERSION, 6.0.0): QT += core5compat
 
 CONFIG += c++14
@@ -90,7 +91,8 @@ isEmpty(ATOOLS_LIB_PATH) : ATOOLS_LIB_PATH=$$PWD/../build-atools-$$CONF_TYPE
 unix:!macx {
   isEmpty(GIT_PATH) : GIT_PATH=git
 
-  LIBS += -lz
+LIBS += -lz
+  QMAKE_LFLAGS += -static-libstdc++
 
   # Use relative path to current .so directory to search for shared libraries
   QMAKE_RPATHDIR=.
