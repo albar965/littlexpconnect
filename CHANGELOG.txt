@@ -4,6 +4,12 @@ This text is partially Markdown, hence sometimes strange formatting.
 
 ===============================================================================
 
+Version 1.0.31
+
+* Updated Linux build to remove unneeded dependencies to shared libraries.
+
+===============================================================================
+
 Version 1.0.30
 
 * Added menu items in X-Plane plugin menus to set AI fetch and performance options. See README.txt or
