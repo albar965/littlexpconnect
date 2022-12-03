@@ -76,7 +76,7 @@ public:
   DataRef xplmVersion, simPaused, simReplay, windSpeedKts, windDirectionDegMag, ambientTemperatureC, leTemperatureC, seaLevelPressurePascal,
           pitotIcePercent, structuralIcePercent, structuralIcePercent2, aoaIcePercent, aoaIcePercent2, inletIcePercent, propIcePercent,
           statIcePercent, statIcePercent2, windowIcePercent, carbIcePercent, airplaneTotalWeightKgs, airplaneMaxGrossWeightKgs,
-          airplaneEmptyWeightKgs, airplanePayloadWeightKgs, fuelTotalWeightKgs, fuelFlowKgSec8, magVarDeg, ambientVisibilityM, trackMagDeg,
+          airplaneEmptyWeightKgs, airplanePayloadWeightKgs, fuelTotalWeightKgs, fuelFlowKgSec8, magVarDeg, ambientVisibility, trackMagDeg,
           localDateDays, localTimeSec, zuluTimeSec, airplaneTailnum, airplaneTitle, airplaneType, transponderCode, latPositionDeg,
           lonPositionDeg, indicatedSpeedKts, trueSpeedMs, groundSpeedMs, machSpeed, verticalSpeedFpm, indicatedAltitudeFt,
           actualAltitudeMeter, aglAltitudeMeter, autopilotAltitudeFt, headingTrueDeg, headingMagDeg, numberOfEngines, onGround,

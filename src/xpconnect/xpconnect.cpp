@@ -98,7 +98,9 @@ bool XpConnect::fillSimConnectData(atools::fs::sc::SimConnectData& data, bool fe
   userAircraft.fuelTotalWeightLbs = kgToLbs(dataRefs->fuelTotalWeightKgs.valueFloat());
   userAircraft.fuelFlowPPH = kgToLbs(dataRefs->fuelFlowKgSec8.valueFloatArrSum()) * 3600.f;
 
-  userAircraft.ambientVisibilityMeter = dataRefs->ambientVisibilityM.valueFloat();
+  userAircraft.ambientVisibilityMeter = dataRefs->isXplane12() ?
+                                        atools::geo::nmToMeter(dataRefs->ambientVisibility.valueFloat()) :
+                                        dataRefs->ambientVisibility.valueFloat();
 
   // Build local time and use timezone offset from simulator
   // X-Plane does not allow to set the year

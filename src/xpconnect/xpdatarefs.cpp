@@ -50,11 +50,11 @@ void XpDataRefs::init()
   // Temperatures
   // air temperature (SAT) is also called: outside air temperature (OAT) or true air temperature
   // Lower than TAT
-  ambientTemperatureC.init(dataRefs, xp12 ? "sim/weather/aircraft/temperature_ambient_c" : "sim/weather/temperature_ambient_c");
+  ambientTemperatureC.init(dataRefs, xp12 ? "sim/weather/aircraft/temperature_ambient_deg_c" : "sim/weather/temperature_ambient_c");
 
   // Total air temperature (TAT) is also called: indicated air temperature (IAT) or ram air temperature (RAT)
   // higher than SAT
-  leTemperatureC.init(dataRefs, xp12 ? "sim/weather/aircraft/temperature_le_c" : "sim/weather/temperature_le_c");
+  leTemperatureC.init(dataRefs, xp12 ? "sim/weather/aircraft/temperature_leadingedge_deg_c" : "sim/weather/temperature_le_c");
 
   seaLevelPressurePascal.init(dataRefs, "sim/physics/earth_pressure_p");
 
@@ -85,7 +85,7 @@ void XpDataRefs::init()
   // fuelFlowGPH.init(dataRefs, ""); value calculated
 
   magVarDeg.init(dataRefs, "sim/flightmodel/position/magnetic_variation");
-  ambientVisibilityM.init(dataRefs, xp12 ? "sim/weather/aircraft/visibility_reported_m" : "sim/weather/visibility_reported_m");
+  ambientVisibility.init(dataRefs, xp12 ? "sim/weather/aircraft/visibility_reported_sm" : "sim/weather/visibility_reported_m");
   trackMagDeg.init(dataRefs, "sim/cockpit2/gauges/indicators/ground_track_mag_pilot");
   // trackTrueDeg.init(dataRefs, ""); value calculated
 
@@ -125,7 +125,7 @@ void XpDataRefs::init()
   // Misc
   numberOfEngines.init(dataRefs, "sim/aircraft/engine/acf_num_engines");
   onGround.init(dataRefs, "sim/flightmodel/failures/onground_any");
-  rainPercentage.init(dataRefs, xp12 ? "sim/weather/aircraft/rain_percent" : "sim/weather/rain_percent");
+  rainPercentage.init(dataRefs, xp12 ? "sim/weather/aircraft/precipitation_on_aircraft_ratio" : "sim/weather/rain_percent");
 
   // Size in local coordinates (meter)
   // points to the right side of the aircraft
