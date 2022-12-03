@@ -53,19 +53,30 @@ void worldToLocal(double& x, double& y, double& z, const atools::geo::Pos& pos)
 
 // ==========================================================================================
 DataRef::DataRef(DataRefPtrVector& refs, const QString& dataRefName)
-  : name(dataRefName)
 {
-  // Add to array but do not find it yet (still invalid)
-  refs.append(this);
+  init(refs, dataRefName);
 }
 
 DataRef::DataRef(const QString& dataRefName)
-  : name(dataRefName)
 {
+  init(dataRefName);
 }
 
 DataRef::DataRef()
 {
+}
+
+void DataRef::init(DataRefPtrVector& refs, const QString& dataRefName)
+{
+  name = dataRefName;
+
+  // Add to array but do not find it yet (still invalid)
+  refs.append(this);
+}
+
+void DataRef::init(const QString& dataRefName)
+{
+  name = dataRefName;
 }
 
 bool DataRef::find()

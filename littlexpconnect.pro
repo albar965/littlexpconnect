@@ -200,6 +200,7 @@ SOURCES += \
   src/xpconnect/dataref.cpp \
   src/xpconnect/sharedmemorywriter.cpp \
   src/xpconnect/xpconnect.cpp \
+  src/xpconnect/xpdatarefs.cpp \
   src/xpconnect/xplog.cpp \
   src/xpconnect/xpmenu.cpp
 
@@ -209,6 +210,7 @@ HEADERS += \
   src/xpconnect/dataref.h \
   src/xpconnect/sharedmemorywriter.h \
   src/xpconnect/xpconnect.h \
+  src/xpconnect/xpdatarefs.h \
   src/xpconnect/xplog.h \
   src/xpconnect/xpmenu.h
 

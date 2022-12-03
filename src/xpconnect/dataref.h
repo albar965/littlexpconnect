@@ -66,6 +66,10 @@ public:
   DataRef(const QString& dataRefName);
   DataRef();
 
+
+  void init(DataRefPtrVector& refs, const QString& dataRefName);
+  void init(const QString& dataRefName);
+
   void setName(const QString& dataRefName)
   {
     name = dataRefName;

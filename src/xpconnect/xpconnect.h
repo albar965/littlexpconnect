@@ -32,6 +32,7 @@ class SimConnectAircraft;
 namespace xpc {
 
 class AircraftFileLoader;
+class XpDataRefs;
 
 /*
  * Class that has full access to SimConnectData.
@@ -54,6 +55,7 @@ public:
 
 private:
   AircraftFileLoader *fileLoader;
+  XpDataRefs *dataRefs;
   bool verbose = false;
 };
 
