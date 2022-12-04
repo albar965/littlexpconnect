@@ -4,6 +4,12 @@ This text is partially Markdown, hence sometimes strange formatting.
 
 ===============================================================================
 
+# Version 1.0.32
+
+* Adapted new weather and environment datarefs to X-Plane 12 changes
+
+===============================================================================
+
 Version 1.0.31
 
 * Updated Linux build to remove unneeded dependencies to shared libraries.
