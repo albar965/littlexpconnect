@@ -20,6 +20,8 @@
 
 #include "dataref.h"
 
+#include <QVector>
+
 namespace xpc {
 
 enum XpEngineType
