@@ -159,7 +159,7 @@ void XpDataRefs::init()
   tcasNumAcf.init(dataRefs, "sim/cockpit2/tcas/indicators/tcas_num_acf");
 
   // int[64] integer 24bit (0-16777215 or 0 - 0xFFFFFF) unique ID of the airframe. This is also known as the ADS-B "hexcode".
-  // modeSId.init(dataRefs, "sim/cockpit2/tcas/targets/modeS_id");
+  tcasModeSId.init(dataRefs, "sim/cockpit2/tcas/targets/modeS_id");
 
   // int[64] integer Mode C transponder code 0000 to 7777. This is not really an integer, this is an octal number.
   tcasModeCcode.init(dataRefs, "sim/cockpit2/tcas/targets/modeC_code");
@@ -181,6 +181,15 @@ void XpDataRefs::init()
 
   // float[64] degrees true heading orientation.
   tcasPsi.init(dataRefs, "sim/cockpit2/tcas/targets/position/psi");
+
+  // int[64]	boolean	ground/flight logic. Writeable only when override_TCAS is set.
+  tcasWeightOnWheels.init(dataRefs, "sim/cockpit2/tcas/targets/position/weight_on_wheels");
+
+  // sim/cockpit2/tcas/targets/icao_type	byte[512]	y	string	7 character ICAO code, terminated by 0 byte. C172, B738, etc...
+  // see https://www.icao.int/publications/DOC8643/Pages/Search.aspx
+  tcasIcaoType.init(dataRefs, "sim/cockpit2/tcas/targets/icao_type");
+
+  // sim/cockpit2/tcas/targets/wake/wing_span_m	float[64]	y	meter	wing span of the aircraft creating wake turbulence
 
   // ============================================================
   // Old AI/multiplayer interface

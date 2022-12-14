@@ -66,7 +66,6 @@ public:
   DataRef(const QString& dataRefName);
   DataRef();
 
-
   void init(DataRefPtrVector& refs, const QString& dataRefName);
   void init(const QString& dataRefName);
 
@@ -114,6 +113,12 @@ public:
     return XPLMGetDatai(dataRef);
   }
 
+  /* get bool value or false if invalid */
+  bool valueBool() const
+  {
+    return valueInt() > 0;
+  }
+
   /* get string from an UTF-8 byte array value or empty string if invalid */
   QString valueString() const
   {
@@ -141,6 +146,11 @@ public:
   int valueIntArr(int index) const;
   float valueFloatArr(int index) const;
   int valueByteArr(int index) const;
+
+  bool valueBoolArr(int index) const
+  {
+    return valueIntArr(index) > 0;
+  }
 
   /* Get the type of the dataref after calling find */
   XPLMDataTypeID getDataRefType() const

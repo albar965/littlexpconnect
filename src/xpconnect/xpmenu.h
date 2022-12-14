@@ -50,6 +50,12 @@ public:
     return fetchAi;
   }
 
+  /* Load acf files */
+  bool isFetchAircraftInfo() const
+  {
+    return fetchAiAircraftInfo;
+  }
+
   /* Restore values from settings. Call before addMenu() */
   void restoreState();
 
@@ -63,7 +69,7 @@ private:
   static void menuHandlerInternal(void *, void *itemRefParam);
 
   int fetchRateMs = 200;
-  bool fetchAi = true;
+  bool fetchAi = true, fetchAiAircraftInfo = true;
 
   XpMenusPrivate *p;
   QByteArray menuName;

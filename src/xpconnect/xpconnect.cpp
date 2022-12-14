@@ -49,7 +49,7 @@ XpConnect::~XpConnect()
   delete dataRefs;
 }
 
-bool XpConnect::fillSimConnectData(atools::fs::sc::SimConnectData& data, bool fetchAi)
+bool XpConnect::fillSimConnectData(atools::fs::sc::SimConnectData& data, bool fetchAi, bool fetchAiAircraftInfo)
 {
   atools::fs::sc::SimConnectUserAircraft& userAircraft = data.userAircraft;
 
@@ -148,19 +148,12 @@ bool XpConnect::fillSimConnectData(atools::fs::sc::SimConnectData& data, bool fe
 
   // Set misc flags
   userAircraft.flags = atools::fs::sc::IS_USER | simFlags;
-  if(dataRefs->onGround.valueInt() > 0)
-    userAircraft.flags |= atools::fs::sc::ON_GROUND;
-
-  if(dataRefs->rainPercentage.valueFloat() > 0.1f)
-    userAircraft.flags |= atools::fs::sc::IN_RAIN;
+  userAircraft.flags.setFlag(atools::fs::sc::ON_GROUND, dataRefs->onGround.valueBool());
+  userAircraft.flags.setFlag(atools::fs::sc::IN_RAIN, dataRefs->rainPercentage.valueFloat() > 0.1f);
+  userAircraft.flags.setFlag(atools::fs::sc::SIM_PAUSED, dataRefs->simPaused.valueBool());
+  userAircraft.flags.setFlag(atools::fs::sc::SIM_REPLAY, dataRefs->simReplay.valueBool());
   // IN_CLOUD = 0x0002, - not available
   // IN_SNOW = 0x0008,  - not available
-
-  if(dataRefs->simPaused.valueInt() > 0)
-    userAircraft.flags |= atools::fs::sc::SIM_PAUSED;
-
-  if(dataRefs->simReplay.valueInt() > 0)
-    userAircraft.flags |= atools::fs::sc::SIM_REPLAY;
 
   // Category is not available - Disable display of category on client
   userAircraft.category = atools::fs::sc::UNKNOWN;
@@ -305,11 +298,15 @@ bool XpConnect::fillSimConnectData(atools::fs::sc::SimConnectData& data, bool fe
     // Count includes user aircraft
     int numTcasAircraft = dataRefs->tcasNumAcf.valueInt();
     bool hasTcasScheme = dataRefs->tcasModeCcode.isValid();
+    QByteArray icaoTypeArr;
+    icaoTypeArr.resize(dataRefs->tcasIcaoType.sizeByteArr());
 
     // Get AI or multiplayer aircraft ===============================
     if(hasTcasScheme && numTcasAircraft > 0)
     {
-      // Use new TCAS scheme - index 0 is user ======================
+      dataRefs->tcasIcaoType.valueByteArr(icaoTypeArr);
+
+      // Use new TCAS scheme - index 0 is user - TCAS arrays also contain user ======================
       for(int i = 1; i < numTcasAircraft; i++)
       {
         Pos pos(dataRefs->tcasLon.valueFloatArr(i), dataRefs->tcasLat.valueFloatArr(i), meterToFeet(dataRefs->tcasEle.valueFloatArr(i)));
@@ -320,6 +317,9 @@ bool XpConnect::fillSimConnectData(atools::fs::sc::SimConnectData& data, bool fe
           aircraft.flags = simFlags;
           aircraft.position = pos;
           aircraft.headingTrueDeg = dataRefs->tcasPsi.valueFloatArr(i);
+          aircraft.flags.setFlag(atools::fs::sc::ON_GROUND, dataRefs->tcasWeightOnWheels.valueBoolArr(i));
+
+          aircraft.airplaneModel = QString(icaoTypeArr.mid(i * 8, 8));
 
           // Mark fields as unavailable
           aircraft.headingMagDeg = atools::fs::sc::SC_INVALID_FLOAT;
@@ -338,12 +338,13 @@ bool XpConnect::fillSimConnectData(atools::fs::sc::SimConnectData& data, bool fe
           aircraft.transponderCode = atools::fs::util::decodeTransponderCode(dataRefs->tcasModeCcode.valueIntArr(i));
 
           aircraft.objectId = objId;
-          // aircraft.objectId = static_cast<quint32>(dataRefs->tcas::modeSId.valueIntArr(i));
+          // aircraft.objectId = static_cast<quint32>(dataRefs->tcasModeSId.valueIntArr(i)) << 4; // Shift to have unique ids with ships
 
           aircraft.category = atools::fs::sc::AIRPLANE;
           aircraft.engineType = atools::fs::sc::UNSUPPORTED;
 
-          fileLoader->loadAircraftFile(aircraft, static_cast<quint32>(i + 1));
+          if(fetchAiAircraftInfo)
+            fileLoader->loadAircraftFile(aircraft, static_cast<quint32>(i));
 
           data.aiAircraft.append(aircraft);
 
@@ -353,13 +354,13 @@ bool XpConnect::fillSimConnectData(atools::fs::sc::SimConnectData& data, bool fe
     }
     else
     {
-      // Use old multplayer scheme ======================
-
+      // Use old multplayer scheme ============================================
       // Includes user aircraft - can return more than 20 despite providing only datarefs 1-19 (minus user)
       int numAi = std::min(getNumActiveAircraft(), 20) - 1;
 
       for(int i = 0; i < numAi; i++)
       {
+        // Datarefs do not contain user
         const MultiplayerDataRefs& ref = dataRefs->multiplayerDataRefs.at(i);
 
         Pos pos(ref.lonPositionDegAi.valueFloat(), ref.latPositionDegAi.valueFloat(),
@@ -386,7 +387,8 @@ bool XpConnect::fillSimConnectData(atools::fs::sc::SimConnectData& data, bool fe
           aircraft.category = atools::fs::sc::AIRPLANE;
           aircraft.engineType = atools::fs::sc::UNSUPPORTED;
 
-          fileLoader->loadAircraftFile(aircraft, static_cast<quint32>(i + 1));
+          if(fetchAiAircraftInfo)
+            fileLoader->loadAircraftFile(aircraft, static_cast<quint32>(i + 1));
 
           data.aiAircraft.append(aircraft);
 

@@ -41,7 +41,7 @@ public:
 
   /* Fetch data from the datarefs (main thread context) and pass it over to the
    * shared memory writer (context of "flightLoopCallback()") */
-  void fetchAndWriteData(bool fetchAi);
+  void fetchAndWriteData(bool fetchAi, bool fetchAiAircraftInfo);
 
   /* Send termination signal and wait for terminated */
   void terminateThread();

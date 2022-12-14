@@ -30,11 +30,13 @@ namespace lxc {
 /* key names for atools::settings */
 static const QLatin1String SETTINGS_OPTIONS_FETCH_RATE_MS("Options/FetchRateMs");
 static const QLatin1String SETTINGS_OPTIONS_FETCH_AI_AIRCRAFT("Options/FetchAiAircraft");
+static const QLatin1String SETTINGS_OPTIONS_FETCH_AI_AIRCRAFT_INFO("Options/FetchAiAircraftInfo");
 }
 
 enum MenuId
 {
   FETCH_AI = 0,
+  FETCH_AI_INFO = 1,
   FETCH_RATE_50 = 50,
   FETCH_RATE_100 = 100,
   FETCH_RATE_150 = 150,
@@ -43,7 +45,7 @@ enum MenuId
   FETCH_RATE_500 = 500
 };
 
-const static int NUM_MENU_IDS = 7;
+const static int NUM_MENU_IDS = 8;
 
 // Pointer to this is passed to the menu handler by a called menu item
 struct Item
@@ -75,6 +77,7 @@ void XpMenu::restoreState()
 {
   atools::settings::Settings& settings = atools::settings::Settings::instance();
   fetchAi = settings.getAndStoreValue(lxc::SETTINGS_OPTIONS_FETCH_AI_AIRCRAFT, true).toBool();
+  fetchAiAircraftInfo = settings.getAndStoreValue(lxc::SETTINGS_OPTIONS_FETCH_AI_AIRCRAFT_INFO, true).toBool();
   fetchRateMs = std::max(settings.getAndStoreValue(lxc::SETTINGS_OPTIONS_FETCH_RATE_MS, 200).toInt(), 50);
 }
 
@@ -82,6 +85,7 @@ void XpMenu::saveState()
 {
   atools::settings::Settings& settings = atools::settings::Settings::instance();
   settings.setValue(lxc::SETTINGS_OPTIONS_FETCH_AI_AIRCRAFT, fetchAi);
+  settings.setValue(lxc::SETTINGS_OPTIONS_FETCH_AI_AIRCRAFT_INFO, fetchAiAircraftInfo);
   settings.setValue(lxc::SETTINGS_OPTIONS_FETCH_RATE_MS, fetchRateMs);
   atools::settings::Settings::syncSettings();
 }
@@ -102,12 +106,20 @@ void XpMenu::menuHandler(int menuId, int itemIndex)
     XPLMCheckMenuItem(p->xpMenuId, itemIndex, check == xplm_Menu_Unchecked ? xplm_Menu_Checked : xplm_Menu_Unchecked);
     fetchAi = check == xplm_Menu_Unchecked;
   }
+  else if(menuId == FETCH_AI_INFO)
+  {
+    // Toggle AI info menu item
+    XPLMMenuCheck check;
+    XPLMCheckMenuItemState(p->xpMenuId, itemIndex, &check);
+    XPLMCheckMenuItem(p->xpMenuId, itemIndex, check == xplm_Menu_Unchecked ? xplm_Menu_Checked : xplm_Menu_Unchecked);
+    fetchAiAircraftInfo = check == xplm_Menu_Unchecked;
+  }
   else if(menuId >= FETCH_RATE_50 && menuId <= FETCH_RATE_500)
   {
     // First deselect all rate items
     for(const Item& itemRef : p->items)
     {
-      if(itemRef.menuId != FETCH_AI)
+      if(itemRef.menuId != FETCH_AI && itemRef.menuId != FETCH_AI_INFO)
         XPLMCheckMenuItem(p->xpMenuId, itemRef.xpItemIndex, xplm_Menu_Unchecked);
     }
 
@@ -115,7 +127,7 @@ void XpMenu::menuHandler(int menuId, int itemIndex)
     XPLMCheckMenuItem(p->xpMenuId, itemIndex, xplm_Menu_Checked);
     fetchRateMs = menuId;
   }
-  qInfo() << "fetchAi" << fetchAi << "fetchRate" << fetchRateMs;
+  qInfo() << "fetchAi" << fetchAi << "fetchAircraftInfo" << fetchAiAircraftInfo << "fetchRate" << fetchRateMs;
 }
 
 void XpMenu::addMenu(const QString& menuNameParam)
@@ -131,6 +143,11 @@ void XpMenu::addMenu(const QString& menuNameParam)
   int menuIndex = XPLMAppendMenuItem(p->xpMenuId, "Fetch AI", static_cast<void *>(&p->items[idx]), 1);
   XPLMCheckMenuItem(p->xpMenuId, menuIndex, fetchAi ? xplm_Menu_Checked : xplm_Menu_Unchecked);
   p->items[idx] = {FETCH_AI, menuIndex, this};
+  idx++;
+
+  menuIndex = XPLMAppendMenuItem(p->xpMenuId, "Load AI Aircraft Information", static_cast<void *>(&p->items[idx]), 1);
+  XPLMCheckMenuItem(p->xpMenuId, menuIndex, fetchAiAircraftInfo ? xplm_Menu_Checked : xplm_Menu_Unchecked);
+  p->items[idx] = {FETCH_AI_INFO, menuIndex, this};
   idx++;
 
   XPLMAppendMenuSeparator(p->xpMenuId);

@@ -193,7 +193,7 @@ float flightLoopCallback(float inElapsedSinceLastCall, float inElapsedTimeSinceL
   Q_UNUSED(inRefcon)
 
   // Copy data from datarefs and pass it over to the thread for writing into the shared memory
-  thread->fetchAndWriteData(menu->isFetchAi());
+  thread->fetchAndWriteData(menu->isFetchAi(), menu->isFetchAircraftInfo());
 
   // Return float seconds until next call
   return static_cast<float>(menu->getFetchRateMs()) / 1000.f;

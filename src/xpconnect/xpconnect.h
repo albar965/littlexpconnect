@@ -48,7 +48,7 @@ public:
 
   /* Fill SimConnectData from X-Plane datarefs. Returns true if data was found.
    * Runs in XP main loop from "flightLoopCallback()". */
-  bool fillSimConnectData(atools::fs::sc::SimConnectData& data, bool fetchAi);
+  bool fillSimConnectData(atools::fs::sc::SimConnectData& data, bool fetchAi, bool fetchAiAircraftInfo);
 
   /* Initialize the datarefs and print a warning if something is wrong. */
   void initDataRefs();

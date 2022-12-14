@@ -66,7 +66,7 @@ private:
                                          const QStringList& keys, bool verboseLogging);
 
   /* Fill and decode keys into aircraft */
-  static void fillAircraftValues(atools::fs::sc::SimConnectAircraft& aircraft, const AircraftEntryType *keyValuePairs);
+  void fillAircraftValues(atools::fs::sc::SimConnectAircraft& aircraft, const AircraftEntryType *keyValuePairs);
 
   /* Started by QtConcurrent::run() in a separate thread and accesses the cache. Runs in thread context. */
   void loadKeysRunner(QString aircraftModelFilepath, QStringList keys);
@@ -77,6 +77,10 @@ private:
 
   /* List of acf files currently loading. Key is lower case filepath. */
   QSet<QString> aircraftFileKeysLoading;
+
+  /* List of objIds where file is empty or not found */
+  QSet<quint32> aircraftIdsNotFound;
+
   QMutex *aircraftFileKeysLoadingMutex;
 
   QThreadPool *threadPool;

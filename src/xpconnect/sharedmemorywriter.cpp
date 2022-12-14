@@ -37,14 +37,14 @@ SharedMemoryWriter::~SharedMemoryWriter()
   delete xpConnect;
 }
 
-void SharedMemoryWriter::fetchAndWriteData(bool fetchAi)
+void SharedMemoryWriter::fetchAndWriteData(bool fetchAi, bool fetchAiAircraftInfo)
 {
   bool foundData = false;
 
   // Use "tryLock" to avoid blocking when other thread is already accessing - rather allow to drop updates than blocking
   if(dataMutex.tryLock(0))
   {
-    foundData = xpConnect->fillSimConnectData(data, fetchAi);
+    foundData = xpConnect->fillSimConnectData(data, fetchAi, fetchAiAircraftInfo);
 
     if(!foundData)
       data = atools::fs::sc::EMPTY_SIMCONNECT_DATA;

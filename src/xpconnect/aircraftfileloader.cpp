@@ -81,44 +81,50 @@ void AircraftFileLoader::loadKeysRunner(QString aircraftModelFilepath, QStringLi
 
 void AircraftFileLoader::loadAircraftFile(atools::fs::sc::SimConnectAircraft& aircraft, quint32 objId)
 {
+  if(aircraftIdsNotFound.contains(objId))
+    // File does not exist for this cached id
+    return;
+
   QString aircraftModelFilepath = getAircraftModelFilepath(static_cast<int>(objId));
   QString aircraftModelKey = aircraftModelFilepath.toLower();
-
   AircraftEntryType keyValuePairs;
   bool found = false;
 
+  if(!aircraftModelKey.isEmpty())
   {
-    // Look for entry in cache
+    // Key is ok - look for entry in cache
     QMutexLocker locker(aircraftFileValuesMutex);
     AircraftEntryType *keyValuePairsPtr = aircraftFileCache->object(aircraftModelKey);
     if(keyValuePairsPtr != nullptr)
     {
-      // Found - create a copy
+      // Found - create a copy and fill later after leaving lock
       keyValuePairs = *keyValuePairsPtr;
       found = true;
     }
   }
 
   if(found)
-    // Use attributes from the acf file ======================================
+    // Use cached and copied attributes from the acf file ======================================
     // Cessna_172SP_seaplane.acf:P acf/_descrip Cessna 172 SP Skyhawk - 180HP
     // Cessna_172SP_seaplane.acf:P acf/_name Cessna Skyhawk (Floats)
     // L5_Sentinel.acf:P acf/_descrip Stinson L5 Sentinel - L5G with uprated engine to 235hp
     // L5_Sentinel.acf:P acf/_name Stinson L5 Sentinel
     // MD80.acf:P acf/_descrip MAD DOG
-    // MD80.acf:P acf/_name MD-82  aircraft.airplaneTitle = keyValuePairs->value("acf/_name"); // Cessna 172 SP Skyhawk - 180HP
+    // MD80.acf:P acf/_name MD-82
     fillAircraftValues(aircraft, &keyValuePairs);
   else
   {
-    // Not found
-    bool currentlyLoading = false;
+    // Not in cache ... ============
+    // Check if file is valid and exists - otherwise add objId to negative cache
+    if(aircraftModelFilepath.isEmpty() || !QFile::exists(aircraftModelFilepath))
+      aircraftIdsNotFound.insert(objId);
+    else
     {
+      // Not found in cache
       QMutexLocker locker(aircraftFileKeysLoadingMutex);
 
       // Is this already loading in background thread?
-      currentlyLoading = aircraftFileKeysLoading.contains(aircraftModelKey);
-
-      if(!currentlyLoading)
+      if(!aircraftFileKeysLoading.contains(aircraftModelKey))
       {
         // Remember key which is loading now - thread will remove this key on completion
         aircraftFileKeysLoading.insert(aircraftModelKey);
@@ -182,15 +188,22 @@ void AircraftFileLoader::readValuesFromAircraftFile(AircraftEntryType& keyValueP
     qWarning() << Q_FUNC_INFO << "Cannot open file" << filepath << "error" << file.errorString();
 }
 
-void AircraftFileLoader::fillAircraftValues(atools::fs::sc::SimConnectAircraft& aircraft,
-                                            const AircraftEntryType *keyValuePairs)
+void AircraftFileLoader::fillAircraftValues(atools::fs::sc::SimConnectAircraft& aircraft, const AircraftEntryType *keyValuePairs)
 {
-  aircraft.airplaneTitle = keyValuePairs->value("acf/_name");
+  if(aircraft.airplaneTitle.isEmpty())
+    aircraft.airplaneTitle = keyValuePairs->value("acf/_name");
 
-  aircraft.airplaneModel = keyValuePairs->value("acf/_ICAO"); // C172
+  QString model = keyValuePairs->value("acf/_ICAO");
+  if(aircraft.airplaneModel.isEmpty())
+    aircraft.airplaneModel = model; // C172
+  else if(!model.isEmpty() && aircraft.airplaneModel != model && verbose)
+    qWarning() << Q_FUNC_INFO << "Aircraft type mismatch" << aircraft.airplaneModel << model;
 
+  QString reg = keyValuePairs->value("acf/_tailnum");
   if(aircraft.airplaneReg.isEmpty())
-    aircraft.airplaneReg = keyValuePairs->value("acf/_tailnum"); // Registration N172SP
+    aircraft.airplaneReg = reg; // Registration N172SP
+  else if(!reg.isEmpty() && aircraft.airplaneReg != reg && verbose)
+    qWarning() << Q_FUNC_INFO << "Aircraft reg mismatch" << aircraft.airplaneReg << reg;
 
   // Engine type - use first engine only ======================
   // PISTON = 0, JET = 1, NO_ENGINE = 2, HELO_TURBINE = 3, UNSUPPORTED = 4, TURBOPROP = 5

@@ -125,6 +125,10 @@ contains the following menu items:
 - "Fetch AI": Enable or disable the fetching of AI aircraft and
   ships (carrier and frigate). Disable AI fetching if you see
   stutters or performance degradation within X-Plane when using the plugin.
+- "Load AI Aircraft Information": Xpconnect tries to load additional information
+  from related ".acf" files. This is done in background and does not cause stutters
+  or hesitations. You can disable this function if you see problems. Only limited
+  information is available for AI and multiplayer if disabled.
 - "Fetch Rate 50 ms" to "Fetch Rate 500 ms": Xpconnect will get all aircraft
   parameters at this rate. Lower values result in smoother aircraft movement but
   may induce stutters or decrease performance in X-Plane.
