@@ -4,6 +4,15 @@ This text is partially Markdown, hence sometimes strange formatting.
 
 ===============================================================================
 
+# Version 1.0.33
+
+* Added menu item `Load AI Aircraft Information` which allows to disable the background loading of
+  `.acf` files.
+* Fixed an issue where ICAO type and other values of AI and multiplayer aircraft were messed up.
+* Now detecting on-ground status correctly for AI or multiplayer aircraft.
+
+===============================================================================
+
 # Version 1.0.32
 
 * Adapted new weather and environment datarefs to X-Plane 12 changes
