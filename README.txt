@@ -133,18 +133,18 @@ contains the following menu items:
   parameters at this rate. Lower values result in smoother aircraft movement but
   may induce stutters or decrease performance in X-Plane.
 
-The settings can also be changed using the configuration file
-"little_xpconnect.ini".
+The changes are applied immediately and are saved on exit.
+
+Note that the settings are shared between all plugin installations on the same computer.
+
+The settings can also be changed using the configuration file "little_xpconnect.ini".
 
 [Options]
-FetchAiAircraft=true  : Also get AI aircraft. You can disable this if
-                        you think the plugin causes performance problems.
-FetchRateMs=200       : Data will be fetched from X-Plane every 200
-                        milliseconds.
-                        Lower this value to get a more fluid movement of the
-                        aircraft symbol on the map. Increase this value if you
-                        think the plugin causes performance problems.
-FetchRate=200         : Old obsolete value. Will be deleted on start.
+FetchAiAircraft=true     : Same as "Fetch AI" in plugin menu.
+FetchAiAircraftInfo=true : Same as "Load AI Aircraft Information" in plugin menu.
+FetchRateMs=200          : Data will be fetched from X-Plane every 200
+                           milliseconds. Same as "Fetch Rate" in plugin menu.
+FetchRate=200            : Old obsolete value. Will be deleted on start.
 
 ------------------------------------------------------------------------------
 -- LICENSE -------------------------------------------------------------------
