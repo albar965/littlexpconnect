@@ -4,6 +4,13 @@ This text is partially Markdown, hence sometimes strange formatting.
 
 ===============================================================================
 
+# Version 1.0.34
+
+Fixed wrong date and timezone calculation which resulted in wrong endurance and
+turn anticipation display in Little Navmap.
+
+===============================================================================
+
 # Version 1.0.33
 
 * Added menu item `Load AI Aircraft Information` which allows to disable the background loading of
