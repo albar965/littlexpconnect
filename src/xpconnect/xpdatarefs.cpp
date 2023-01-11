@@ -90,7 +90,7 @@ void XpDataRefs::init()
   // trackTrueDeg.init(dataRefs, ""); value calculated
 
   // Date and time
-  localDateDays.init(dataRefs, "sim/time/local_date_days");
+  localDateDays.init(dataRefs, "sim/time/local_date_days"); // 1. Jan = 0
   localTimeSec.init(dataRefs, "sim/time/local_time_sec");
   zuluTimeSec.init(dataRefs, "sim/time/zulu_time_sec");
 
