@@ -38,6 +38,11 @@ Please refer to the Little Navmap installation instructions for a more detailed 
 https://www.littlenavmap.org/manuals/littlenavmap/release/latest/en/INSTALLATION.html
 https://www.littlenavmap.org/manuals/littlenavmap/release/latest/en/XPCONNECT.html
 
+Apple macOS users: Keep in mind that you have to clear the quarantine flag for *Little Xpconnect*
+on update or installation. See further below or
+https://www.littlenavmap.org/manuals/littlenavmap/release/latest/en/XPCONNECT.html#clearing-the-quarantine-flag-on-macos
+for more information.
+
 ------------------------------------------------------------------------------
 
 Download the correct archive for your operating system. The program is bundled
