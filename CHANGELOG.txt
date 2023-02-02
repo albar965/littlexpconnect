@@ -4,6 +4,13 @@ This text is partially Markdown, hence sometimes strange formatting.
 
 ===============================================================================
 
+# Version 1.0.35
+
+Added change from @maxhille (https://github.com/maxhille) to fix X-Plane 12
+color issues on Linux after installing plugin. #983
+
+===============================================================================
+
 # Version 1.0.34
 
 Fixed wrong date and timezone calculation which resulted in wrong endurance and
