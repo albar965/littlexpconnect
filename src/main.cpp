@@ -87,6 +87,8 @@ PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc)
   // Create application object which is needed for the server thread event queue
   int argc = 0;
   app = new atools::gui::ConsoleApplication(argc, nullptr);
+  // See http://stackoverflow.com/questions/25661295/why-does-qcoreapplication-call-setlocalelc-all-by-default-on-unix-linux
+  setlocale(LC_NUMERIC, "C");
   QCoreApplication::setApplicationName("Little Xpconnect");
   QCoreApplication::setOrganizationName("ABarthel");
   QCoreApplication::setOrganizationDomain("littlenavmap.org");
