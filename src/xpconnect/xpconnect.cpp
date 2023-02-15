@@ -323,12 +323,12 @@ bool XpConnect::fillSimConnectData(atools::fs::sc::SimConnectData& data, bool fe
 
           // Mark fields as unavailable
           aircraft.headingMagDeg = atools::fs::sc::SC_INVALID_FLOAT;
-          aircraft.groundSpeedKts = atools::fs::sc::SC_INVALID_FLOAT;
+          aircraft.trueAirspeedKts = atools::fs::sc::SC_INVALID_FLOAT;
           aircraft.indicatedAltitudeFt = atools::fs::sc::SC_INVALID_FLOAT;
           aircraft.indicatedSpeedKts = atools::fs::sc::SC_INVALID_FLOAT;
 
           // Ignore the vertical component
-          aircraft.trueAirspeedKts = atools::geo::meterPerSecToKnots(dataRefs->tcasVMsc.valueFloatArr(i));
+          aircraft.groundSpeedKts = atools::geo::meterPerSecToKnots(dataRefs->tcasVMsc.valueFloatArr(i));
 
           aircraft.machSpeed = atools::fs::sc::SC_INVALID_FLOAT;
 
