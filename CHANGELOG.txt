@@ -4,6 +4,12 @@ This text is partially Markdown, hence sometimes strange formatting.
 
 ===============================================================================
 
+# Version 1.0.36
+
+* Fixed TAS swapped with GS for AI aircraft.
+
+===============================================================================
+
 # Version 1.0.35
 
 Added fix from Max Hille (https://github.com/maxhille) to avoid X-Plane 12 issues
