@@ -87,7 +87,7 @@ public:
 
   /* TCAS interface datarefs - all arrays of 64 elements */
   DataRef tcasNumAcf, tcasModeCcode, tcasLat, tcasLon, tcasEle, tcasVerticalSpeed, tcasVMsc, tcasPsi, tcasWeightOnWheels, tcasIcaoType,
-          tcasModeSId;
+          tcasFlightId, tcasModeSId;
 
   /* Multiplayer aircraft from old (not TCAS) interface */
   QVector<MultiplayerDataRefs> multiplayerDataRefs;

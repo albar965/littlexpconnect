@@ -4,6 +4,17 @@ This text is partially Markdown, hence sometimes strange formatting.
 
 ===============================================================================
 
+# Version 1.0.37
+
+* Added missing fetching of aircraft registrations for AI and online aircraft.
+
+===============================================================================
+
+# Version 1.0.36
+
+* Fixed TAS swapped with GS for AI aircraft.
+===============================================================================
+
 # Version 1.0.36
 
 * Fixed TAS swapped with GS for AI aircraft.

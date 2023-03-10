@@ -189,6 +189,9 @@ void XpDataRefs::init()
   // see https://www.icao.int/publications/DOC8643/Pages/Search.aspx
   tcasIcaoType.init(dataRefs, "sim/cockpit2/tcas/targets/icao_type");
 
+  // sim/cockpit2/tcas/targets/flight_id	byte[512]	y	string	7 character Flight ID, terminated by 0 byte. ICAO flightplan item 7.
+  tcasFlightId.init(dataRefs, "sim/cockpit2/tcas/targets/flight_id");
+
   // sim/cockpit2/tcas/targets/wake/wing_span_m	float[64]	y	meter	wing span of the aircraft creating wake turbulence
 
   // ============================================================

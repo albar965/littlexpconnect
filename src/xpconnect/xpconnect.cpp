@@ -298,13 +298,15 @@ bool XpConnect::fillSimConnectData(atools::fs::sc::SimConnectData& data, bool fe
     // Count includes user aircraft
     int numTcasAircraft = dataRefs->tcasNumAcf.valueInt();
     bool hasTcasScheme = dataRefs->tcasModeCcode.isValid();
-    QByteArray icaoTypeArr;
+    QByteArray icaoTypeArr, flightIdArr;
     icaoTypeArr.resize(dataRefs->tcasIcaoType.sizeByteArr());
+    flightIdArr.resize(dataRefs->tcasFlightId.sizeByteArr());
 
     // Get AI or multiplayer aircraft ===============================
     if(hasTcasScheme && numTcasAircraft > 0)
     {
       dataRefs->tcasIcaoType.valueByteArr(icaoTypeArr);
+      dataRefs->tcasFlightId.valueByteArr(flightIdArr);
 
       // Use new TCAS scheme - index 0 is user - TCAS arrays also contain user ======================
       for(int i = 1; i < numTcasAircraft; i++)
@@ -320,6 +322,7 @@ bool XpConnect::fillSimConnectData(atools::fs::sc::SimConnectData& data, bool fe
           aircraft.flags.setFlag(atools::fs::sc::ON_GROUND, dataRefs->tcasWeightOnWheels.valueBoolArr(i));
 
           aircraft.airplaneModel = QString(icaoTypeArr.mid(i * 8, 8));
+          aircraft.airplaneReg = QString(flightIdArr.mid(i * 8, 8));
 
           // Mark fields as unavailable
           aircraft.headingMagDeg = atools::fs::sc::SC_INVALID_FLOAT;
