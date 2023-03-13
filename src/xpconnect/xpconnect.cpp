@@ -366,8 +366,7 @@ bool XpConnect::fillSimConnectData(atools::fs::sc::SimConnectData& data, bool fe
         // Datarefs do not contain user
         const MultiplayerDataRefs& ref = dataRefs->multiplayerDataRefs.at(i);
 
-        Pos pos(ref.lonPositionDegAi.valueFloat(), ref.latPositionDegAi.valueFloat(),
-                meterToFeet(ref.actualAltitudeMeterAi.valueFloat()));
+        Pos pos(ref.lonPositionDegAi.valueFloat(), ref.latPositionDegAi.valueFloat(), meterToFeet(ref.actualAltitudeMeterAi.valueFloat()));
 
         if(pos.isValid() && !pos.isNull())
         {
@@ -376,6 +375,7 @@ bool XpConnect::fillSimConnectData(atools::fs::sc::SimConnectData& data, bool fe
           aircraft.flags = simFlags;
           aircraft.position = pos;
           aircraft.headingTrueDeg = ref.headingTrueDegAi.valueFloat();
+          aircraft.airplaneReg = ref.tailnum.valueString();
 
           // Mark fields as unavailable
           aircraft.headingMagDeg = atools::fs::sc::SC_INVALID_FLOAT;

@@ -1,5 +1,5 @@
 /*****************************************************************************
-* Copyright 2015-2022 Alexander Barthel alex@littlenavmap.org
+* Copyright 2015-2023 Alexander Barthel alex@littlenavmap.org
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -22,10 +22,11 @@ namespace xpc {
 void XpDataRefs::init()
 {
   // AI values - will be updated with number
-  const static QLatin1String HEADING_DEG_TRUE_AI("sim/multiplayer/position/plane%1_psi");
-  const static QLatin1String LAT_POSITION_DEG_AI("sim/multiplayer/position/plane%1_lat");
-  const static QLatin1String LON_POSITION_DEG_AI("sim/multiplayer/position/plane%1_lon");
-  const static QLatin1String ACTUAL_ALTITUDE_METER_AI("sim/multiplayer/position/plane%1_el");
+  const static QLatin1String MULTIPLAYER_HEADING_DEG_TRUE_AI("sim/multiplayer/position/plane%1_psi");
+  const static QLatin1String MULTIPLAYER_LAT_POSITION_DEG_AI("sim/multiplayer/position/plane%1_lat");
+  const static QLatin1String MULTIPLAYER_LON_POSITION_DEG_AI("sim/multiplayer/position/plane%1_lon");
+  const static QLatin1String MULTIPLAYER_ACTUAL_ALTITUDE_METER_AI("sim/multiplayer/position/plane%1_el");
+  const static QLatin1String MULTIPLAYER_TAILNUM("sim/multiplayer/position/plane%1_tailnum"); // Not standard
 
   // This is the internal build number - it is a unique integer that always increases and is unique with each beta.
   // For example, 10.51b5 might be 105105.
@@ -200,10 +201,11 @@ void XpDataRefs::init()
   for(int i = 1; i < 20; i++)
   {
     MultiplayerDataRefs refs;
-    refs.headingTrueDegAi.setName(QString(HEADING_DEG_TRUE_AI).arg(i));
-    refs.latPositionDegAi.setName(QString(LAT_POSITION_DEG_AI).arg(i));
-    refs.lonPositionDegAi.setName(QString(LON_POSITION_DEG_AI).arg(i));
-    refs.actualAltitudeMeterAi.setName(QString(ACTUAL_ALTITUDE_METER_AI).arg(i));
+    refs.headingTrueDegAi.setName(QString(MULTIPLAYER_HEADING_DEG_TRUE_AI).arg(i));
+    refs.latPositionDegAi.setName(QString(MULTIPLAYER_LAT_POSITION_DEG_AI).arg(i));
+    refs.lonPositionDegAi.setName(QString(MULTIPLAYER_LON_POSITION_DEG_AI).arg(i));
+    refs.actualAltitudeMeterAi.setName(QString(MULTIPLAYER_ACTUAL_ALTITUDE_METER_AI).arg(i));
+    refs.tailnum.setName(QString(MULTIPLAYER_TAILNUM).arg(i));
 
     // Add to the list
     multiplayerDataRefs.append(refs);
@@ -214,6 +216,7 @@ void XpDataRefs::init()
     r.latPositionDegAi.find();
     r.lonPositionDegAi.find();
     r.actualAltitudeMeterAi.find();
+    r.tailnum.find(false /* warnNotFound */);
   }
 
   // Find remaining datarefs of user aircraft
