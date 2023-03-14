@@ -303,7 +303,8 @@ bool XpConnect::fillSimConnectData(atools::fs::sc::SimConnectData& data, bool fe
     flightIdArr.resize(dataRefs->tcasFlightId.sizeByteArr());
 
     // Get AI or multiplayer aircraft ===============================
-    if(hasTcasScheme && numTcasAircraft > 0)
+    // Use TCAS scheme if there is at least one AI aircraft - ignore user at 0
+    if(hasTcasScheme && numTcasAircraft > 1)
     {
       dataRefs->tcasIcaoType.valueByteArr(icaoTypeArr);
       dataRefs->tcasFlightId.valueByteArr(flightIdArr);
@@ -352,9 +353,9 @@ bool XpConnect::fillSimConnectData(atools::fs::sc::SimConnectData& data, bool fe
           data.aiAircraft.append(aircraft);
 
           objId++;
-        }
-      }
-    }
+        } // if(pos.isValid() && !pos.isNull())
+      } // for(int i = 1; i < numTcasAircraft; i++)
+    } // if(hasTcasScheme && numTcasAircraft > 1)
     else
     {
       // Use old multplayer scheme ============================================
@@ -396,9 +397,9 @@ bool XpConnect::fillSimConnectData(atools::fs::sc::SimConnectData& data, bool fe
           data.aiAircraft.append(aircraft);
 
           objId++;
-        }
+        } // if(pos.isValid() && !pos.isNull())
       } // for(int i = 0; i < numAi; i++)
-    } // if(numTcasAircraft > 0) ... else
+    } // if(numTcasAircraft > 0) ... else ...
   } // if(fetchAi)
 
   return true;
