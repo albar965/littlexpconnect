@@ -50,6 +50,13 @@ struct MultiplayerDataRefs
   DataRef lonPositionDegAi;
   DataRef actualAltitudeMeterAi;
   DataRef tailnum;
+
+  bool isValid() const
+  {
+    return headingTrueDegAi.isValid() && latPositionDegAi.isValid() && lonPositionDegAi.isValid() &&
+           actualAltitudeMeterAi.isValid();
+  }
+
 };
 
 /*
@@ -90,7 +97,7 @@ public:
   DataRef tcasNumAcf, tcasModeCcode, tcasLat, tcasLon, tcasEle, tcasVerticalSpeed, tcasVMsc, tcasPsi, tcasWeightOnWheels, tcasIcaoType,
           tcasFlightId, tcasModeSId;
 
-  /* Multiplayer aircraft from old (not TCAS) interface */
+  /* Multiplayer aircraft from old (not TCAS) interface. Does not include user aircraft. Contains only valid refs. */
   QVector<MultiplayerDataRefs> multiplayerDataRefs;
 
 private:

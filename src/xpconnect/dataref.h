@@ -40,6 +40,7 @@ typedef QVector<DataRef *> DataRefPtrVector;
 /* Get full path to the acf file for the aircraft at the given index. 0 is the user aircraft. */
 QString getAircraftModelFilepath(int index);
 
+/* Number of active AI and user aircraft */
 int getNumActiveAircraft();
 
 /* The XYZ coordinates are in meters in the local OpenGL coordinate system.

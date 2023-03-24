@@ -35,8 +35,9 @@ static const QLatin1String SETTINGS_OPTIONS_FETCH_AI_AIRCRAFT_INFO("Options/Fetc
 
 enum MenuId
 {
-  FETCH_AI = 0,
-  FETCH_AI_INFO = 1,
+  VERSION = 0,
+  FETCH_AI = 1,
+  FETCH_AI_INFO = 2,
   FETCH_RATE_50 = 50,
   FETCH_RATE_100 = 100,
   FETCH_RATE_150 = 150,
@@ -45,7 +46,7 @@ enum MenuId
   FETCH_RATE_500 = 500
 };
 
-const static int NUM_MENU_IDS = 8;
+const static int NUM_MENU_IDS = 9;
 
 // Pointer to this is passed to the menu handler by a called menu item
 struct Item
@@ -132,6 +133,7 @@ void XpMenu::menuHandler(int menuId, int itemIndex)
 
 void XpMenu::addMenu(const QString& menuNameParam)
 {
+  versionName = QString("Version %1").arg(QCoreApplication::applicationVersion()).toLatin1();
   menuName = menuNameParam.toLatin1();
 
   // The index of our menu item in the Plugins menu
@@ -140,7 +142,15 @@ void XpMenu::addMenu(const QString& menuNameParam)
   p->xpMenuId = XPLMCreateMenu(menuName.constData(), XPLMFindPluginsMenu(), xpMenuContainterIndex, XpMenu::menuHandlerInternal, nullptr);
 
   int idx = 0;
-  int menuIndex = XPLMAppendMenuItem(p->xpMenuId, "Fetch AI", static_cast<void *>(&p->items[idx]), 1);
+  int menuIndex = XPLMAppendMenuItem(p->xpMenuId, versionName.constData(), static_cast<void *>(&p->items[idx]), 1);
+  XPLMCheckMenuItem(p->xpMenuId, menuIndex, xplm_Menu_NoCheck);
+  XPLMEnableMenuItem(p->xpMenuId, menuIndex, 0);
+  p->items[idx] = {VERSION, menuIndex, this};
+  idx++;
+
+  XPLMAppendMenuSeparator(p->xpMenuId);
+
+  menuIndex = XPLMAppendMenuItem(p->xpMenuId, "Fetch AI", static_cast<void *>(&p->items[idx]), 1);
   XPLMCheckMenuItem(p->xpMenuId, menuIndex, fetchAi ? xplm_Menu_Checked : xplm_Menu_Unchecked);
   p->items[idx] = {FETCH_AI, menuIndex, this};
   idx++;

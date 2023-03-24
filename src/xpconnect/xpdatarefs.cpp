@@ -197,26 +197,28 @@ void XpDataRefs::init()
 
   // ============================================================
   // Old AI/multiplayer interface
-  // Initialize datarefs for the 19 AI aircraft first
-  for(int i = 1; i < 20; i++)
+  // Initialize datarefs for the 64 AI aircraft first until an invalid one is found
+  for(int i = 1; i <= 64; i++)
   {
     MultiplayerDataRefs refs;
-    refs.headingTrueDegAi.setName(QString(MULTIPLAYER_HEADING_DEG_TRUE_AI).arg(i));
     refs.latPositionDegAi.setName(QString(MULTIPLAYER_LAT_POSITION_DEG_AI).arg(i));
     refs.lonPositionDegAi.setName(QString(MULTIPLAYER_LON_POSITION_DEG_AI).arg(i));
+    refs.headingTrueDegAi.setName(QString(MULTIPLAYER_HEADING_DEG_TRUE_AI).arg(i));
     refs.actualAltitudeMeterAi.setName(QString(MULTIPLAYER_ACTUAL_ALTITUDE_METER_AI).arg(i));
     refs.tailnum.setName(QString(MULTIPLAYER_TAILNUM).arg(i));
 
-    // Add to the list
-    multiplayerDataRefs.append(refs);
+    // Find datarefs
+    refs.latPositionDegAi.find();
+    refs.lonPositionDegAi.find();
+    refs.headingTrueDegAi.find();
+    refs.actualAltitudeMeterAi.find();
+    refs.tailnum.find(false /* warnNotFound */);
 
-    // Find them all
-    MultiplayerDataRefs& r = multiplayerDataRefs.last();
-    r.headingTrueDegAi.find();
-    r.latPositionDegAi.find();
-    r.lonPositionDegAi.find();
-    r.actualAltitudeMeterAi.find();
-    r.tailnum.find(false /* warnNotFound */);
+    if(refs.isValid())
+      // Add to the list
+      multiplayerDataRefs.append(refs);
+    else
+      break;
   }
 
   // Find remaining datarefs of user aircraft

@@ -72,7 +72,7 @@ private:
   bool fetchAi = true, fetchAiAircraftInfo = true;
 
   XpMenusPrivate *p;
-  QByteArray menuName;
+  QByteArray menuName, versionName;
 };
 
 #endif // XPMENU_H

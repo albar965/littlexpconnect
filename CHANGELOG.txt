@@ -7,6 +7,8 @@ This text is partially Markdown, hence sometimes strange formatting.
 # Version 1.0.37
 
 * Added missing fetching of aircraft registrations for AI and online aircraft.
+* Better logic to read AI aircraft from add-ons.
+* Added version number to menu.
 
 ===============================================================================
 

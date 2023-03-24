@@ -356,11 +356,14 @@ bool XpConnect::fillSimConnectData(atools::fs::sc::SimConnectData& data, bool fe
         } // if(pos.isValid() && !pos.isNull())
       } // for(int i = 1; i < numTcasAircraft; i++)
     } // if(hasTcasScheme && numTcasAircraft > 1)
-    else
+
+    if(data.aiAircraft.isEmpty())
     {
       // Use old multplayer scheme ============================================
       // Includes user aircraft - can return more than 20 despite providing only datarefs 1-19 (minus user)
-      int numAi = std::min(getNumActiveAircraft(), 20) - 1;
+      // Add-ons might add more datarefs
+      // multiplayerDataRefs is AI not including user aircraft
+      int numAi = std::min(getNumActiveAircraft() - 1, dataRefs->multiplayerDataRefs.size());
 
       for(int i = 0; i < numAi; i++)
       {
