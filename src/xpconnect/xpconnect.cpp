@@ -363,7 +363,7 @@ bool XpConnect::fillSimConnectData(atools::fs::sc::SimConnectData& data, bool fe
       // Includes user aircraft - can return more than 20 despite providing only datarefs 1-19 (minus user)
       // Add-ons might add more datarefs
       // multiplayerDataRefs is AI not including user aircraft
-      int numAi = std::min(getNumActiveAircraft() - 1, dataRefs->multiplayerDataRefs.size());
+      int numAi = std::min(getNumActiveAircraft() - 1, static_cast<int>(dataRefs->multiplayerDataRefs.size()));
 
       for(int i = 0; i < numAi; i++)
       {
