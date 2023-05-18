@@ -53,9 +53,14 @@ bool XpConnect::fillSimConnectData(atools::fs::sc::SimConnectData& data, bool fe
 {
   atools::fs::sc::SimConnectUserAircraft& userAircraft = data.userAircraft;
 
+  // Reset user aircraft
+  userAircraft = atools::fs::sc::SimConnectUserAircraft();
+
   float actualAlt = meterToFeet(dataRefs->actualAltitudeMeter.valueFloat());
-  userAircraft.position =
-    Pos(dataRefs->lonPositionDeg.valueFloat(), dataRefs->latPositionDeg.valueFloat(), actualAlt);
+  userAircraft.position = Pos(dataRefs->lonPositionDeg.valueFloat(), dataRefs->latPositionDeg.valueFloat(), actualAlt);
+
+  userAircraft.properties.addProp(atools::util::Prop(atools::fs::sc::PROP_AIRCRAFT_LONX, dataRefs->lonPositionDeg.valueDouble()));
+  userAircraft.properties.addProp(atools::util::Prop(atools::fs::sc::PROP_AIRCRAFT_LATY, dataRefs->latPositionDeg.valueDouble()));
 
   if(!userAircraft.position.isValid() || userAircraft.position.isNull())
     return false;
