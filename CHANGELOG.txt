@@ -4,6 +4,14 @@ This text is partially Markdown, hence sometimes strange formatting.
 
 ===============================================================================
 
+# Version 1.0.38
+
+* Added new properties for more accurate position
+* Now resetting user aircraft before filling it to avoid wrong and stale values transmitted to the
+  client.
+
+===============================================================================
+
 # Version 1.0.37
 
 * Added missing fetching of aircraft registrations for AI and online aircraft.
