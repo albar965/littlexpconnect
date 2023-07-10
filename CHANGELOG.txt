@@ -4,6 +4,12 @@ This text is partially Markdown, hence sometimes strange formatting.
 
 ===============================================================================
 
+# Version 1.0.39
+
+* Fixed crash when rotating log file on size overflow.
+
+===============================================================================
+
 # Version 1.0.38
 
 * Added new properties for more accurate position
