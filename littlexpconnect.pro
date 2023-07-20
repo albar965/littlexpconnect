@@ -46,10 +46,16 @@
 # End of configuration documentation
 # =============================================================================
 
-# Define program version here
-VERSION_NUMBER=1.1.2.develop
+# Define program version here VERSION_NUMBER_TODO
+VERSION_NUMBER=1.0.39
 
 QT += core
+QT -= gui
+versionAtLeast(QT_VERSION, 6.0.0): QT += core5compat
+
+macx {
+QT += widgets
+}
 
 CONFIG += c++14
 CONFIG += dll
@@ -89,7 +95,8 @@ isEmpty(ATOOLS_LIB_PATH) : ATOOLS_LIB_PATH=$$PWD/../build-atools-$$CONF_TYPE
 unix:!macx {
   isEmpty(GIT_PATH) : GIT_PATH=git
 
-  LIBS += -lz
+LIBS += -lz
+  QMAKE_LFLAGS += -static-libstdc++
 
   # Use relative path to current .so directory to search for shared libraries
   QMAKE_RPATHDIR=.
@@ -106,8 +113,13 @@ macx {
 
   QMAKE_RPATHDIR=.
 
-  # Compatibility down to OS X Sierra 10.12 inclusive
-  QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.12
+  versionAtLeast(QT_VERSION, 6.0.0) {
+    # Compatibility down to OS X Mojave 10.14 inclusive
+    QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.14
+  } else {
+    # Compatibility down to OS X Sierra 10.12 inclusive
+    QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.12
+  }
 
   LIBS += -F$${XPSDK_BASE}/Libraries/Mac -framework XPLM -framework XPWidgets
 }
@@ -133,7 +145,7 @@ DEFINES += VERSION_NUMBER_LITTLEXPCONNECT='\\"$$VERSION_NUMBER\\"'
 DEFINES += GIT_REVISION_LITTLEXPCONNECT='\\"$$GIT_REVISION\\"'
 DEFINES += QT_NO_CAST_FROM_BYTEARRAY
 DEFINES += QT_NO_CAST_TO_ASCII
-DEFINES += XPLM302=1 XPLM301=1 XPLM300=1 XPLM210=1 APL=0 IBM=0 LIN=1
+DEFINES += XPLM302=1 XPLM301=1 XPLM300=1 XPLM210=1 XPLM200=1 APL=0 IBM=0 LIN=1
 
 # Compiling the DLL but not using it
 DEFINES += LITTLEXPCONNECT_LIBRARY
@@ -183,18 +195,24 @@ message(-----------------------------------)
 # Files
 
 SOURCES += \
-  src/aircraftfileloader.cpp \
-  src/dataref.cpp \
   src/main.cpp \
-  src/sharedmemorywriter.cpp \
-  src/xpconnect.cpp
+  src/xpconnect/aircraftfileloader.cpp \
+  src/xpconnect/dataref.cpp \
+  src/xpconnect/sharedmemorywriter.cpp \
+  src/xpconnect/xpconnect.cpp \
+  src/xpconnect/xpdatarefs.cpp \
+  src/xpconnect/xplog.cpp \
+  src/xpconnect/xpmenu.cpp
 
 HEADERS += \
-  src/aircraftfileloader.h \
-  src/dataref.h \
   src/littlexpconnect_global.h \
-  src/sharedmemorywriter.h \
-  src/xpconnect.h
+  src/xpconnect/aircraftfileloader.h \
+  src/xpconnect/dataref.h \
+  src/xpconnect/sharedmemorywriter.h \
+  src/xpconnect/xpconnect.h \
+  src/xpconnect/xpdatarefs.h \
+  src/xpconnect/xplog.h \
+  src/xpconnect/xpmenu.h
 
 RESOURCES += \
     littlexpconnect.qrc
@@ -248,6 +266,26 @@ macx {
   deploy.commands += rm -fv $${DEPLOY_DIR}/QtCore.framework/QtCore_debug.prl &&
   deploy.commands += rm -Rfv $${DEPLOY_DIR}/QtCore.framework/Versions/*/Headers &&
   deploy.commands += rm -fv $${DEPLOY_DIR}/QtCore.framework/Versions/*/QtCore_debug &&
+  versionAtLeast(QT_VERSION, 6.0.0) {
+    deploy.commands += cp -vfa $$[QT_INSTALL_LIBS]/QtCore5Compat.framework  $${DEPLOY_DIR} &&
+    deploy.commands += rm -Rfv $${DEPLOY_DIR}/QtCore5Compat.framework/Headers &&
+    deploy.commands += rm -fv $${DEPLOY_DIR}/QtCore5Compat.framework/QtCore_debug &&
+    deploy.commands += rm -fv $${DEPLOY_DIR}/QtCore5Compat.framework/QtCore_debug.prl &&
+    deploy.commands += rm -Rfv $${DEPLOY_DIR}/QtCore5Compat.framework/Versions/*/Headers &&
+    deploy.commands += rm -fv $${DEPLOY_DIR}/QtCore5Compat.framework/Versions/*/QtCore_debug &&
+  }
+  deploy.commands += cp -vfa $$[QT_INSTALL_LIBS]/QtDBus.framework  $${DEPLOY_DIR} &&
+  deploy.commands += rm -Rfv $${DEPLOY_DIR}/QtDBus.framework/Headers &&
+  deploy.commands += rm -fv $${DEPLOY_DIR}/QtDBus.framework/QtCore_debug &&
+  deploy.commands += rm -fv $${DEPLOY_DIR}/QtDBus.framework/QtCore_debug.prl &&
+  deploy.commands += rm -Rfv $${DEPLOY_DIR}/QtDBus.framework/Versions/*/Headers &&
+  deploy.commands += rm -fv $${DEPLOY_DIR}/QtDBus.framework/Versions/*/QtCore_debug &&
+  deploy.commands += cp -vfa $$[QT_INSTALL_LIBS]/QtWidgets.framework  $${DEPLOY_DIR} &&
+  deploy.commands += rm -Rfv $${DEPLOY_DIR}/QtWidgets.framework/Headers &&
+  deploy.commands += rm -fv $${DEPLOY_DIR}/QtWidgets.framework/QtCore_debug &&
+  deploy.commands += rm -fv $${DEPLOY_DIR}/QtWidgets.framework/QtCore_debug.prl &&
+  deploy.commands += rm -Rfv $${DEPLOY_DIR}/QtWidgets.framework/Versions/*/Headers &&
+  deploy.commands += rm -fv $${DEPLOY_DIR}/QtWidgets.framework/Versions/*/QtCore_debug &&
   deploy.commands += cp -vfa $$[QT_INSTALL_LIBS]/QtGui.framework  $${DEPLOY_DIR} &&
   deploy.commands += rm -Rfv $${DEPLOY_DIR}/QtGui.framework/Headers &&
   deploy.commands += rm -fv $${DEPLOY_DIR}/QtGui.framework/QtGui_debug &&

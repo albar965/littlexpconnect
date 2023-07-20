@@ -91,8 +91,12 @@ PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc)
   // Create application object which is needed for the server thread event queue
   int argc = 0;
   app = new atools::gui::ConsoleApplication(argc, nullptr);
-  // See http://stackoverflow.com/questions/25661295/why-does-qcoreapplication-call-setlocalelc-all-by-default-on-unix-linux
+#ifdef Q_OS_LINUX
+  // Avoid various issues in X-Plane 12 like messed up colors ignored exclusion regions
+  // See https://stackoverflow.com/questions/25661295/why-does-qcoreapplication-call-setlocalelc-all-by-default-on-unix-linux
+  // https://github.com/albar965/littlenavmap/issues/983
   setlocale(LC_NUMERIC, "C");
+#endif
   QCoreApplication::setApplicationName("Little Xpconnect");
   QCoreApplication::setOrganizationName("ABarthel");
   QCoreApplication::setOrganizationDomain("littlenavmap.org");

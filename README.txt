@@ -35,7 +35,13 @@ X-Plane <-> Little XpConnect <-> Little Navconnect <- (Network) -> Little Navmap
 
 Please refer to the Little Navmap installation instructions for a more detailed description:
 
-https://www.littlenavmap.org/manuals/littlenavmap/release/2.6/en/INSTALLATION.html
+https://www.littlenavmap.org/manuals/littlenavmap/release/latest/en/INSTALLATION.html
+https://www.littlenavmap.org/manuals/littlenavmap/release/latest/en/XPCONNECT.html
+
+Apple macOS users: Keep in mind that you have to clear the quarantine flag for *Little Xpconnect*
+on update or installation. See further below or
+https://www.littlenavmap.org/manuals/littlenavmap/release/latest/en/XPCONNECT.html#clearing-the-quarantine-flag-on-macos
+for more information.
 
 ------------------------------------------------------------------------------
 
@@ -44,7 +50,7 @@ with Little Navmap and can be downloaded separately too.
 
 Delete any old "Little Xpconnect" installations in the plugins directory before copying
 the new version.
-Do not merge new and old installtions.
+Do not merge new and old installations.
 
 Copy the whole plugin directory "Little Xpconnect" into the directory "plugins"
 in the directory "Resources" in the X-Plane installation. The complete path
@@ -54,15 +60,32 @@ should look like:
 You can check the X-Plane plugin manager to see if it is loaded  correctly.
 The installation was successful if "Little Xpconnect" shows up in the plugin manager.
 
-Note that "Little Xpconnect" does not add menu items in the X-Plane "Plugins" menu.
+Note that "Little Xpconnect" adds a sub-menu in the X-Plane "Plugins" menu.
+See CONFIGURATION below.
 
 When connecting with Little Navmap choose the "Connect directly to a local
 X-Plane simulator" option. See the Little Navmap manual for more information.
 
 See online manual for installation instructions:
-https://www.littlenavmap.org/manuals/littlenavmap/release/2.6/en/INSTALLATION.html
+https://www.littlenavmap.org/manuals/littlenavmap/release/latest/en/INSTALLATION.html
 
 -- Apple macOS ---------------------------------------------------------------
+
+This X-Plane plugin comes in two separate folders for different architectures.
+
+"Little Xpconnect arm64":
+   This is for Apple computers having an Apple Silicon or an Intel CPU.
+   It supports only newer macOS releases from Mojave 10.14 and later.
+   Usable for X-Plane 11 and 12.
+
+"Little Xpconnect x86":
+   This is for Apple computers having an Intel CPU. This supports
+   older macOS releases from High Sierra 10.13.
+   Usable for X-Plane 11 and 12.
+
+Install "Little Xpconnect arm64" if in doubt. See the README.txt files in the
+Little Xpconnect folders or the Little Navmap user manual for installation instructions:
+https://www.littlenavmap.org/manuals/littlenavmap/release/latest/en/INSTALLATION.html#macos
 
 You have to remove the quarantine flag from the plugin after downloading and extracting it.
 Otherwise X-Plane will silently not load the plugin.
@@ -101,17 +124,32 @@ Additionally a small settings file is created which can be found in
 -- CONFIGURATION -------------------------------------------------------------
 ------------------------------------------------------------------------------
 
-Settings can only be changed using the configuration file
-"little_xpconnect.ini".
+The plugin adds a sub-menu "Little Xpconnect" to the X-Plane plugins menu which
+contains the following menu items:
+
+- "Fetch AI": Enable or disable the fetching of AI aircraft and
+  ships (carrier and frigate). Disable AI fetching if you see
+  stutters or performance degradation within X-Plane when using the plugin.
+- "Load AI Aircraft Information": Xpconnect tries to load additional information
+  from related ".acf" files. This is done in background and does not cause stutters
+  or hesitations. You can disable this function if you see problems. Only limited
+  information is available for AI and multiplayer if disabled.
+- "Fetch Rate 50 ms" to "Fetch Rate 500 ms": Xpconnect will get all aircraft
+  parameters at this rate. Lower values result in smoother aircraft movement but
+  may induce stutters or decrease performance in X-Plane.
+
+The changes are applied immediately and are saved on exit.
+
+Note that the settings are shared between all plugin installations on the same computer.
+
+The settings can also be changed using the configuration file "little_xpconnect.ini".
 
 [Options]
-FetchAiAircraft=true  : Also get AI aircraft. You can disable this if
-                        you think the plugin causes performance problems.
-FetchRate=200         : Data will be fetched from X-Plane every 200
-                        milliseconds.
-                        Lower this value to get a more fluid movement of the
-                        aircraft symbol on the map. Increase this value if you
-                        think the plugin causes performance problems.
+FetchAiAircraft=true     : Same as "Fetch AI" in plugin menu.
+FetchAiAircraftInfo=true : Same as "Load AI Aircraft Information" in plugin menu.
+FetchRateMs=200          : Data will be fetched from X-Plane every 200
+                           milliseconds. Same as "Fetch Rate" in plugin menu.
+FetchRate=200            : Old obsolete value. Will be deleted on start.
 
 ------------------------------------------------------------------------------
 -- LICENSE -------------------------------------------------------------------

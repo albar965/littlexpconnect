@@ -15,9 +15,9 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *****************************************************************************/
 
-#include "sharedmemorywriter.h"
+#include "xpconnect/sharedmemorywriter.h"
 
-#include "xpconnect.h"
+#include "xpconnect/xpconnect.h"
 #include "fs/sc/xpconnecthandler.h"
 
 #include <QBuffer>
@@ -37,48 +37,58 @@ SharedMemoryWriter::~SharedMemoryWriter()
   delete xpConnect;
 }
 
-void SharedMemoryWriter::fetchAndWriteData(bool fetchAi)
+void SharedMemoryWriter::fetchAndWriteData(bool fetchAi, bool fetchAiAircraftInfo)
 {
+  bool foundData = false;
+
+  // Use "tryLock" to avoid blocking when other thread is already accessing - rather allow to drop updates than blocking
+  if(dataMutex.tryLock(0))
   {
-    QMutexLocker locker(&dataMutex);
-    if(!xpConnect->fillSimConnectData(data, fetchAi))
+    foundData = xpConnect->fillSimConnectData(data, fetchAi, fetchAiAircraftInfo);
+
+    if(!foundData)
       data = atools::fs::sc::EMPTY_SIMCONNECT_DATA;
+
+    dataMutex.unlock();
   }
 
-  waitCondition.wakeAll();
-
-  if(verbose)
+  if(foundData)
   {
-    qint64 now = QDateTime::currentSecsSinceEpoch();
-    if(now > lastReport + 10)
+    waitCondition.wakeAll();
+
+    if(verbose)
     {
-      lastReport = now;
-      const atools::fs::sc::SimConnectUserAircraft& userAircraft = data.getUserAircraftConst();
-
-      if(userAircraft.isValid())
-        qDebug() << Q_FUNC_INFO << "User id" << userAircraft.getObjectId()
-                 << "type" << userAircraft.getAirplaneType()
-                 << "model" << userAircraft.getAirplaneModel()
-                 << "reg" << userAircraft.getAirplaneRegistration()
-                 << userAircraft.getPosition();
-      else
-        qDebug() << Q_FUNC_INFO << "User not valid";
-
-      if(!data.getAiAircraftConst().isEmpty())
+      qint64 now = QDateTime::currentSecsSinceEpoch();
+      if(now > lastReport + 10)
       {
-        for(const atools::fs::sc::SimConnectAircraft& aircraft : data.getAiAircraftConst())
+        lastReport = now;
+        const atools::fs::sc::SimConnectUserAircraft& userAircraft = data.getUserAircraftConst();
+
+        if(userAircraft.isValid())
+          qDebug() << Q_FUNC_INFO << "User id" << userAircraft.getObjectId()
+                   << "type" << userAircraft.getAirplaneType()
+                   << "model" << userAircraft.getAirplaneModel()
+                   << "reg" << userAircraft.getAirplaneRegistration()
+                   << userAircraft.getPosition();
+        else
+          qDebug() << Q_FUNC_INFO << "User not valid";
+
+        if(!data.getAiAircraftConst().isEmpty())
         {
-          qDebug() << Q_FUNC_INFO << "AI id" << aircraft.getObjectId()
-                   << "type" << aircraft.getAirplaneType()
-                   << "model" << aircraft.getAirplaneModel()
-                   << "reg" << aircraft.getAirplaneRegistration()
-                   << aircraft.getPosition();
+          for(const atools::fs::sc::SimConnectAircraft& aircraft : data.getAiAircraftConst())
+          {
+            qDebug() << Q_FUNC_INFO << "AI id" << aircraft.getObjectId()
+                     << "type" << aircraft.getAirplaneType()
+                     << "model" << aircraft.getAirplaneModel()
+                     << "reg" << aircraft.getAirplaneRegistration()
+                     << aircraft.getPosition();
+          }
         }
+        else
+          qDebug() << Q_FUNC_INFO << "AI list empty";
       }
-      else
-        qDebug() << Q_FUNC_INFO << "AI list empty";
-    }
-  }
+    } // if(verbose)
+  } // if(foundData)
 }
 
 void SharedMemoryWriter::terminateThread()

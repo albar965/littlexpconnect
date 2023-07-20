@@ -1,5 +1,5 @@
 /*****************************************************************************
-* Copyright 2015-2020 Alexander Barthel alex@littlenavmap.org
+* Copyright 2015-2023 Alexander Barthel alex@littlenavmap.org
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -40,6 +40,7 @@ typedef QVector<DataRef *> DataRefPtrVector;
 /* Get full path to the acf file for the aircraft at the given index. 0 is the user aircraft. */
 QString getAircraftModelFilepath(int index);
 
+/* Number of active AI and user aircraft */
 int getNumActiveAircraft();
 
 /* The XYZ coordinates are in meters in the local OpenGL coordinate system.
@@ -66,6 +67,9 @@ public:
   DataRef(const QString& dataRefName);
   DataRef();
 
+  void init(DataRefPtrVector& refs, const QString& dataRefName);
+  void init(const QString& dataRefName);
+
   void setName(const QString& dataRefName)
   {
     name = dataRefName;
@@ -75,7 +79,7 @@ public:
    * Calls the find method and return true if that dataref name was valid and found.
    * Prints a warning into the log if the ref could not be found.
    */
-  bool find();
+  bool find(bool warnNotFound = true);
 
   /* returns true if ref was found. */
   bool isValid() const
@@ -110,6 +114,12 @@ public:
     return XPLMGetDatai(dataRef);
   }
 
+  /* get bool value or false if invalid */
+  bool valueBool() const
+  {
+    return valueInt() > 0;
+  }
+
   /* get string from an UTF-8 byte array value or empty string if invalid */
   QString valueString() const
   {
@@ -137,6 +147,11 @@ public:
   int valueIntArr(int index) const;
   float valueFloatArr(int index) const;
   int valueByteArr(int index) const;
+
+  bool valueBoolArr(int index) const
+  {
+    return valueIntArr(index) > 0;
+  }
 
   /* Get the type of the dataref after calling find */
   XPLMDataTypeID getDataRefType() const

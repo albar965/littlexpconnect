@@ -32,6 +32,7 @@ class SimConnectAircraft;
 namespace xpc {
 
 class AircraftFileLoader;
+class XpDataRefs;
 
 /*
  * Class that has full access to SimConnectData.
@@ -45,14 +46,16 @@ public:
   XpConnect(const XpConnect& other) = delete;
   XpConnect& operator=(const XpConnect& other) = delete;
 
-  /* Fill SimConnectData from X-Plane datarefs. Returns true if data was found */
-  bool fillSimConnectData(atools::fs::sc::SimConnectData& data, bool fetchAi);
+  /* Fill SimConnectData from X-Plane datarefs. Returns true if data was found.
+   * Runs in XP main loop from "flightLoopCallback()". */
+  bool fillSimConnectData(atools::fs::sc::SimConnectData& data, bool fetchAi, bool fetchAiAircraftInfo);
 
-  /* Initilaize the datarefs and print a warning if something is wrong. */
+  /* Initialize the datarefs and print a warning if something is wrong. */
   void initDataRefs();
 
 private:
   AircraftFileLoader *fileLoader;
+  XpDataRefs *dataRefs;
   bool verbose = false;
 };
 

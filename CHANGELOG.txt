@@ -4,26 +4,133 @@ This text is partially Markdown, hence sometimes strange formatting.
 
 ===============================================================================
 
-Version 1.1.2.develop
+# Version 1.0.39
 
-* Fixed detection of wrong installation path on macOS which was confused by old path notation
-  from X-Plane. #899
-* Removed unneeded rounding of simulator time to allow millisecond accuracy. #907
+* Fixed crash when rotating log file on size overflow.
 
 ===============================================================================
 
-Version 1.1.1.develop
+# Version 1.0.38
+
+* Added new properties for more accurate position
+* Now resetting user aircraft before filling it to avoid wrong and stale values transmitted to the
+  client.
+
+===============================================================================
+
+# Version 1.0.37
+
+* Added missing fetching of aircraft registrations for AI and online aircraft.
+* Better logic to read AI aircraft from add-ons.
+* Added version number to menu.
+
+===============================================================================
+
+# Version 1.0.36
+
+* Fixed TAS swapped with GS for AI aircraft.
+===============================================================================
+
+# Version 1.0.36
+
+* Fixed TAS swapped with GS for AI aircraft.
+
+===============================================================================
+
+# Version 1.0.35
+
+Added fix from Max Hille (https://github.com/maxhille) to avoid X-Plane 12 issues
+with light colors and ignored exclusion regions on Linux after installing plugin. #983
+
+===============================================================================
+
+# Version 1.0.34
+
+Fixed wrong date and timezone calculation which resulted in wrong endurance and
+turn anticipation display in Little Navmap.
+
+===============================================================================
+
+# Version 1.0.33
+
+* Added menu item `Load AI Aircraft Information` which allows to disable the background loading of
+  `.acf` files.
+* Fixed an issue where ICAO type and other values of AI and multiplayer aircraft were messed up.
+* Now detecting on-ground status correctly for AI or multiplayer aircraft.
+
+===============================================================================
+
+# Version 1.0.32
+
+* Adapted new weather and environment datarefs to X-Plane 12 changes
+
+===============================================================================
+
+Version 1.0.31
+
+* Updated Linux build to remove unneeded dependencies to shared libraries.
+
+===============================================================================
+
+Version 1.0.30
+
+* Added menu items in X-Plane plugin menus to set AI fetch and performance options. See README.txt or
+  [Little Navmap User Manual - Little Xpconnect](https://www.littlenavmap.org/manuals/littlenavmap/release/2.8/en/XPCONNECT.html).
+* Changed locking mechanism to mitigate probable simulator stutters.
+* Note about password in prepare command.
+* Added missing library for macOS builds.
+* Change build for Linux to use a minimum of dependencies to avoid issues with X-Plane 12.
+
+===============================================================================
+
+Version 1.0.29
 
 ## General
 
-* Now printing a warning to the X-Plane log.txt if installation path is not correct.
-* Lowered default data fetch rate to 100 ms. This will be overridden by configuration file. Change this manually if needed.
+* macOS: Apple Silicon / ARM 64 build now supported in universal binary.
+
+===============================================================================
+
+Version 1.0.28
+
+## General
+
+* Removed unneeded rounding of simulator time to allow millisecond accuracy. #907
+* Now printing a warning to the X-Plane `log.txt` if installation path is not correct.
+* Lowered default data fetch rate to 100 ms. This will be overridden by configuration file.
+  Change this manually if needed.
 
 ## Build
 
 * Moved version number to variable `VERSION_NUMBER` in file `littlenavconnect.pro` instead of
   coding it into sources.
 * Now writing files `version.txt` and `revision.txt` files into deployment folder allowing
+  deployment scripts to automatically name archives. These files can be used to identify
+  a version without opening the program.
+
+===============================================================================
+
+Version 1.0.26
+
+* Added script `Prepare Little Xpconnect.command` to ease installation on macOS Catalina
+  and Big Sur. See included README.txt or the Little Navmap user manual for installation
+  instructions.
+* Updated to Qt library version 5.15.2.
+
+===============================================================================
+
+Version 1.0.28
+
+* Added warning in X-Plane `Log.txt` if installation path is not correct.
+* Better logging to fix detection of wrong installation path. #899
+
+===============================================================================
+
+Version 1.0.27
+
+* Moved version number to variable `VERSION_NUMBER` in file `littlexpconnect.pro` instead of
+  coding it into sources.
+* Now writing files `version.txt` and `revision.txt` files into install folder allowing
   deployment scripts to automatically name archives. These files can be used to identify
   a version without opening the program.
 

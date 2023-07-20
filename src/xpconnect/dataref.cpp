@@ -1,5 +1,5 @@
 /*****************************************************************************
-* Copyright 2015-2020 Alexander Barthel alex@littlenavmap.org
+* Copyright 2015-2023 Alexander Barthel alex@littlenavmap.org
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -15,9 +15,8 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *****************************************************************************/
 
-#include "dataref.h"
+#include "xpconnect/dataref.h"
 
-#include "atools.h"
 #include "geo/pos.h"
 
 #include <QDebug>
@@ -54,27 +53,40 @@ void worldToLocal(double& x, double& y, double& z, const atools::geo::Pos& pos)
 
 // ==========================================================================================
 DataRef::DataRef(DataRefPtrVector& refs, const QString& dataRefName)
-  : name(dataRefName)
 {
-  // Add to array but do not find it yet (still invalid)
-  refs.append(this);
+  init(refs, dataRefName);
 }
 
 DataRef::DataRef(const QString& dataRefName)
-  : name(dataRefName)
 {
+  init(dataRefName);
 }
 
 DataRef::DataRef()
 {
 }
 
-bool DataRef::find()
+void DataRef::init(DataRefPtrVector& refs, const QString& dataRefName)
 {
-  // qDebug() << Q_FUNC_INFO << name;
+  name = dataRefName;
+
+  // Add to array but do not find it yet (still invalid)
+  refs.append(this);
+}
+
+void DataRef::init(const QString& dataRefName)
+{
+  name = dataRefName;
+}
+
+bool DataRef::find(bool warnNotFound)
+{
   dataRef = XPLMFindDataRef(name.toLatin1().constData());
   if(dataRef == nullptr)
-    qWarning() << Q_FUNC_INFO << "Cannot find" << name;
+  {
+    if(warnNotFound)
+      qWarning() << Q_FUNC_INFO << "Cannot find dataref" << name;
+  }
   else
   {
     dataRefType = XPLMGetDataRefTypes(dataRef);
@@ -90,13 +102,18 @@ QVector<int> DataRef::valueIntArr() const
 #ifdef DATAREF_VALIDATION
   checkType(xplmType_IntArray);
 #endif
+  IntVector retval;
 
-  // Get size first by calling with null pointer
-  int size = XPLMGetDatavi(dataRef, nullptr, 0, 0);
+  if(dataRef != nullptr)
+  {
+    // Get size first by calling with null pointer
+    int size = XPLMGetDatavi(dataRef, nullptr, 0, 0);
+    retval.resize(size);
 
-  // Get the array contents
-  IntVector retval(size);
-  XPLMGetDatavi(dataRef, retval.data(), 0, size);
+    // Get the array contents
+    XPLMGetDatavi(dataRef, retval.data(), 0, size);
+  }
+
   return retval;
 }
 
@@ -106,12 +123,17 @@ QVector<float> DataRef::valueFloatArr() const
   checkType(xplmType_FloatArray);
 #endif
 
-  // Get size first by calling with null pointer
-  int size = XPLMGetDatavf(dataRef, nullptr, 0, 0);
+  FloatVector retval;
+  if(dataRef != nullptr)
+  {
+    // Get size first by calling with null pointer
+    int size = XPLMGetDatavf(dataRef, nullptr, 0, 0);
+    retval.resize(size);
 
-  // Get the array contents
-  FloatVector retval(size);
-  XPLMGetDatavf(dataRef, retval.data(), 0, size);
+    // Get the array contents
+    XPLMGetDatavf(dataRef, retval.data(), 0, size);
+  }
+
   return retval;
 }
 
@@ -121,12 +143,16 @@ QByteArray DataRef::valueByteArr() const
   checkType(xplmType_Data);
 #endif
 
-  // Get size first by calling with null pointer
-  int size = XPLMGetDatab(dataRef, nullptr, 0, 0);
+  QByteArray retval;
+  if(dataRef != nullptr)
+  {
+    // Get size first by calling with null pointer
+    int size = XPLMGetDatab(dataRef, nullptr, 0, 0);
+    retval.resize(size);
 
-  // Get the array contents
-  QByteArray retval(size, 0);
-  XPLMGetDatab(dataRef, retval.data(), 0, size);
+    // Get the array contents
+    XPLMGetDatab(dataRef, retval.data(), 0, size);
+  }
   return retval;
 }
 
@@ -135,7 +161,11 @@ int DataRef::sizeIntArr() const
 #ifdef DATAREF_VALIDATION
   checkType(xplmType_IntArray);
 #endif
-  return XPLMGetDatavi(dataRef, nullptr, 0, 0);
+
+  if(dataRef != nullptr)
+    return XPLMGetDatavi(dataRef, nullptr, 0, 0);
+  else
+    return 0;
 }
 
 int DataRef::sizeFloatArr() const
@@ -143,7 +173,11 @@ int DataRef::sizeFloatArr() const
 #ifdef DATAREF_VALIDATION
   checkType(xplmType_FloatArray);
 #endif
-  return XPLMGetDatavf(dataRef, nullptr, 0, 0);
+
+  if(dataRef != nullptr)
+    return XPLMGetDatavf(dataRef, nullptr, 0, 0);
+  else
+    return 0;
 }
 
 int DataRef::sizeByteArr() const
@@ -151,7 +185,11 @@ int DataRef::sizeByteArr() const
 #ifdef DATAREF_VALIDATION
   checkType(xplmType_Data);
 #endif
-  return XPLMGetDatab(dataRef, nullptr, 0, 0);
+
+  if(dataRef != nullptr)
+    return XPLMGetDatab(dataRef, nullptr, 0, 0);
+  else
+    return 0;
 }
 
 int DataRef::valueIntArr(int index) const
@@ -161,7 +199,8 @@ int DataRef::valueIntArr(int index) const
 #endif
 
   int retval = 0;
-  XPLMGetDatavi(dataRef, &retval, index, 1);
+  if(dataRef != nullptr)
+    XPLMGetDatavi(dataRef, &retval, index, 1);
   return retval;
 }
 
@@ -171,8 +210,9 @@ float DataRef::valueFloatArr(int index) const
   checkType(xplmType_FloatArray);
 #endif
 
-  float retval = 0;
-  XPLMGetDatavf(dataRef, &retval, index, 1);
+  float retval = 0.f;
+  if(dataRef != nullptr)
+    XPLMGetDatavf(dataRef, &retval, index, 1);
   return retval;
 }
 
@@ -182,8 +222,9 @@ int DataRef::valueByteArr(int index) const
   checkType(xplmType_FloatArray);
 #endif
 
-  char retval = 0;
-  XPLMGetDatab(dataRef, &retval, index, 1);
+  char retval = '\0';
+  if(dataRef != nullptr)
+    XPLMGetDatab(dataRef, &retval, index, 1);
   return retval;
 }
 
@@ -193,9 +234,14 @@ void DataRef::valueIntArr(IntVector& array) const
   checkType(xplmType_IntArray);
 #endif
 
-  int size = XPLMGetDatavi(dataRef, nullptr, 0, 0);
-  array.resize(size);
-  XPLMGetDatavi(dataRef, array.data(), 0, size);
+  if(dataRef != nullptr)
+  {
+    int size = XPLMGetDatavi(dataRef, nullptr, 0, 0);
+    array.resize(size);
+    XPLMGetDatavi(dataRef, array.data(), 0, size);
+  }
+  else
+    array.clear();
 }
 
 void DataRef::valueFloatArr(FloatVector& array) const
@@ -204,16 +250,26 @@ void DataRef::valueFloatArr(FloatVector& array) const
   checkType(xplmType_FloatArray);
 #endif
 
-  int size = XPLMGetDatavf(dataRef, nullptr, 0, 0);
-  array.resize(size);
-  XPLMGetDatavf(dataRef, array.data(), 0, size);
+  if(dataRef != nullptr)
+  {
+    int size = XPLMGetDatavf(dataRef, nullptr, 0, 0);
+    array.resize(size);
+    XPLMGetDatavf(dataRef, array.data(), 0, size);
+  }
+  else
+    array.clear();
 }
 
 void DataRef::valueByteArr(QByteArray& bytes) const
 {
-  int size = XPLMGetDatab(dataRef, nullptr, 0, 0);
-  bytes.resize(size);
-  XPLMGetDatab(dataRef, bytes.data(), 0, size);
+  if(dataRef != nullptr)
+  {
+    int size = XPLMGetDatab(dataRef, nullptr, 0, 0);
+    bytes.resize(size);
+    XPLMGetDatab(dataRef, bytes.data(), 0, size);
+  }
+  else
+    bytes.clear();
 }
 
 #ifdef DATAREF_VALIDATION
@@ -227,7 +283,7 @@ void DataRef::checkType(int type) const
 
 int DataRef::valueIntArrSum() const
 {
-  int sumValue = 0.f;
+  int sumValue = 0;
   for(int val : valueIntArr())
     sumValue += val;
   return sumValue;
@@ -238,6 +294,7 @@ float DataRef::valueFloatArrSum() const
   float sumValue = 0.f;
   for(float val : valueFloatArr())
     sumValue += val;
+
   return sumValue;
 }
 
