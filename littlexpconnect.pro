@@ -47,7 +47,7 @@
 # =============================================================================
 
 # Define program version here VERSION_NUMBER_TODO
-VERSION_NUMBER=1.0.39
+VERSION_NUMBER=1.1.0.develop
 
 QT += core
 QT -= gui
