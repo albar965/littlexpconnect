@@ -18,14 +18,15 @@
 // Include definitions for import and export for shared library
 #include "littlexpconnect_global.h"
 
+#include "geo/calculations.h"
+#include "gui/consoleapplication.h"
+#include "xpconnect/xplog.h"
 #include "logging/logginghandler.h"
 #include "logging/loggingutil.h"
 #include "settings/settings.h"
-#include "gui/consoleapplication.h"
-#include "sharedmemorywriter.h"
-#include "xpconnect.h"
 #include "util/version.h"
-#include "geo/calculations.h"
+#include "xpconnect/sharedmemorywriter.h"
+#include "xpconnect/xpmenu.h"
 
 extern "C" {
 #include "XPLMPlugin.h"
@@ -57,27 +58,22 @@ using atools::settings::Settings;
 
 namespace lxc {
 /* key names for atools::settings */
-static const QLatin1String SETTINGS_OPTIONS_FETCH_RATE_MS("Options/FetchRate");
-static const QLatin1String SETTINGS_OPTIONS_FETCH_AI_AIRCRAFT("Options/FetchAiAircraft");
 static const QLatin1String SETTINGS_OPTIONS_VERBOSE("Options/Verbose");
 }
 
 float flightLoopCallback(float inElapsedSinceLastCall, float inElapsedTimeSinceLastFlightLoop, int inCounter,
                          void *inRefcon);
 void checkPath();
-void logXpInfo(QString message);
-void logXpErr(QString message);
 
 /* Application object for event queue in server thread */
 static atools::gui::ConsoleApplication *app = nullptr;
 
-static bool fetchAi = true;
-static float fetchRateSecs = 0.2f;
 static bool verbose = false;
 
 // Use a background thread to write the data to the shared memory to avoid simulator stutters due to
 // locking
 static SharedMemoryWriter *thread = nullptr;
+static XpMenu *menu = nullptr;
 
 /* Called on simulator startup */
 PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc)
@@ -101,7 +97,7 @@ PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc)
   QCoreApplication::setOrganizationName("ABarthel");
   QCoreApplication::setOrganizationDomain("littlenavmap.org");
 
-  QCoreApplication::setApplicationVersion(VERSION_NUMBER_LITTLEXPCONNECT); // VERSION_NUMBER - Little Xpconnect
+  QCoreApplication::setApplicationVersion(VERSION_NUMBER_LITTLEXPCONNECT);
 
   // Initialize logging and force logfiles into the system or user temp directory
   LoggingHandler::initializeForTemp(Settings::getOverloadedPath(":/littlexpconnect/resources/config/logging.cfg"));
@@ -127,8 +123,7 @@ PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc)
 
   // Need to create an instance here since it will be accessed from the main server thread
   Settings& settings = Settings::instance();
-  fetchAi = settings.getAndStoreValue(lxc::SETTINGS_OPTIONS_FETCH_AI_AIRCRAFT, true).toBool();
-  fetchRateSecs = settings.getAndStoreValue(lxc::SETTINGS_OPTIONS_FETCH_RATE_MS, 100).toFloat() / 1000.f;
+  settings.remove("Options/FetchRate"); // Delete obsolete key in any case
   verbose = settings.getAndStoreValue(lxc::SETTINGS_OPTIONS_VERBOSE, false).toBool();
 
   // Always successfull
@@ -138,8 +133,6 @@ PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc)
 /* Called when simulator terminates */
 PLUGIN_API void XPluginStop(void)
 {
-  qDebug() << Q_FUNC_INFO << "Little Xpconnect" << "sync settings";
-  Settings::syncSettings();
 
   qDebug() << Q_FUNC_INFO << "Little Xpconnect" << "Logging shutdown";
   LoggingHandler::shutdown();
@@ -162,6 +155,10 @@ PLUGIN_API int XPluginEnable(void)
   // Check installation path and print a warning to Log.txt if invalid
   checkPath();
 
+  // Create menu structure and load values from settings
+  menu = new XpMenu();
+  menu->restoreState();
+  menu->addMenu("Little Xpconnect");
   return 1;
 }
 
@@ -170,6 +167,9 @@ PLUGIN_API void XPluginDisable()
 {
   qDebug() << Q_FUNC_INFO << "Little Xpconnect";
 
+  menu->saveState();
+  delete menu;
+  menu = nullptr;
   // Unregister call back
   XPLMUnregisterFlightLoopCallback(flightLoopCallback, nullptr);
 
@@ -188,8 +188,7 @@ PLUGIN_API void XPluginReceiveMessage(XPLMPluginID inFromWho, long inMessage, vo
   Q_UNUSED(inParam)
 }
 
-float flightLoopCallback(float inElapsedSinceLastCall, float inElapsedTimeSinceLastFlightLoop, int inCounter,
-                         void *inRefcon)
+float flightLoopCallback(float inElapsedSinceLastCall, float inElapsedTimeSinceLastFlightLoop, int inCounter, void *inRefcon)
 {
   Q_UNUSED(inElapsedSinceLastCall)
   Q_UNUSED(inElapsedTimeSinceLastFlightLoop)
@@ -197,9 +196,10 @@ float flightLoopCallback(float inElapsedSinceLastCall, float inElapsedTimeSinceL
   Q_UNUSED(inRefcon)
 
   // Copy data from datarefs and pass it over to the thread for writing into the shared memory
-  thread->fetchAndWriteData(fetchAi);
+  thread->fetchAndWriteData(menu->isFetchAi(), menu->isFetchAircraftInfo());
 
-  return fetchRateSecs;
+  // Return float seconds until next call
+  return static_cast<float>(menu->getFetchRateMs()) / 1000.f;
 }
 
 void checkPath()
@@ -221,8 +221,8 @@ void checkPath()
   QString path = QString(xpPath);
 #endif
 
-  logXpInfo(QString("Plugin id %1 installed in path \"%2\" (\"%3\"), app path \"%4\"").
-            arg(pluginId).arg(xpPath).arg(path).arg(qApp->applicationFilePath()));
+  xplog::logXpInfo(QString("Plugin id %1 installed in path \"%2\" (\"%3\"), app path \"%4\"").
+                   arg(pluginId).arg(xpPath).arg(path).arg(qApp->applicationFilePath()));
   bool valid = true;
 
   // Check file extension
@@ -244,21 +244,7 @@ void checkPath()
   valid &= pluginDir.dirName().compare("Resources", Qt::CaseInsensitive) == 0;
 
   if(!valid)
-    logXpErr(QString("Plugin installed in the wrong path: \"%1\"").arg(pluginFile.absolutePath()));
+    xplog::logXpErr(QString("Plugin installed in the wrong path: \"%1\"").arg(pluginFile.absolutePath()));
   else
-    logXpInfo(QString("Plugin path \"%1\" is ok").arg(pluginFile.absolutePath()));
-}
-
-void logXpInfo(QString message)
-{
-  message = "Little Xpconnect: " % message % "\n";
-  XPLMDebugString(message.toUtf8().constData());
-  qInfo() << Q_FUNC_INFO << message;
-}
-
-void logXpErr(QString message)
-{
-  message = "*** Little Xpconnect error: " % message % "\n";
-  XPLMDebugString(message.toUtf8().constData());
-  qWarning() << Q_FUNC_INFO << message;
+    xplog::logXpInfo(QString("Plugin path \"%1\" is ok").arg(pluginFile.absolutePath()));
 }
