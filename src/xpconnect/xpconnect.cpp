@@ -26,6 +26,8 @@
 #include "fs/util/fsutil.h"
 #include "geo/calculations.h"
 
+#include <QCoreApplication>
+
 using atools::geo::kgToLbs;
 using atools::geo::meterToFeet;
 using atools::geo::meterToNm;
@@ -61,6 +63,7 @@ bool XpConnect::fillSimConnectData(atools::fs::sc::SimConnectData& data, bool fe
 
   userAircraft.properties.addProp(atools::util::Prop(atools::fs::sc::PROP_AIRCRAFT_LONX, dataRefs->lonPositionDeg.valueDouble()));
   userAircraft.properties.addProp(atools::util::Prop(atools::fs::sc::PROP_AIRCRAFT_LATY, dataRefs->latPositionDeg.valueDouble()));
+  userAircraft.properties.addProp(atools::util::Prop(atools::fs::sc::PROP_XPCONNECT_VERSION, QCoreApplication::applicationVersion()));
 
   if(!userAircraft.position.isValid() || userAircraft.position.isNull())
     return false;

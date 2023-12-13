@@ -222,7 +222,7 @@ void checkPath()
 #endif
 
   xplog::logXpInfo(QString("Plugin id %1 installed in path \"%2\" (\"%3\"), app path \"%4\"").
-                   arg(pluginId).arg(xpPath).arg(path).arg(qApp->applicationFilePath()));
+                   arg(pluginId).arg(xpPath).arg(path).arg(QCoreApplication::applicationFilePath()));
   bool valid = true;
 
   // Check file extension
