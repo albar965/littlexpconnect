@@ -220,7 +220,6 @@ RESOURCES += \
 
 OTHER_FILES += \
   $$files(etc/*, true) \
-  .travis.yml \
   .gitignore \
   BUILD.txt \
   CHANGELOG.txt \
