@@ -10,7 +10,7 @@ map, airport search and airport information system for Flight Simulator X,
 Prepar3D and X-Plane.
 
 This plugin is only useful for X-Plane and is available for Windows, macOS and
-Linux (all 64 bit only). Only tested on X-Plane 11.
+Linux (all 64 bit only). Tested on X-Plane 11 and 12.
 
 Issues can be submitted at https://github.com/albar965/littlenavmap/issues .
 
