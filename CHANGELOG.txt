@@ -4,6 +4,12 @@ This text is partially Markdown, hence sometimes strange formatting.
 
 ===============================================================================
 
+# Version 1.2.1
+
+* Updated to release.
+
+===============================================================================
+
 # Version 1.2.0.beta
 
 * Now transmitting plugin version to client.
