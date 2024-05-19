@@ -80,6 +80,8 @@ QUIET=$$(ATOOLS_QUIET)
 # =======================================================================
 # Fill defaults for unset
 
+QMAKE_CXXFLAGS += -Wall -Wextra -Wpedantic -Wno-pragmas -Wno-unknown-warning -Wno-unknown-warning-option -Wdangling-pointer=2
+
 CONFIG(debug, debug|release) : CONF_TYPE=debug
 CONFIG(release, debug|release) : CONF_TYPE=release
 
