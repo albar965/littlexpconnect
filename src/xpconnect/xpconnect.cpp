@@ -1,5 +1,5 @@
 /*****************************************************************************
-* Copyright 2015-2020 Alexander Barthel alex@littlenavmap.org
+* Copyright 2015-2024 Alexander Barthel alex@littlenavmap.org
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -367,7 +367,7 @@ bool XpConnect::fillSimConnectData(atools::fs::sc::SimConnectData& data, bool fe
 
     if(data.aiAircraft.isEmpty())
     {
-      // Use old multplayer scheme ============================================
+      // Use old multiplayer scheme ============================================
       // Includes user aircraft - can return more than 20 despite providing only datarefs 1-19 (minus user)
       // Add-ons might add more datarefs
       // multiplayerDataRefs is AI not including user aircraft
