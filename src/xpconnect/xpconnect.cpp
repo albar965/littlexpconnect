@@ -1,5 +1,5 @@
 /*****************************************************************************
-* Copyright 2015-2024 Alexander Barthel alex@littlenavmap.org
+* Copyright 2015-2025 Alexander Barthel alex@littlenavmap.org
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -54,6 +54,7 @@ XpConnect::~XpConnect()
 bool XpConnect::fillSimConnectData(atools::fs::sc::SimConnectData& data, bool fetchAi, bool fetchAiAircraftInfo)
 {
   atools::fs::sc::SimConnectUserAircraft& userAircraft = data.userAircraft;
+  bool xp12 = dataRefs->isXplane12();
 
   // Reset user aircraft
   userAircraft = atools::fs::sc::SimConnectUserAircraft();
@@ -73,8 +74,13 @@ bool XpConnect::fillSimConnectData(atools::fs::sc::SimConnectData& data, bool fe
   userAircraft.numberOfEngines = static_cast<quint8>(dataRefs->numberOfEngines.valueInt());
 
   // Wind and ambient parameters
-  userAircraft.windSpeedKts = dataRefs->windSpeedKts.valueFloat();
-  userAircraft.windDirectionDegT = dataRefs->windDirectionDegMag.valueFloat() + userAircraft.magVarDeg;
+  userAircraft.windSpeedKts =
+    xp12 ? atools::geo::meterPerSecToKnots(dataRefs->windSpeed.valueFloat()) : dataRefs->windSpeed.valueFloat();
+
+  userAircraft.windDirectionDegT =
+    xp12 ? dataRefs->windDirectionDeg.valueFloat() : atools::geo::normalizeCourse(dataRefs->windDirectionDeg.valueFloat() +
+                                                                                  userAircraft.magVarDeg);
+
   userAircraft.ambientTemperatureCelsius = dataRefs->ambientTemperatureC.valueFloat();
   userAircraft.totalAirTemperatureCelsius = dataRefs->leTemperatureC.valueFloat();
   userAircraft.seaLevelPressureMbar = dataRefs->seaLevelPressurePascal.valueFloat() / 100.f;
