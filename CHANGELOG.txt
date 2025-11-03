@@ -4,6 +4,12 @@ This text is partially Markdown, hence sometimes strange formatting.
 
 ===============================================================================
 
+# Version 1.2.2
+
+* Adapted to new X-Plane 12 datarefs to fix wind display on map.
+
+===============================================================================
+
 # Version 1.2.1
 
 * Updated to release.
