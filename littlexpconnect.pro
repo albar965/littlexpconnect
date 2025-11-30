@@ -47,7 +47,7 @@
 # =============================================================================
 
 # Define program version here VERSION_NUMBER_TODO
-VERSION_NUMBER=1.1.0.develop
+VERSION_NUMBER=1.2.2
 
 QT += core
 QT -= gui
@@ -79,6 +79,8 @@ QUIET=$$(ATOOLS_QUIET)
 
 # =======================================================================
 # Fill defaults for unset
+
+QMAKE_CXXFLAGS += -Wall -Wextra -Wpedantic -Wno-pragmas -Wno-unknown-warning -Wno-unknown-warning-option
 
 CONFIG(debug, debug|release) : CONF_TYPE=debug
 CONFIG(release, debug|release) : CONF_TYPE=release

@@ -1,5 +1,5 @@
 /*****************************************************************************
-* Copyright 2015-2023 Alexander Barthel alex@littlenavmap.org
+* Copyright 2015-2025 Alexander Barthel alex@littlenavmap.org
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -83,7 +83,7 @@ public:
   }
 
   /* Values documented in init() */
-  DataRef xplmVersion, simPaused, simReplay, windSpeedKts, windDirectionDegMag, ambientTemperatureC, leTemperatureC, seaLevelPressurePascal,
+  DataRef xplmVersion, simPaused, simReplay, windSpeed, windDirectionDeg, ambientTemperatureC, leTemperatureC, seaLevelPressurePascal,
           pitotIcePercent, structuralIcePercent, structuralIcePercent2, aoaIcePercent, aoaIcePercent2, inletIcePercent, propIcePercent,
           statIcePercent, statIcePercent2, windowIcePercent, carbIcePercent, airplaneTotalWeightKgs, airplaneMaxGrossWeightKgs,
           airplaneEmptyWeightKgs, airplanePayloadWeightKgs, fuelTotalWeightKgs, fuelFlowKgSec8, magVarDeg, ambientVisibility, trackMagDeg,

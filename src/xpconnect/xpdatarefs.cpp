@@ -1,5 +1,5 @@
 /*****************************************************************************
-* Copyright 2015-2023 Alexander Barthel alex@littlenavmap.org
+* Copyright 2015-2025 Alexander Barthel alex@littlenavmap.org
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -45,8 +45,12 @@ void XpDataRefs::init()
   simReplay.init(dataRefs, "sim/operation/prefs/replay_mode");
 
   // SimConnectUserAircraft
-  windSpeedKts.init(dataRefs, "sim/cockpit2/gauges/indicators/wind_speed_kts");
-  windDirectionDegMag.init(dataRefs, "sim/cockpit2/gauges/indicators/wind_heading_deg_mag");
+  windSpeed.init(dataRefs, xp12 ? "sim/weather/aircraft/wind_now_speed_msc" /* m/s */ :
+  "sim/cockpit2/gauges/indicators/wind_speed_kts" /* kts */);
+
+  windDirectionDeg.
+  init(dataRefs, xp12 ? "sim/weather/aircraft/wind_now_direction_degt" /* true */ :
+  "sim/cockpit2/gauges/indicators/wind_heading_deg_mag" /* mag */);
 
   // Temperatures
   // air temperature (SAT) is also called: outside air temperature (OAT) or true air temperature
