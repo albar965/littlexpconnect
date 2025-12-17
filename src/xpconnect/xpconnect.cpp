@@ -98,7 +98,7 @@ bool XpConnect::fillSimConnectData(atools::fs::sc::SimConnectData& data, bool fe
   userAircraft.windowIcePercent = static_cast<quint8>(dataRefs->windowIcePercent.valueFloat() * 100.f);
 
   userAircraft.carbIcePercent = 0.f;
-  FloatVector carbIce = dataRefs->carbIcePercent.valueFloatArr();
+  FloatList carbIce = dataRefs->carbIcePercent.valueFloatArr();
   for(int i = 0; i < carbIce.size() && i < userAircraft.numberOfEngines; i++)
     userAircraft.carbIcePercent = static_cast<quint8>(std::max(carbIce.value(i, 0.f) * 100.f,
                                                                static_cast<float>(userAircraft.carbIcePercent)));
@@ -177,7 +177,7 @@ bool XpConnect::fillSimConnectData(atools::fs::sc::SimConnectData& data, bool fe
   float fuelMassToVolDivider = 6.f;
 
   // Get the engine array
-  IntVector engines = dataRefs->engineType8.valueIntArr();
+  IntList engines = dataRefs->engineType8.valueIntArr();
   userAircraft.engineType = atools::fs::sc::UNSUPPORTED;
   // PISTON = 0, JET = 1, NO_ENGINE = 2, HELO_TURBINE = 3, UNSUPPORTED = 4, TURBOPROP = 5
 
@@ -228,11 +228,11 @@ bool XpConnect::fillSimConnectData(atools::fs::sc::SimConnectData& data, bool fe
     quint32 objId = 1;
 
     // Carrier on first and frigate on second index in arrays
-    FloatVector headings = dataRefs->boatHeadingDeg.valueFloatArr();
-    FloatVector velocity = dataRefs->boatVelocityMsc.valueFloatArr();
-    FloatVector x = dataRefs->boatXMtr.valueFloatArr();
-    FloatVector y = dataRefs->boatYMtr.valueFloatArr();
-    FloatVector z = dataRefs->boatZMtr.valueFloatArr();
+    FloatList headings = dataRefs->boatHeadingDeg.valueFloatArr();
+    FloatList velocity = dataRefs->boatVelocityMsc.valueFloatArr();
+    FloatList x = dataRefs->boatXMtr.valueFloatArr();
+    FloatList y = dataRefs->boatYMtr.valueFloatArr();
+    FloatList z = dataRefs->boatZMtr.valueFloatArr();
 
     // Add aircraft carrier =============================================================
     if(headings.size() > 0 && velocity.size() > 0 && x.size() > 0 && y.size() > 0 && z.size() > 0)

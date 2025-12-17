@@ -51,15 +51,13 @@ VERSION_NUMBER=1.3.0.develop
 
 QT += core
 QT -= gui
-versionAtLeast(QT_VERSION, 6.0.0): QT += core5compat
 
 macx {
 QT += widgets
 }
 
-CONFIG += c++14
 CONFIG += dll
-CONFIG += build_all c++14
+CONFIG += build_all c++17
 CONFIG -= gui debug_and_release debug_and_release_target
 
 TARGET = littlexpconnect
@@ -72,6 +70,7 @@ TARGET_NAME=Little Xpconnect
 
 ATOOLS_INC_PATH=$$(ATOOLS_INC_PATH)
 ATOOLS_LIB_PATH=$$(ATOOLS_LIB_PATH)
+ATOOLS_NO_QT5COMPAT=$$(ATOOLS_NO_QT5COMPAT)
 GIT_PATH=$$(ATOOLS_GIT_PATH)
 XPSDK_BASE=$$(XPSDK_BASE)
 DEPLOY_BASE=$$(DEPLOY_BASE)
@@ -126,6 +125,11 @@ macx {
   LIBS += -F$${XPSDK_BASE}/Libraries/Mac -framework XPLM -framework XPWidgets
 }
 
+DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x050F00
+
+# https://doc.qt.io/qt-6.5/qtcore5-index.html - needed for QTextCodec
+!isEqual(ATOOLS_NO_QT5COMPAT, "true"): QT += core5compat
+
 isEmpty(GIT_PATH) {
   GIT_REVISION=UNKNOWN
   GIT_REVISION_FULL=UNKNOWN
@@ -179,6 +183,7 @@ message(GIT_PATH: $$GIT_PATH)
 message(XPSDK_BASE: $$XPSDK_BASE)
 message(ATOOLS_INC_PATH: $$ATOOLS_INC_PATH)
 message(ATOOLS_LIB_PATH: $$ATOOLS_LIB_PATH)
+message(ATOOLS_NO_QT5COMPAT: $$ATOOLS_NO_QT5COMPAT)
 message(DEPLOY_BASE: $$DEPLOY_BASE)
 message(DEFINES: $$DEFINES)
 message(INCLUDEPATH: $$INCLUDEPATH)
@@ -268,7 +273,7 @@ macx {
   deploy.commands += rm -fv $${DEPLOY_DIR}/QtCore.framework/QtCore_debug.prl &&
   deploy.commands += rm -Rfv $${DEPLOY_DIR}/QtCore.framework/Versions/*/Headers &&
   deploy.commands += rm -fv $${DEPLOY_DIR}/QtCore.framework/Versions/*/QtCore_debug &&
-  versionAtLeast(QT_VERSION, 6.0.0) {
+  !isEqual(ATOOLS_NO_QT5COMPAT, "true") {
     deploy.commands += cp -vfa $$[QT_INSTALL_LIBS]/QtCore5Compat.framework  $${DEPLOY_DIR} &&
     deploy.commands += rm -Rfv $${DEPLOY_DIR}/QtCore5Compat.framework/Headers &&
     deploy.commands += rm -fv $${DEPLOY_DIR}/QtCore5Compat.framework/QtCore_debug &&

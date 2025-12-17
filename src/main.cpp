@@ -18,7 +18,6 @@
 // Include definitions for import and export for shared library
 #include "littlexpconnect_global.h"
 
-#include "geo/calculations.h"
 #include "gui/consoleapplication.h"
 #include "xpconnect/xplog.h"
 #include "logging/logginghandler.h"
@@ -81,7 +80,6 @@ PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc)
   qDebug() << Q_FUNC_INFO << "Little Xpconnect";
 
   // Register atools types so we can stream them
-  atools::geo::registerMetaTypes();
   atools::fs::sc::registerMetaTypes();
 
   // Create application object which is needed for the server thread event queue
@@ -134,11 +132,7 @@ PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc)
 /* Called when simulator terminates */
 PLUGIN_API void XPluginStop(void)
 {
-
-  qDebug() << Q_FUNC_INFO << "Little Xpconnect" << "Logging shutdown";
-  LoggingHandler::shutdown();
-
-  qDebug() << Q_FUNC_INFO << "Little Xpconnect" << "Logging shutdown done";
+  qDebug() << Q_FUNC_INFO << "Little Xpconnect";
 }
 
 /* Enable plugin - can be called more than once during a simulator session */

@@ -20,7 +20,7 @@
 
 #include "dataref.h"
 
-#include <QVector>
+#include <QList>
 
 namespace xpc {
 
@@ -98,14 +98,14 @@ public:
           tcasFlightId, tcasModeSId;
 
   /* Multiplayer aircraft from old (not TCAS) interface. Does not include user aircraft. Contains only valid refs. */
-  QVector<MultiplayerDataRefs> multiplayerDataRefs;
+  QList<MultiplayerDataRefs> multiplayerDataRefs;
 
 private:
   // Contains all datarefs for simple initialization
-  DataRefPtrVector dataRefs;
+  DataRefPtrList dataRefs;
 
   // Contains multiplayer aircraft datarefs
-  DataRefPtrVector aiDataRefs;
+  DataRefPtrList aiDataRefs;
 };
 
 } // namespace xpc

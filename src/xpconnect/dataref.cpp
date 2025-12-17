@@ -52,7 +52,7 @@ void worldToLocal(double& x, double& y, double& z, const atools::geo::Pos& pos)
 }
 
 // ==========================================================================================
-DataRef::DataRef(DataRefPtrVector& refs, const QString& dataRefName)
+DataRef::DataRef(DataRefPtrList& refs, const QString& dataRefName)
 {
   init(refs, dataRefName);
 }
@@ -66,7 +66,7 @@ DataRef::DataRef()
 {
 }
 
-void DataRef::init(DataRefPtrVector& refs, const QString& dataRefName)
+void DataRef::init(DataRefPtrList& refs, const QString& dataRefName)
 {
   name = dataRefName;
 
@@ -97,12 +97,12 @@ bool DataRef::find(bool warnNotFound)
   return isValid();
 }
 
-QVector<int> DataRef::valueIntArr() const
+QList<int> DataRef::valueIntArr() const
 {
 #ifdef DATAREF_VALIDATION
   checkType(xplmType_IntArray);
 #endif
-  IntVector retval;
+  IntList retval;
 
   if(dataRef != nullptr)
   {
@@ -117,13 +117,13 @@ QVector<int> DataRef::valueIntArr() const
   return retval;
 }
 
-QVector<float> DataRef::valueFloatArr() const
+QList<float> DataRef::valueFloatArr() const
 {
 #ifdef DATAREF_VALIDATION
   checkType(xplmType_FloatArray);
 #endif
 
-  FloatVector retval;
+  FloatList retval;
   if(dataRef != nullptr)
   {
     // Get size first by calling with null pointer
@@ -228,7 +228,7 @@ int DataRef::valueByteArr(int index) const
   return retval;
 }
 
-void DataRef::valueIntArr(IntVector& array) const
+void DataRef::valueIntArr(IntList& array) const
 {
 #ifdef DATAREF_VALIDATION
   checkType(xplmType_IntArray);
@@ -244,7 +244,7 @@ void DataRef::valueIntArr(IntVector& array) const
     array.clear();
 }
 
-void DataRef::valueFloatArr(FloatVector& array) const
+void DataRef::valueFloatArr(FloatList& array) const
 {
 #ifdef DATAREF_VALIDATION
   checkType(xplmType_FloatArray);

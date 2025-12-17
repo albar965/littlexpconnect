@@ -33,9 +33,9 @@ class Pos;
 
 class DataRef;
 
-typedef QVector<float> FloatVector;
-typedef QVector<int> IntVector;
-typedef QVector<DataRef *> DataRefPtrVector;
+typedef QList<float> FloatList;
+typedef QList<int> IntList;
+typedef QList<DataRef *> DataRefPtrList;
 
 /* Get full path to the acf file for the aircraft at the given index. 0 is the user aircraft. */
 QString getAircraftModelFilepath(int index);
@@ -63,11 +63,11 @@ public:
    * @param refs Object adds itself to the list when constructed.
    * @param name Path/name of the dataref like "sim/aircraft/view/acf_tailnum".
    */
-  DataRef(DataRefPtrVector& refs, const QString& dataRefName);
+  DataRef(DataRefPtrList& refs, const QString& dataRefName);
   DataRef(const QString& dataRefName);
   DataRef();
 
-  void init(DataRefPtrVector& refs, const QString& dataRefName);
+  void init(DataRefPtrList& refs, const QString& dataRefName);
   void init(const QString& dataRefName);
 
   void setName(const QString& dataRefName)
@@ -131,11 +131,11 @@ public:
   float valueFloatArrSum() const;
 
   /* Get arrays. The length of the array is checked beforeretrieving the values.*/
-  IntVector valueIntArr() const;
-  FloatVector valueFloatArr() const;
+  IntList valueIntArr() const;
+  FloatList valueFloatArr() const;
   QByteArray valueByteArr() const;
-  void valueIntArr(IntVector& array) const;
-  void valueFloatArr(FloatVector& array) const;
+  void valueIntArr(IntList& array) const;
+  void valueFloatArr(FloatList& array) const;
   void valueByteArr(QByteArray& bytes) const;
 
   /* Get array length */
