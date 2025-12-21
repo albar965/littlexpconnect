@@ -130,7 +130,7 @@ void AircraftFileLoader::loadAircraftFile(atools::fs::sc::SimConnectAircraft& ai
         aircraftFileKeysLoading.insert(aircraftModelKey);
 
         // Threadpool will wait until a free thread is available
-        QtConcurrent::run(threadPool, &AircraftFileLoader::loadKeysRunner, this, aircraftModelFilepath, aircraftKeys);
+        auto result = QtConcurrent::run(threadPool, &AircraftFileLoader::loadKeysRunner, this, aircraftModelFilepath, aircraftKeys);
       }
     }
   }
