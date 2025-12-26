@@ -114,15 +114,9 @@ macx {
 
   QMAKE_RPATHDIR=.
 
-  versionAtLeast(QT_VERSION, 6.0.0) {
-    # Compatibility down to OS X Mojave 10.14 inclusive
-    QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.14
-  } else {
-    # Compatibility down to OS X Sierra 10.12 inclusive
-    QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.12
-  }
-
   LIBS += -F$${XPSDK_BASE}/Libraries/Mac -framework XPLM -framework XPWidgets
+
+  QMAKE_MACOSX_DEPLOYMENT_TARGET = 11.0
 }
 
 DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x050F00
