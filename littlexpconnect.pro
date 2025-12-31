@@ -57,7 +57,7 @@ QT += widgets
 }
 
 CONFIG += dll
-CONFIG += build_all c++17
+CONFIG += build_all c++20
 CONFIG -= gui debug_and_release debug_and_release_target
 
 TARGET = littlexpconnect
