@@ -57,7 +57,7 @@ using atools::settings::Settings;
 
 namespace lxc {
 /* key names for atools::settings */
-static const QLatin1String SETTINGS_OPTIONS_VERBOSE("Options/Verbose");
+static const QLatin1String SETTINGS_OPTIONS_VERBOSE(QStringLiteral("Options/Verbose"));
 }
 
 float flightLoopCallback(float inElapsedSinceLastCall, float inElapsedTimeSinceLastFlightLoop, int inCounter,
@@ -91,28 +91,28 @@ PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc)
   // https://github.com/albar965/littlenavmap/issues/983
   setlocale(LC_NUMERIC, "C");
 #endif
-  QCoreApplication::setApplicationName("Little Xpconnect");
-  QCoreApplication::setOrganizationName("ABarthel");
-  QCoreApplication::setOrganizationDomain("littlenavmap.org");
+  QCoreApplication::setApplicationName(QStringLiteral("Little Xpconnect"));
+  QCoreApplication::setOrganizationName(QStringLiteral("ABarthel"));
+  QCoreApplication::setOrganizationDomain(QStringLiteral("littlenavmap.org"));
 
   QCoreApplication::setApplicationVersion(VERSION_NUMBER_LITTLEXPCONNECT);
 
   // Initialize logging and force logfiles into the system or user temp directory
-  LoggingHandler::initializeForTemp(Settings::getOverloadedPath(":/littlexpconnect/resources/config/logging.cfg"));
+  LoggingHandler::initializeForTemp(Settings::getOverloadedPath(QStringLiteral(":/littlexpconnect/resources/config/logging.cfg")));
   Settings::logMessages();
   LoggingUtil::logSystemInformation();
   LoggingUtil::logStandardPaths();
 
   // Pass plugin information to X-Plane
-  QString info = QString("%1 %2").arg(QCoreApplication::applicationName()).arg(QCoreApplication::applicationVersion());
+  QString info = QStringLiteral("%1 %2").arg(QCoreApplication::applicationName()).arg(QCoreApplication::applicationVersion());
   atools::util::Version version(QCoreApplication::applicationVersion());
 
   // Program version and revision ==========================================
   if(version.isReleaseCandidate() || version.isBeta() || version.isDevelop())
-    info += QString(" (%1)").arg(GIT_REVISION_LITTLEXPCONNECT);
+    info += QStringLiteral(" (%1)").arg(GIT_REVISION_LITTLEXPCONNECT);
 
 #ifndef QT_NO_DEBUG
-  info += " - DEBUG";
+  info += QStringLiteral(" - DEBUG");
 #endif
 
   // Initialize plugin parameters passed in to this function
@@ -122,7 +122,7 @@ PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc)
 
   // Need to create an instance here since it will be accessed from the main server thread
   Settings& settings = Settings::instance();
-  settings.remove("Options/FetchRate"); // Delete obsolete key in any case
+  settings.remove(QStringLiteral("Options/FetchRate")); // Delete obsolete key in any case
   verbose = settings.getAndStoreValue(lxc::SETTINGS_OPTIONS_VERBOSE, false).toBool();
 
   // Always successfull
@@ -153,7 +153,7 @@ PLUGIN_API int XPluginEnable(void)
   // Create menu structure and load values from settings
   menu = new XpMenu();
   menu->restoreState();
-  menu->addMenu("Little Xpconnect");
+  menu->addMenu(QStringLiteral("Little Xpconnect"));
   return 1;
 }
 
@@ -216,13 +216,13 @@ void checkPath()
   QString path = QString(xpPath);
 #endif
 
-  xplog::logXpInfo(QString("Plugin id %1 installed in path \"%2\" (\"%3\"), app path \"%4\"").
+  xplog::logXpInfo(QStringLiteral("Plugin id %1 installed in path \"%2\" (\"%3\"), app path \"%4\"").
                    arg(pluginId).arg(xpPath).arg(path).arg(QCoreApplication::applicationFilePath()));
   bool valid = true;
 
   // Check file extension
   QFileInfo pluginFile(path);
-  valid &= pluginFile.suffix().compare("xpl", Qt::CaseInsensitive) == 0;
+  valid &= pluginFile.suffix().compare(QStringLiteral("xpl"), Qt::CaseInsensitive) == 0;
 
   // Installationp path
   // X-Plane/Resources/plugins/Little Xpconnect/mac.xpl
@@ -230,16 +230,16 @@ void checkPath()
   // X-Plane/Resources/plugins/Little Xpconnect/64/lin.xpl
   QDir pluginDir(pluginFile.absoluteDir());
 #if !defined(Q_OS_MACOS)
-  valid &= pluginDir.dirName() == "64";
+  valid &= pluginDir.dirName() == QStringLiteral("64");
   pluginDir.cdUp(); // Skip "64"
 #endif
   pluginDir.cdUp(); // Skip "Little Xpconnect" or other sub-folder
-  valid &= pluginDir.dirName().compare("plugins", Qt::CaseInsensitive) == 0;
+  valid &= pluginDir.dirName().compare(QStringLiteral("plugins"), Qt::CaseInsensitive) == 0;
   pluginDir.cdUp(); // Skip "plugins"
-  valid &= pluginDir.dirName().compare("Resources", Qt::CaseInsensitive) == 0;
+  valid &= pluginDir.dirName().compare(QStringLiteral("Resources"), Qt::CaseInsensitive) == 0;
 
   if(!valid)
-    xplog::logXpErr(QString("Plugin installed in the wrong path: \"%1\"").arg(pluginFile.absolutePath()));
+    xplog::logXpErr(QStringLiteral("Plugin installed in the wrong path: \"%1\"").arg(pluginFile.absolutePath()));
   else
-    xplog::logXpInfo(QString("Plugin path \"%1\" is ok").arg(pluginFile.absolutePath()));
+    xplog::logXpInfo(QStringLiteral("Plugin path \"%1\" is ok").arg(pluginFile.absolutePath()));
 }

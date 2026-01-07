@@ -133,7 +133,7 @@ void XpMenu::menuHandler(int menuId, int itemIndex)
 
 void XpMenu::addMenu(const QString& menuNameParam)
 {
-  versionName = QString("Version %1").arg(QCoreApplication::applicationVersion()).toLatin1();
+  versionName = QStringLiteral("Version %1").arg(QCoreApplication::applicationVersion()).toLatin1();
   menuName = menuNameParam.toLatin1();
 
   // The index of our menu item in the Plugins menu

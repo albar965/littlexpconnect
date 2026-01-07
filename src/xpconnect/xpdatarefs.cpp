@@ -1,5 +1,5 @@
 /*****************************************************************************
-* Copyright 2015-2025 Alexander Barthel alex@littlenavmap.org
+* Copyright 2015-2026 Alexander Barthel alex@littlenavmap.org
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -187,17 +187,17 @@ void XpDataRefs::init()
   // float[64] degrees true heading orientation.
   tcasPsi.init(dataRefs, "sim/cockpit2/tcas/targets/position/psi");
 
-  // int[64]	boolean	ground/flight logic. Writeable only when override_TCAS is set.
+  // int[64]  boolean ground/flight logic. Writeable only when override_TCAS is set.
   tcasWeightOnWheels.init(dataRefs, "sim/cockpit2/tcas/targets/position/weight_on_wheels");
 
-  // sim/cockpit2/tcas/targets/icao_type	byte[512]	y	string	7 character ICAO code, terminated by 0 byte. C172, B738, etc...
+  // sim/cockpit2/tcas/targets/icao_type  byte[512] y string  7 character ICAO code, terminated by 0 byte. C172, B738, etc...
   // see https://www.icao.int/publications/DOC8643/Pages/Search.aspx
   tcasIcaoType.init(dataRefs, "sim/cockpit2/tcas/targets/icao_type");
 
-  // sim/cockpit2/tcas/targets/flight_id	byte[512]	y	string	7 character Flight ID, terminated by 0 byte. ICAO flightplan item 7.
+  // sim/cockpit2/tcas/targets/flight_id  byte[512] y string  7 character Flight ID, terminated by 0 byte. ICAO flightplan item 7.
   tcasFlightId.init(dataRefs, "sim/cockpit2/tcas/targets/flight_id");
 
-  // sim/cockpit2/tcas/targets/wake/wing_span_m	float[64]	y	meter	wing span of the aircraft creating wake turbulence
+  // sim/cockpit2/tcas/targets/wake/wing_span_m float[64] y meter wing span of the aircraft creating wake turbulence
 
   // ============================================================
   // Old AI/multiplayer interface
