@@ -57,7 +57,7 @@ using atools::settings::Settings;
 
 namespace lxc {
 /* key names for atools::settings */
-static const QLatin1String SETTINGS_OPTIONS_VERBOSE(QStringLiteral("Options/Verbose"));
+static const QLatin1String SETTINGS_OPTIONS_VERBOSE("Options/Verbose");
 }
 
 float flightLoopCallback(float inElapsedSinceLastCall, float inElapsedTimeSinceLastFlightLoop, int inCounter,
