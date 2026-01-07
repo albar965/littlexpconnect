@@ -275,24 +275,6 @@ macx {
     deploy.commands += rm -Rfv $${DEPLOY_DIR}/QtCore5Compat.framework/Versions/*/Headers &&
     deploy.commands += rm -fv $${DEPLOY_DIR}/QtCore5Compat.framework/Versions/*/QtCore_debug &&
   }
-  deploy.commands += cp -vfa $$[QT_INSTALL_LIBS]/QtDBus.framework  $${DEPLOY_DIR} &&
-  deploy.commands += rm -Rfv $${DEPLOY_DIR}/QtDBus.framework/Headers &&
-  deploy.commands += rm -fv $${DEPLOY_DIR}/QtDBus.framework/QtCore_debug &&
-  deploy.commands += rm -fv $${DEPLOY_DIR}/QtDBus.framework/QtCore_debug.prl &&
-  deploy.commands += rm -Rfv $${DEPLOY_DIR}/QtDBus.framework/Versions/*/Headers &&
-  deploy.commands += rm -fv $${DEPLOY_DIR}/QtDBus.framework/Versions/*/QtCore_debug &&
-  deploy.commands += cp -vfa $$[QT_INSTALL_LIBS]/QtWidgets.framework  $${DEPLOY_DIR} &&
-  deploy.commands += rm -Rfv $${DEPLOY_DIR}/QtWidgets.framework/Headers &&
-  deploy.commands += rm -fv $${DEPLOY_DIR}/QtWidgets.framework/QtCore_debug &&
-  deploy.commands += rm -fv $${DEPLOY_DIR}/QtWidgets.framework/QtCore_debug.prl &&
-  deploy.commands += rm -Rfv $${DEPLOY_DIR}/QtWidgets.framework/Versions/*/Headers &&
-  deploy.commands += rm -fv $${DEPLOY_DIR}/QtWidgets.framework/Versions/*/QtCore_debug &&
-  deploy.commands += cp -vfa $$[QT_INSTALL_LIBS]/QtGui.framework  $${DEPLOY_DIR} &&
-  deploy.commands += rm -Rfv $${DEPLOY_DIR}/QtGui.framework/Headers &&
-  deploy.commands += rm -fv $${DEPLOY_DIR}/QtGui.framework/QtGui_debug &&
-  deploy.commands += rm -fv $${DEPLOY_DIR}/QtGui.framework/QtGui_debug.prl &&
-  deploy.commands += rm -Rfv $${DEPLOY_DIR}/QtGui.framework/Versions/*/Headers &&
-  deploy.commands += rm -fv $${DEPLOY_DIR}/QtGui.framework/Versions/*/QtGui_debug
 }
 
 # Windows specific deploy target
