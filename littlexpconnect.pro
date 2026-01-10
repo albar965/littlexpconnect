@@ -63,6 +63,11 @@ CONFIG -= gui debug_and_release debug_and_release_target
 TARGET = littlexpconnect
 TEMPLATE = lib
 
+!versionAtLeast(QT_VERSION, 6.5) {
+    message("Cannot use Qt $${QT_VERSION}. Need at least Qt 6.5 or newer.")
+    error("Need at least Qt 6.5 or newer")
+}
+
 TARGET_NAME=Little Xpconnect
 
 # =======================================================================
@@ -119,7 +124,7 @@ macx {
   QMAKE_MACOSX_DEPLOYMENT_TARGET = 11.0
 }
 
-DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x050F00
+DEFINES += QT_DISABLE_DEPRECATED_UP_TO=0x060500
 
 # https://doc.qt.io/qt-6.5/qtcore5-index.html - needed for QTextCodec
 !isEqual(ATOOLS_NO_QT5COMPAT, "true"): QT += core5compat
