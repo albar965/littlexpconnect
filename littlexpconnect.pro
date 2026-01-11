@@ -266,20 +266,20 @@ macx {
   deploy.commands += cp -vf $${PWD}/README.txt $${DEPLOY_DIR} &&
   deploy.commands += cp -vf $${PWD}/LICENSE.txt $${DEPLOY_DIR} &&
   deploy.commands += cp -vf \"$${PWD}/etc/Prepare Little Xpconnect.command\" $${DEPLOY_DIR} &&
-  deploy.commands += cp -vfa $$[QT_INSTALL_LIBS]/QtCore.framework  $${DEPLOY_DIR} &&
-  deploy.commands += rm -Rfv $${DEPLOY_DIR}/QtCore.framework/Headers &&
-  deploy.commands += rm -fv $${DEPLOY_DIR}/QtCore.framework/QtCore_debug &&
-  deploy.commands += rm -fv $${DEPLOY_DIR}/QtCore.framework/QtCore_debug.prl &&
-  deploy.commands += rm -Rfv $${DEPLOY_DIR}/QtCore.framework/Versions/*/Headers &&
-  deploy.commands += rm -fv $${DEPLOY_DIR}/QtCore.framework/Versions/*/QtCore_debug &&
   !isEqual(ATOOLS_NO_QT5COMPAT, "true") {
-    deploy.commands += cp -vfa $$[QT_INSTALL_LIBS]/QtCore5Compat.framework  $${DEPLOY_DIR} &&
+    deploy.commands += cp -vfa $$[QT_INSTALL_LIBS]/QtCore5Compat.framework $${DEPLOY_DIR} &&
     deploy.commands += rm -Rfv $${DEPLOY_DIR}/QtCore5Compat.framework/Headers &&
     deploy.commands += rm -fv $${DEPLOY_DIR}/QtCore5Compat.framework/QtCore_debug &&
     deploy.commands += rm -fv $${DEPLOY_DIR}/QtCore5Compat.framework/QtCore_debug.prl &&
     deploy.commands += rm -Rfv $${DEPLOY_DIR}/QtCore5Compat.framework/Versions/*/Headers &&
     deploy.commands += rm -fv $${DEPLOY_DIR}/QtCore5Compat.framework/Versions/*/QtCore_debug &&
   }
+  deploy.commands += cp -vfa $$[QT_INSTALL_LIBS]/QtCore.framework  $${DEPLOY_DIR} &&
+  deploy.commands += rm -Rfv $${DEPLOY_DIR}/QtCore.framework/Headers &&
+  deploy.commands += rm -fv $${DEPLOY_DIR}/QtCore.framework/QtCore_debug &&
+  deploy.commands += rm -fv $${DEPLOY_DIR}/QtCore.framework/QtCore_debug.prl &&
+  deploy.commands += rm -Rfv $${DEPLOY_DIR}/QtCore.framework/Versions/*/Headers &&
+  deploy.commands += rm -fv $${DEPLOY_DIR}/QtCore.framework/Versions/*/QtCore_debug
 }
 
 # Windows specific deploy target
