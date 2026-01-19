@@ -41,7 +41,8 @@ XpConnect::XpConnect(bool verboseLogging)
 {
   qDebug() << Q_FUNC_INFO;
   fileLoader = new AircraftFileLoader(verbose);
-  fileLoader->setAircraftKeys({"acf/_name", "acf/_ICAO", "acf/_tailnum", "acf/_is_helicopter", "_engn/0/_type"});
+  fileLoader->setAircraftKeys({QStringLiteral("acf/_name"), QStringLiteral("acf/_ICAO"), QStringLiteral("acf/_tailnum"),
+                               QStringLiteral("acf/_is_helicopter"), QStringLiteral("_engn/0/_type")});
 }
 
 XpConnect::~XpConnect()

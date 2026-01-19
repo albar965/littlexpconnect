@@ -183,15 +183,15 @@ void AircraftFileLoader::readValuesFromAircraftFile(AircraftEntryType& keyValueP
 void AircraftFileLoader::fillAircraftValues(atools::fs::sc::SimConnectAircraft& aircraft, const AircraftEntryType *keyValuePairs)
 {
   if(aircraft.airplaneTitle.isEmpty())
-    aircraft.airplaneTitle = keyValuePairs->value("acf/_name");
+    aircraft.airplaneTitle = keyValuePairs->value(QStringLiteral("acf/_name"));
 
-  QString model = keyValuePairs->value("acf/_ICAO");
+  QString model = keyValuePairs->value(QStringLiteral("acf/_ICAO"));
   if(aircraft.airplaneModel.isEmpty())
     aircraft.airplaneModel = model; // C172
   else if(!model.isEmpty() && aircraft.airplaneModel != model && verbose)
     qWarning() << Q_FUNC_INFO << "Aircraft type mismatch" << aircraft.airplaneModel << model;
 
-  QString reg = keyValuePairs->value("acf/_tailnum");
+  QString reg = keyValuePairs->value(QStringLiteral("acf/_tailnum"));
   if(aircraft.airplaneReg.isEmpty())
     aircraft.airplaneReg = reg; // Registration N172SP
   else if(!reg.isEmpty() && aircraft.airplaneReg != reg && verbose)
@@ -200,12 +200,12 @@ void AircraftFileLoader::fillAircraftValues(atools::fs::sc::SimConnectAircraft& 
   // Engine type - use first engine only ======================
   // PISTON = 0, JET = 1, NO_ENGINE = 2, HELO_TURBINE = 3, UNSUPPORTED = 4, TURBOPROP = 5
   aircraft.engineType = atools::fs::sc::UNSUPPORTED;
-  const QString engineType = keyValuePairs->value("_engn/0/_type");
-  if(engineType.startsWith("JET") || engineType.startsWith("ROC"))
+  const QString engineType = keyValuePairs->value(QStringLiteral("_engn/0/_type"));
+  if(engineType.startsWith(QStringLiteral("JET")) || engineType.startsWith(QStringLiteral("ROC")))
     aircraft.engineType = atools::fs::sc::JET;
-  else if(engineType.startsWith("RCP"))
+  else if(engineType.startsWith(QStringLiteral("RCP")))
     aircraft.engineType = atools::fs::sc::PISTON;
-  else if(engineType.startsWith("TRB"))
+  else if(engineType.startsWith(QStringLiteral("TRB")))
     aircraft.engineType = atools::fs::sc::TURBOPROP;
 
   // Extra Aircraft/B-52G NASA/B-52G NASA.acf:P _engn/0/_type JET
@@ -219,7 +219,7 @@ void AircraftFileLoader::fillAircraftValues(atools::fs::sc::SimConnectAircraft& 
 
   // Category ======================
   // AIRPLANE, HELICOPTER, BOAT, GROUNDVEHICLE, CONTROLTOWER, SIMPLEOBJECT, VIEWER, UNKNOWN
-  if(keyValuePairs->value("acf/_is_helicopter").toInt() == 1)
+  if(keyValuePairs->value(QStringLiteral("acf/_is_helicopter")).toInt() == 1)
     aircraft.category = atools::fs::sc::HELICOPTER;
   else
     aircraft.category = atools::fs::sc::AIRPLANE;

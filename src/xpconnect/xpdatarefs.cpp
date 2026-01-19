@@ -31,7 +31,7 @@ void XpDataRefs::init()
   // This is the internal build number - it is a unique integer that always increases and is unique with each beta.
   // For example, 10.51b5 might be 105105.
   // There is no guarantee that the build number (last 2 digits) is in sync with the official beta number.
-  xplmVersion.init("sim/version/xplane_internal_version");
+  xplmVersion.init(QStringLiteral("sim/version/xplane_internal_version"));
   xplmVersion.find();
 
   // Dataref 'sim/weather/temperature_ambient_c' has been replaced. Please use the new name.
@@ -41,161 +41,161 @@ void XpDataRefs::init()
   // New "sim/weather/aircraft"
   bool xp12 = isXplane12();
 
-  simPaused.init(dataRefs, "sim/time/paused");
-  simReplay.init(dataRefs, "sim/operation/prefs/replay_mode");
+  simPaused.init(dataRefs, QStringLiteral("sim/time/paused"));
+  simReplay.init(dataRefs, QStringLiteral("sim/operation/prefs/replay_mode"));
 
   // SimConnectUserAircraft
-  windSpeed.init(dataRefs, xp12 ? "sim/weather/aircraft/wind_now_speed_msc" /* m/s */ :
-  "sim/cockpit2/gauges/indicators/wind_speed_kts" /* kts */);
+  windSpeed.init(dataRefs, xp12 ? QStringLiteral("sim/weather/aircraft/wind_now_speed_msc") /* m/s */ :
+  QStringLiteral("sim/cockpit2/gauges/indicators/wind_speed_kts") /* kts */);
 
   windDirectionDeg.
-  init(dataRefs, xp12 ? "sim/weather/aircraft/wind_now_direction_degt" /* true */ :
-  "sim/cockpit2/gauges/indicators/wind_heading_deg_mag" /* mag */);
+  init(dataRefs, xp12 ? QStringLiteral("sim/weather/aircraft/wind_now_direction_degt") /* true */ :
+  QStringLiteral("sim/cockpit2/gauges/indicators/wind_heading_deg_mag") /* mag */);
 
   // Temperatures
   // air temperature (SAT) is also called: outside air temperature (OAT) or true air temperature
   // Lower than TAT
-  ambientTemperatureC.init(dataRefs, xp12 ? "sim/weather/aircraft/temperature_ambient_deg_c" : "sim/weather/temperature_ambient_c");
+  ambientTemperatureC.init(dataRefs, xp12 ? QStringLiteral("sim/weather/aircraft/temperature_ambient_deg_c") : QStringLiteral("sim/weather/temperature_ambient_c"));
 
   // Total air temperature (TAT) is also called: indicated air temperature (IAT) or ram air temperature (RAT)
   // higher than SAT
-  leTemperatureC.init(dataRefs, xp12 ? "sim/weather/aircraft/temperature_leadingedge_deg_c" : "sim/weather/temperature_le_c");
+  leTemperatureC.init(dataRefs, xp12 ? QStringLiteral("sim/weather/aircraft/temperature_leadingedge_deg_c") : QStringLiteral("sim/weather/temperature_le_c"));
 
-  seaLevelPressurePascal.init(dataRefs, "sim/physics/earth_pressure_p");
+  seaLevelPressurePascal.init(dataRefs, QStringLiteral("sim/physics/earth_pressure_p"));
 
   // Ice
-  pitotIcePercent.init(dataRefs, "sim/flightmodel/failures/pitot_ice");
-  structuralIcePercent.init(dataRefs, "sim/flightmodel/failures/frm_ice");
-  structuralIcePercent2.init(dataRefs, "sim/flightmodel/failures/frm_ice2");
-  aoaIcePercent.init(dataRefs, "sim/flightmodel/failures/aoa_ice");
-  aoaIcePercent2.init(dataRefs, "sim/flightmodel/failures/aoa_ice2");
-  inletIcePercent.init(dataRefs, "sim/flightmodel/failures/inlet_ice");
-  propIcePercent.init(dataRefs, "sim/flightmodel/failures/prop_ice");
-  statIcePercent.init(dataRefs, "sim/flightmodel/failures/stat_ice");
-  statIcePercent2.init(dataRefs, "sim/flightmodel/failures/stat_ice2");
-  windowIcePercent.init(dataRefs, "sim/flightmodel/failures/window_ice");
-  carbIcePercent.init(dataRefs, "sim/flightmodel/engine/ENGN_crbice");
+  pitotIcePercent.init(dataRefs, QStringLiteral("sim/flightmodel/failures/pitot_ice"));
+  structuralIcePercent.init(dataRefs, QStringLiteral("sim/flightmodel/failures/frm_ice"));
+  structuralIcePercent2.init(dataRefs, QStringLiteral("sim/flightmodel/failures/frm_ice2"));
+  aoaIcePercent.init(dataRefs, QStringLiteral("sim/flightmodel/failures/aoa_ice"));
+  aoaIcePercent2.init(dataRefs, QStringLiteral("sim/flightmodel/failures/aoa_ice2"));
+  inletIcePercent.init(dataRefs, QStringLiteral("sim/flightmodel/failures/inlet_ice"));
+  propIcePercent.init(dataRefs, QStringLiteral("sim/flightmodel/failures/prop_ice"));
+  statIcePercent.init(dataRefs, QStringLiteral("sim/flightmodel/failures/stat_ice"));
+  statIcePercent2.init(dataRefs, QStringLiteral("sim/flightmodel/failures/stat_ice2"));
+  windowIcePercent.init(dataRefs, QStringLiteral("sim/flightmodel/failures/window_ice"));
+  carbIcePercent.init(dataRefs, QStringLiteral("sim/flightmodel/engine/ENGN_crbice"));
 
   // Weight
-  airplaneTotalWeightKgs.init(dataRefs, "sim/flightmodel/weight/m_total");
-  airplaneMaxGrossWeightKgs.init(dataRefs, "sim/aircraft/weight/acf_m_max");
-  airplaneEmptyWeightKgs.init(dataRefs, "sim/aircraft/weight/acf_m_empty");
-  airplanePayloadWeightKgs.init(dataRefs, "sim/flightmodel/weight/m_fixed");
+  airplaneTotalWeightKgs.init(dataRefs, QStringLiteral("sim/flightmodel/weight/m_total"));
+  airplaneMaxGrossWeightKgs.init(dataRefs, QStringLiteral("sim/aircraft/weight/acf_m_max"));
+  airplaneEmptyWeightKgs.init(dataRefs, QStringLiteral("sim/aircraft/weight/acf_m_empty"));
+  airplanePayloadWeightKgs.init(dataRefs, QStringLiteral("sim/flightmodel/weight/m_fixed"));
 
   // fuelTotalQuantityGallons.init(dataRefs, ""); value calculated
-  fuelTotalWeightKgs.init(dataRefs, "sim/flightmodel/weight/m_fuel_total");
+  fuelTotalWeightKgs.init(dataRefs, QStringLiteral("sim/flightmodel/weight/m_fuel_total"));
 
   // Value for up to eight engines
-  fuelFlowKgSec8.init(dataRefs, "sim/cockpit2/engine/indicators/fuel_flow_kg_sec");
+  fuelFlowKgSec8.init(dataRefs, QStringLiteral("sim/cockpit2/engine/indicators/fuel_flow_kg_sec"));
   // fuelFlowGPH.init(dataRefs, ""); value calculated
 
-  magVarDeg.init(dataRefs, "sim/flightmodel/position/magnetic_variation");
-  ambientVisibility.init(dataRefs, xp12 ? "sim/weather/aircraft/visibility_reported_sm" : "sim/weather/visibility_reported_m");
-  trackMagDeg.init(dataRefs, "sim/cockpit2/gauges/indicators/ground_track_mag_pilot");
+  magVarDeg.init(dataRefs, QStringLiteral("sim/flightmodel/position/magnetic_variation"));
+  ambientVisibility.init(dataRefs, xp12 ? QStringLiteral("sim/weather/aircraft/visibility_reported_sm") : QStringLiteral("sim/weather/visibility_reported_m"));
+  trackMagDeg.init(dataRefs, QStringLiteral("sim/cockpit2/gauges/indicators/ground_track_mag_pilot"));
   // trackTrueDeg.init(dataRefs, ""); value calculated
 
   // Date and time
-  localDateDays.init(dataRefs, "sim/time/local_date_days"); // 1. Jan = 0
-  localTimeSec.init(dataRefs, "sim/time/local_time_sec");
-  zuluTimeSec.init(dataRefs, "sim/time/zulu_time_sec");
+  localDateDays.init(dataRefs, QStringLiteral("sim/time/local_date_days")); // 1. Jan = 0
+  localTimeSec.init(dataRefs, QStringLiteral("sim/time/local_time_sec"));
+  zuluTimeSec.init(dataRefs, QStringLiteral("sim/time/zulu_time_sec"));
 
   // SimConnectAircraft
-  airplaneTailnum.init(dataRefs, "sim/aircraft/view/acf_tailnum");
-  airplaneTitle.init(dataRefs, "sim/aircraft/view/acf_descrip");
-  airplaneType.init(dataRefs, "sim/aircraft/view/acf_ICAO");
-  transponderCode.init(dataRefs, "sim/cockpit/radios/transponder_code");
+  airplaneTailnum.init(dataRefs, QStringLiteral("sim/aircraft/view/acf_tailnum"));
+  airplaneTitle.init(dataRefs, QStringLiteral("sim/aircraft/view/acf_descrip"));
+  airplaneType.init(dataRefs, QStringLiteral("sim/aircraft/view/acf_ICAO"));
+  transponderCode.init(dataRefs, QStringLiteral("sim/cockpit/radios/transponder_code"));
 
   // Position
-  latPositionDeg.init(dataRefs, "sim/flightmodel/position/latitude");
-  lonPositionDeg.init(dataRefs, "sim/flightmodel/position/longitude");
+  latPositionDeg.init(dataRefs, QStringLiteral("sim/flightmodel/position/latitude"));
+  lonPositionDeg.init(dataRefs, QStringLiteral("sim/flightmodel/position/longitude"));
 
   // Speeds
-  indicatedSpeedKts.init(dataRefs, "sim/flightmodel/position/indicated_airspeed");
-  trueSpeedMs.init(dataRefs, "sim/flightmodel/position/true_airspeed");
-  groundSpeedMs.init(dataRefs, "sim/flightmodel/position/groundspeed");
-  machSpeed.init(dataRefs, "sim/flightmodel/misc/machno");
-  verticalSpeedFpm.init(dataRefs, "sim/flightmodel/position/vh_ind_fpm");
+  indicatedSpeedKts.init(dataRefs, QStringLiteral("sim/flightmodel/position/indicated_airspeed"));
+  trueSpeedMs.init(dataRefs, QStringLiteral("sim/flightmodel/position/true_airspeed"));
+  groundSpeedMs.init(dataRefs, QStringLiteral("sim/flightmodel/position/groundspeed"));
+  machSpeed.init(dataRefs, QStringLiteral("sim/flightmodel/misc/machno"));
+  verticalSpeedFpm.init(dataRefs, QStringLiteral("sim/flightmodel/position/vh_ind_fpm"));
 
   // Altitude
-  indicatedAltitudeFt.init(dataRefs, "sim/flightmodel/misc/h_ind");
-  actualAltitudeMeter.init(dataRefs, "sim/flightmodel/position/elevation");
-  aglAltitudeMeter.init(dataRefs, "sim/flightmodel/position/y_agl");
+  indicatedAltitudeFt.init(dataRefs, QStringLiteral("sim/flightmodel/misc/h_ind"));
+  actualAltitudeMeter.init(dataRefs, QStringLiteral("sim/flightmodel/position/elevation"));
+  aglAltitudeMeter.init(dataRefs, QStringLiteral("sim/flightmodel/position/y_agl"));
 
-  autopilotAltitudeFt.init(dataRefs, "sim/cockpit/autopilot/altitude");
+  autopilotAltitudeFt.init(dataRefs, QStringLiteral("sim/cockpit/autopilot/altitude"));
 
   // Heading
-  headingTrueDeg.init(dataRefs, "sim/flightmodel/position/true_psi");
-  headingMagDeg.init(dataRefs, "sim/flightmodel/position/mag_psi");
+  headingTrueDeg.init(dataRefs, QStringLiteral("sim/flightmodel/position/true_psi"));
+  headingMagDeg.init(dataRefs, QStringLiteral("sim/flightmodel/position/mag_psi"));
 
   // Misc
-  numberOfEngines.init(dataRefs, "sim/aircraft/engine/acf_num_engines");
-  onGround.init(dataRefs, "sim/flightmodel/failures/onground_any");
-  rainPercentage.init(dataRefs, xp12 ? "sim/weather/aircraft/precipitation_on_aircraft_ratio" : "sim/weather/rain_percent");
+  numberOfEngines.init(dataRefs, QStringLiteral("sim/aircraft/engine/acf_num_engines"));
+  onGround.init(dataRefs, QStringLiteral("sim/flightmodel/failures/onground_any"));
+  rainPercentage.init(dataRefs, xp12 ? QStringLiteral("sim/weather/aircraft/precipitation_on_aircraft_ratio") : QStringLiteral("sim/weather/rain_percent"));
 
   // Size in local coordinates (meter)
   // points to the right side of the aircraft
-  aircraftSizeX.init(dataRefs, "sim/aircraft/view/acf_size_x");
+  aircraftSizeX.init(dataRefs, QStringLiteral("sim/aircraft/view/acf_size_x"));
   // points to the tail of the aircraft
-  aircraftSizeZ.init(dataRefs, "sim/aircraft/view/acf_size_z");
+  aircraftSizeZ.init(dataRefs, QStringLiteral("sim/aircraft/view/acf_size_z"));
 
   // The two X-Plane ships - Index 0=carrier,1=frigate ===========================
   // Heading of the boat in degrees from true north
-  boatHeadingDeg.init(dataRefs, "sim/world/boat/heading_deg");
+  boatHeadingDeg.init(dataRefs, QStringLiteral("sim/world/boat/heading_deg"));
 
   // Deck height of the frigate (in coordinates of the OBJ model)
-  boatFrigateDeckHeightMtr.init(dataRefs, "sim/world/boat/frigate_deck_height_mtr");
+  boatFrigateDeckHeightMtr.init(dataRefs, QStringLiteral("sim/world/boat/frigate_deck_height_mtr"));
 
   // Deck height of the carrier (in coordinates of the OBJ model)
-  boatCarrierDeckHeightMtr.init(dataRefs, "sim/world/boat/carrier_deck_height_mtr");
+  boatCarrierDeckHeightMtr.init(dataRefs, QStringLiteral("sim/world/boat/carrier_deck_height_mtr"));
 
   // Velocity of the boat in meters per second in its current direction (value is always null in 11.41 and 11.50)
-  boatVelocityMsc.init(dataRefs, "sim/world/boat/velocity_msc");
+  boatVelocityMsc.init(dataRefs, QStringLiteral("sim/world/boat/velocity_msc"));
 
   // Position of the boat in meters in the local coordinate OpenGL coordinate system.
-  boatXMtr.init(dataRefs, "sim/world/boat/x_mtr");
-  boatYMtr.init(dataRefs, "sim/world/boat/y_mtr");
-  boatZMtr.init(dataRefs, "sim/world/boat/z_mtr");
+  boatXMtr.init(dataRefs, QStringLiteral("sim/world/boat/x_mtr"));
+  boatYMtr.init(dataRefs, QStringLiteral("sim/world/boat/y_mtr"));
+  boatZMtr.init(dataRefs, QStringLiteral("sim/world/boat/z_mtr"));
 
-  engineType8.init(dataRefs, "sim/aircraft/prop/acf_en_type");
+  engineType8.init(dataRefs, QStringLiteral("sim/aircraft/prop/acf_en_type"));
 
   // ============================================================
   // New TCAS AI/multiplayer interface
   // int integer If TCAS is not overriden by plgugin, returns the number of planes in X-Plane, which might be under plugin control or X-Plane control. If TCAS is overriden, returns how many targets are actually being written to with the override. These are not necessarily consecutive entries in the TCAS arrays.
-  tcasNumAcf.init(dataRefs, "sim/cockpit2/tcas/indicators/tcas_num_acf");
+  tcasNumAcf.init(dataRefs, QStringLiteral("sim/cockpit2/tcas/indicators/tcas_num_acf"));
 
-  // int[64] integer 24bit (0-16777215 or 0 - 0xFFFFFF) unique ID of the airframe. This is also known as the ADS-B "hexcode".
-  tcasModeSId.init(dataRefs, "sim/cockpit2/tcas/targets/modeS_id");
+  // int[64] integer 24bit (0-16777215 or 0 - 0xFFFFFF) unique ID of the airframe. This is also known as the ADS-B QStringLiteral("hexcode").
+  tcasModeSId.init(dataRefs, QStringLiteral("sim/cockpit2/tcas/targets/modeS_id"));
 
   // int[64] integer Mode C transponder code 0000 to 7777. This is not really an integer, this is an octal number.
-  tcasModeCcode.init(dataRefs, "sim/cockpit2/tcas/targets/modeC_code");
+  tcasModeCcode.init(dataRefs, QStringLiteral("sim/cockpit2/tcas/targets/modeC_code"));
 
   // float[64] degrees global coordinate, degrees.
-  tcasLat.init(dataRefs, "sim/cockpit2/tcas/targets/position/lat");
+  tcasLat.init(dataRefs, QStringLiteral("sim/cockpit2/tcas/targets/position/lat"));
 
   // float[64] degrees global coordinate, degrees.
-  tcasLon.init(dataRefs, "sim/cockpit2/tcas/targets/position/lon");
+  tcasLon.init(dataRefs, QStringLiteral("sim/cockpit2/tcas/targets/position/lon"));
 
   // float[64] meter global coordinate, meter.
-  tcasEle.init(dataRefs, "sim/cockpit2/tcas/targets/position/ele");
+  tcasEle.init(dataRefs, QStringLiteral("sim/cockpit2/tcas/targets/position/ele"));
 
   // float[64] feet/min absolute vertical speed feet per minute.
-  tcasVerticalSpeed.init(dataRefs, "sim/cockpit2/tcas/targets/position/vertical_speed");
+  tcasVerticalSpeed.init(dataRefs, QStringLiteral("sim/cockpit2/tcas/targets/position/vertical_speed"));
 
   // float[64] meter/s total true speed, norm of local velocity vector. That means it includes vertical speed
-  tcasVMsc.init(dataRefs, "sim/cockpit2/tcas/targets/position/V_msc");
+  tcasVMsc.init(dataRefs, QStringLiteral("sim/cockpit2/tcas/targets/position/V_msc"));
 
   // float[64] degrees true heading orientation.
-  tcasPsi.init(dataRefs, "sim/cockpit2/tcas/targets/position/psi");
+  tcasPsi.init(dataRefs, QStringLiteral("sim/cockpit2/tcas/targets/position/psi"));
 
   // int[64]  boolean ground/flight logic. Writeable only when override_TCAS is set.
-  tcasWeightOnWheels.init(dataRefs, "sim/cockpit2/tcas/targets/position/weight_on_wheels");
+  tcasWeightOnWheels.init(dataRefs, QStringLiteral("sim/cockpit2/tcas/targets/position/weight_on_wheels"));
 
   // sim/cockpit2/tcas/targets/icao_type  byte[512] y string  7 character ICAO code, terminated by 0 byte. C172, B738, etc...
   // see https://www.icao.int/publications/DOC8643/Pages/Search.aspx
-  tcasIcaoType.init(dataRefs, "sim/cockpit2/tcas/targets/icao_type");
+  tcasIcaoType.init(dataRefs, QStringLiteral("sim/cockpit2/tcas/targets/icao_type"));
 
   // sim/cockpit2/tcas/targets/flight_id  byte[512] y string  7 character Flight ID, terminated by 0 byte. ICAO flightplan item 7.
-  tcasFlightId.init(dataRefs, "sim/cockpit2/tcas/targets/flight_id");
+  tcasFlightId.init(dataRefs, QStringLiteral("sim/cockpit2/tcas/targets/flight_id"));
 
   // sim/cockpit2/tcas/targets/wake/wing_span_m float[64] y meter wing span of the aircraft creating wake turbulence
 
@@ -226,7 +226,7 @@ void XpDataRefs::init()
   }
 
   // Find remaining datarefs of user aircraft
-  for(DataRef *ref : dataRefs)
+  for(DataRef *ref : std::as_const(dataRefs))
   {
     if(!ref->isValid())
       ref->find();
