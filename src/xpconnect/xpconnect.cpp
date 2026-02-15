@@ -117,11 +117,20 @@ bool XpConnect::fillSimConnectData(atools::fs::sc::SimConnectData& data, bool fe
                                         atools::geo::nmToMeter(dataRefs->ambientVisibility.valueFloat()) :
                                         dataRefs->ambientVisibility.valueFloat();
 
+  // Pass raw time values via properties and let the client resolve to a precise value
+  userAircraft.properties.addProp(atools::util::Prop(atools::fs::sc::PROP_LOCAL_DATE_DAYS, dataRefs->localDateDays.valueInt()));
+  userAircraft.properties.addProp(atools::util::Prop(atools::fs::sc::PROP_LOCAL_TIME_SEC, dataRefs->localTimeSec.valueFloat()));
+  userAircraft.properties.addProp(atools::util::Prop(atools::fs::sc::PROP_ZULU_TIME_SEC, dataRefs->zuluTimeSec.valueFloat()));
+
+  // Build time and date in client using timezone database since X-Plane's datarefs are lacking information for a reliable calculation
+  userAircraft.localDateTime = userAircraft.zuluDateTime = QDateTime();
+
   // Build local time and use timezone offset from simulator
-  // X-Plane does not allow to set the year
-  userAircraft.localDateTime = atools::correctDateLocal(dataRefs->localDateDays.valueInt() + 1, dataRefs->localTimeSec.valueFloat(),
-                                                        dataRefs->zuluTimeSec.valueFloat(), userAircraft.position.getLonX());
-  userAircraft.zuluDateTime = userAircraft.localDateTime.toUTC();
+  // X-Plane does not allow to set the year. Unreliable - atools::timezone::TimeZone::correctDateLocal()
+  // is used in the client for a more accurate representation.
+  atools::correctDateLocal(userAircraft.localDateTime, userAircraft.zuluDateTime,
+                           dataRefs->localDateDays.valueInt() + 1, dataRefs->localTimeSec.valueFloat(),
+                           dataRefs->zuluTimeSec.valueFloat(), userAircraft.position.getLonX());
 
   // SimConnectAircraft
   userAircraft.airplaneTitle = dataRefs->airplaneTitle.valueString();
