@@ -104,7 +104,7 @@ PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc)
   LoggingUtil::logStandardPaths();
 
   // Pass plugin information to X-Plane
-  QString info = QStringLiteral("%1 %2").arg(QCoreApplication::applicationName()).arg(QCoreApplication::applicationVersion());
+  QString info = QStringLiteral("%1 %2").arg(QCoreApplication::applicationName(), QCoreApplication::applicationVersion());
   atools::util::Version version(QCoreApplication::applicationVersion());
 
   // Program version and revision ==========================================
@@ -217,7 +217,7 @@ void checkPath()
 #endif
 
   xplog::logXpInfo(QStringLiteral("Plugin id %1 installed in path \"%2\" (\"%3\"), app path \"%4\"").
-                   arg(pluginId).arg(xpPath).arg(path).arg(QCoreApplication::applicationFilePath()));
+                   arg(pluginId).arg(xpPath, path, QCoreApplication::applicationFilePath()));
   bool valid = true;
 
   // Check file extension
