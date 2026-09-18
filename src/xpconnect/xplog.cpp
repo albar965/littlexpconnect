@@ -28,15 +28,15 @@ extern "C" {
 namespace xplog {
 void logXpInfo(QString message)
 {
-  message = "[" % QDateTime::currentDateTime().toString(Qt::ISODateWithMs) % " INFO] " %
-            QCoreApplication::applicationName() % ": " % message % "\n";
+  message = '[' % QDateTime::currentDateTime().toString(Qt::ISODateWithMs) % QStringLiteral(" INFO] ") %
+            QCoreApplication::applicationName() % QStringLiteral(": ") % message % '\n';
   XPLMDebugString(message.toUtf8().constData());
 }
 
 void logXpErr(QString message)
 {
-  message = "[" % QDateTime::currentDateTime().toString(Qt::ISODateWithMs) % " ERROR] " %
-            QCoreApplication::applicationName() % " error: " % message % "\n";
+  message = '[' % QDateTime::currentDateTime().toString(Qt::ISODateWithMs) % QStringLiteral(" ERROR] ") %
+            QCoreApplication::applicationName() % QStringLiteral(" error: ") % message % '\n';
   XPLMDebugString(message.toUtf8().constData());
 }
 
