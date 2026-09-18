@@ -317,7 +317,11 @@ win32 {
   deploy.commands += copy $$p($${OUT_PWD}/littlexpconnect.dll) $$p($$DEPLOY_BASE/$$TARGET_NAME/64/win.xpl) &&
   deploy.commands += xcopy $$p($${PWD}/CHANGELOG.txt) $$p($$DEPLOY_BASE/$$TARGET_NAME) &&
   deploy.commands += xcopy $$p($${PWD}/README.txt) $$p($$DEPLOY_BASE/$$TARGET_NAME) &&
-  deploy.commands += xcopy $$p($${PWD}/LICENSE.txt) $$p($$DEPLOY_BASE/$$TARGET_NAME)
+  deploy.commands += xcopy $$p($${PWD}/LICENSE.txt) $$p($$DEPLOY_BASE/$$TARGET_NAME) &&
+  deploy.commands += xcopy /F $$p($$[QT_INSTALL_BINS]/libgcc*.dll) $$p($$DEPLOY_BASE/$$TARGET_NAME/64) &&
+  deploy.commands += xcopy /F $$p($$[QT_INSTALL_BINS]/libstdc*.dll) $$p($$DEPLOY_BASE/$$TARGET_NAME/64) &&
+  deploy.commands += xcopy /F $$p($$[QT_INSTALL_BINS]/libwinpthread*.dll) $$p($$DEPLOY_BASE/$$TARGET_NAME/64) &&
+  deploy.commands += xcopy /F $$p($$[QT_INSTALL_BINS]/Qt6Core.dll) $$p($$DEPLOY_BASE/$$TARGET_NAME/64)
 }
 
 # =====================================================================
