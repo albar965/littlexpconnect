@@ -52,9 +52,7 @@ VERSION_NUMBER=1.4.1.beta
 QT += core
 QT -= gui
 
-macx {
-QT += widgets
-}
+macx { QT += widgets }
 
 CONFIG += dll
 CONFIG += build_all c++20
@@ -64,8 +62,8 @@ TARGET = littlexpconnect
 TEMPLATE = lib
 
 !versionAtLeast(QT_VERSION, 6.5) {
-    message("Cannot use Qt $${QT_VERSION}. Need at least Qt 6.5 or newer.")
-    error("Need at least Qt 6.5 or newer")
+  message("Cannot use Qt $${QT_VERSION}. Need at least Qt 6.5 or newer.")
+  error("Need at least Qt 6.5 or newer")
 }
 
 TARGET_NAME=Little Xpconnect
@@ -102,17 +100,19 @@ isEmpty(ATOOLS_LIB_PATH) : ATOOLS_LIB_PATH=$$PWD/../build-atools-$$CONF_TYPE
 unix:!macx {
   isEmpty(GIT_PATH) : GIT_PATH=git
 
-LIBS += -lz
+  LIBS += -lz
   QMAKE_LFLAGS += -static-libstdc++
 
   # Use relative path to current .so directory to search for shared libraries
   QMAKE_RPATHDIR=.
+  DEFINES += APL=0 IBM=0 LIN=1
 }
 
 win32 {
   DEFINES += _USE_MATH_DEFINES
 
   LIBS += -L$${XPSDK_BASE}\Libraries\Win -lXPLM_64 -lXPWidgets_64
+  DEFINES += APL=0 IBM=1 LIN=0
 }
 
 macx {
@@ -121,6 +121,7 @@ macx {
   QMAKE_RPATHDIR=.
 
   LIBS += -F$${XPSDK_BASE}/Libraries/Mac -framework XPLM -framework XPWidgets
+  DEFINES += APL=1 IBM=0 LIN=0
 
   QMAKE_MACOSX_DEPLOYMENT_TARGET = 11.0
 }
@@ -151,7 +152,7 @@ DEFINES += VERSION_NUMBER_LITTLEXPCONNECT='\\"$$VERSION_NUMBER\\"'
 DEFINES += GIT_REVISION_LITTLEXPCONNECT='\\"$$GIT_REVISION\\"'
 DEFINES += QT_NO_CAST_FROM_BYTEARRAY
 DEFINES += QT_NO_CAST_TO_ASCII
-DEFINES += XPLM302=1 XPLM301=1 XPLM300=1 XPLM210=1 XPLM200=1 APL=0 IBM=0 LIN=1
+DEFINES += XPLM400=1 XPLM303=1 XPLM301=1 XPLM300=1 XPLM210=1 XPLM200=1
 
 # Compiling the DLL but not using it
 DEFINES += LITTLEXPCONNECT_LIBRARY
