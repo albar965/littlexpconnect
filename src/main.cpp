@@ -62,7 +62,6 @@ static const QLatin1String SETTINGS_OPTIONS_VERBOSE("Options/Verbose");
 
 float flightLoopCallback(float inElapsedSinceLastCall, float inElapsedTimeSinceLastFlightLoop, int inCounter,
                          void *inRefcon);
-void checkPath();
 
 /* Application object for event queue in server thread */
 static atools::gui::ConsoleApplication *app = nullptr;
@@ -147,9 +146,6 @@ PLUGIN_API int XPluginEnable(void)
   // Register callback into method - first call in five seconds
   XPLMRegisterFlightLoopCallback(flightLoopCallback, 5.f, nullptr);
 
-  // Check installation path and print a warning to Log.txt if invalid
-  checkPath();
-
   // Create menu structure and load values from settings
   menu = new XpMenu();
   menu->restoreState();
@@ -195,51 +191,4 @@ float flightLoopCallback(float inElapsedSinceLastCall, float inElapsedTimeSinceL
 
   // Return float seconds until next call
   return static_cast<float>(menu->getFetchRateMs()) / 1000.f;
-}
-
-void checkPath()
-{
-  // Get own id (int) and plugin path of DLL/.so
-  XPLMPluginID pluginId = XPLMGetMyID();
-
-  // Get path for xpl file - returns a colon separated path on macOS
-  char xpPath[1024];
-  memset(xpPath, '\0', 1024);
-  XPLMGetPluginInfo(pluginId, nullptr, xpPath, nullptr, nullptr);
-
-#if defined(Q_OS_MACOS)
-  // Convert the stone-age macOS path notation from X-Plane - replace colons and add volumes to get access to disk
-  // From "BigSur:Users:USER:Programme:X-Plane 11:Resources:plugins:Little Xpconnect:mac.xpl" to
-  // "/Volumes/BigSur/Users/USER/Programme/X-Plane 11/Resources/plugins/Little Xpconnect/mac.xpl"
-  QString path = "/Volumes/" + QString(xpPath).replace(':', '/');
-#else
-  QString path = QString(xpPath);
-#endif
-
-  xplog::logXpInfo(QStringLiteral("Plugin id %1 installed in path \"%2\" (\"%3\"), app path \"%4\"").
-                   arg(pluginId).arg(xpPath, path, QCoreApplication::applicationFilePath()));
-  bool valid = true;
-
-  // Check file extension
-  QFileInfo pluginFile(path);
-  valid &= pluginFile.suffix().compare(QStringLiteral("xpl"), Qt::CaseInsensitive) == 0;
-
-  // Installationp path
-  // X-Plane/Resources/plugins/Little Xpconnect/mac.xpl
-  // X-Plane/Resources/plugins/Little Xpconnect/64/win.xpl
-  // X-Plane/Resources/plugins/Little Xpconnect/64/lin.xpl
-  QDir pluginDir(pluginFile.absoluteDir());
-#if !defined(Q_OS_MACOS)
-  valid &= pluginDir.dirName() == QStringLiteral("64");
-  pluginDir.cdUp(); // Skip "64"
-#endif
-  pluginDir.cdUp(); // Skip "Little Xpconnect" or other sub-folder
-  valid &= pluginDir.dirName().compare(QStringLiteral("plugins"), Qt::CaseInsensitive) == 0;
-  pluginDir.cdUp(); // Skip "plugins"
-  valid &= pluginDir.dirName().compare(QStringLiteral("Resources"), Qt::CaseInsensitive) == 0;
-
-  if(!valid)
-    xplog::logXpErr(QStringLiteral("Plugin installed in the wrong path: \"%1\"").arg(pluginFile.absolutePath()));
-  else
-    xplog::logXpInfo(QStringLiteral("Plugin path \"%1\" is ok").arg(pluginFile.absolutePath()));
 }
