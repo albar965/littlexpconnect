@@ -140,9 +140,9 @@ isEmpty(GIT_PATH) {
 }
 
 # Link all static in Windows to avoid DLL conflicts with other plugins
-win32 {
-  QMAKE_LFLAGS=-static -static-libstdc++ -static-libgcc
-}
+# win32 {
+#   QMAKE_LFLAGS=-static -static-libstdc++ -static-libgcc
+# }
 
 LIBS += -lz -L$$ATOOLS_LIB_PATH -latools
 PRE_TARGETDEPS += $$ATOOLS_LIB_PATH/libatools.a
