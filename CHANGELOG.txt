@@ -4,6 +4,41 @@ This text is partially Markdown, hence sometimes strange formatting.
 
 ===============================================================================
 
+# Version 1.4.1.beta
+
+* Needs the DLLs below which might result in conflicts
+  libgcc_s_seh-1.dll
+  libstdc++-6.dll
+  libwinpthread-1.dll
+  Qt6Core.dll
+* Optimizations after check
+* Removed warnings
+* Fixed wrong time zone and UTC time
+  albar965/littlenavmap#1125
+* Fixed deprecated time functions from Qt 6.10
+* Optimizations
+  Added more QStringLiteral for literals where needed for performance
+* Added missing macOS Qt frameworks
+* Fixes for build on macOS
+* More Qt 6 porting
+  Disabled all deprecated before qt 6.5 Added version check for Qt version
+* Fix for compilation error
+* Changed build for minimum Xpconnect
+  Removed unused frameworks
+* Optimisations
+  Partly added QString with QStringLiteral Removed 32-bit build scripts Updated copyright year
+* Updated to c++20 to allow compilation with Qt 6.10
+* Fixes for build on macOS and cleared warnings. Minmum OS is now 11. Now building Intel and Arm
+  architectures.
+* Fixed warning about QtConcurrent
+* Adapted to Qt 6
+* 1.3.0.develop
+* Merge branch 'release/1.2'
+* Version 1.1.0.develop
+* Updated readme
+
+===============================================================================
+
 # Version 1.2.2
 
 * Adapted to new X-Plane 12 datarefs to fix wind display on map.
