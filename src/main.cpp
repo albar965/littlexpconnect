@@ -124,6 +124,8 @@ PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc)
   settings.remove(QStringLiteral("Options/FetchRate")); // Delete obsolete key in any case
   verbose = settings.getAndStoreValue(lxc::SETTINGS_OPTIONS_VERBOSE, false).toBool();
 
+  xplog::logXpInfo(QStringLiteral("Started %1 %2").arg(QCoreApplication::applicationName(), QCoreApplication::applicationVersion()));
+
   // Always successfull
   return 1;
 }
