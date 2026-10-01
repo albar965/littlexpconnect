@@ -6,11 +6,6 @@ This text is partially Markdown, hence sometimes strange formatting.
 
 # Version 1.4.1.beta
 
-* Little Xpconnect needs the following DLLs now on Windows which has a small potential to cause
-  conflicts with other plugins using the same libraries.
-  `libgcc_s_seh-1.dll`, `libstdc++-6.dll`, `libwinpthread-1.dll` and `Qt6Core.dll`.
-  This will be fixed in a future release by going back to a static build. Revert to an older
-  Little Xpconnect version from Little Navmap 3.0.18 if you run into issues.
 * Fixed wrong time zone and UTC time. albar965/littlenavmap#1125
 * Several optimizations.
 * Ported to Qt 6. Currently using 6.5 but all up to 6.11 should compile as well.
