@@ -55,11 +55,15 @@ void XpDataRefs::init()
   // Temperatures
   // air temperature (SAT) is also called: outside air temperature (OAT) or true air temperature
   // Lower than TAT
-  ambientTemperatureC.init(dataRefs, xp12 ? QStringLiteral("sim/weather/aircraft/temperature_ambient_deg_c") : QStringLiteral("sim/weather/temperature_ambient_c"));
+  ambientTemperatureC.init(dataRefs,
+                           xp12 ? QStringLiteral("sim/weather/aircraft/temperature_ambient_deg_c") :
+                           QStringLiteral("sim/weather/temperature_ambient_c"));
 
   // Total air temperature (TAT) is also called: indicated air temperature (IAT) or ram air temperature (RAT)
   // higher than SAT
-  leTemperatureC.init(dataRefs, xp12 ? QStringLiteral("sim/weather/aircraft/temperature_leadingedge_deg_c") : QStringLiteral("sim/weather/temperature_le_c"));
+  leTemperatureC.init(dataRefs,
+                      xp12 ? QStringLiteral("sim/weather/aircraft/temperature_leadingedge_deg_c") :
+                      QStringLiteral("sim/weather/temperature_le_c"));
 
   seaLevelPressurePascal.init(dataRefs, QStringLiteral("sim/physics/earth_pressure_p"));
 
@@ -76,6 +80,24 @@ void XpDataRefs::init()
   windowIcePercent.init(dataRefs, QStringLiteral("sim/flightmodel/failures/window_ice"));
   carbIcePercent.init(dataRefs, QStringLiteral("sim/flightmodel/engine/ENGN_crbice"));
 
+  // Weather
+  // sim/weather/use_real_weather_bool Whether a real weather file is in use. Deprecated.
+  // sim/weather/download_real_weather Whether the sim downloads real weather itself.  Deprecated.
+  // sim/weather/has_real_weather_bool Whether a real weather file has been located. Deprecated.
+
+  if(xp12)
+  {
+    // How the weather is changing. 0 = Rapidly Improving, 1 = Improving, 2 = Gradually Improving, 3 = Static,
+    // 4 = Gradually Deteriorating, 5 = Deteriorating, 6 = Rapidly Deteriorating, 7 = Using Real Weather
+    weatherRegionChangeMode.init(dataRefs, QStringLiteral("sim/weather/region/change_mode"));
+
+    // What time-source to use for downloading real-world weather. 0 == real-time (i.e. matches real-world right now), 1 == simulator time
+    weatherRegionTimeSource.init(dataRefs, QStringLiteral("sim/weather/region/rwx_time_source"));
+
+    // What system is currently controlling the weather. 0 = Preset, 1 = Real Weather, 2 = Controlpad, 3 = Plugin.
+    weatherRegionWeatherSource.init(dataRefs, QStringLiteral("sim/weather/region/weather_source"));
+  }
+
   // Weight
   airplaneTotalWeightKgs.init(dataRefs, QStringLiteral("sim/flightmodel/weight/m_total"));
   airplaneMaxGrossWeightKgs.init(dataRefs, QStringLiteral("sim/aircraft/weight/acf_m_max"));
@@ -90,7 +112,9 @@ void XpDataRefs::init()
   // fuelFlowGPH.init(dataRefs, ""); value calculated
 
   magVarDeg.init(dataRefs, QStringLiteral("sim/flightmodel/position/magnetic_variation"));
-  ambientVisibility.init(dataRefs, xp12 ? QStringLiteral("sim/weather/aircraft/visibility_reported_sm") : QStringLiteral("sim/weather/visibility_reported_m"));
+  ambientVisibility.init(dataRefs,
+                         xp12 ? QStringLiteral("sim/weather/aircraft/visibility_reported_sm") :
+                         QStringLiteral("sim/weather/visibility_reported_m"));
   trackMagDeg.init(dataRefs, QStringLiteral("sim/cockpit2/gauges/indicators/ground_track_mag_pilot"));
   // trackTrueDeg.init(dataRefs, ""); value calculated
 
@@ -130,7 +154,9 @@ void XpDataRefs::init()
   // Misc
   numberOfEngines.init(dataRefs, QStringLiteral("sim/aircraft/engine/acf_num_engines"));
   onGround.init(dataRefs, QStringLiteral("sim/flightmodel/failures/onground_any"));
-  rainPercentage.init(dataRefs, xp12 ? QStringLiteral("sim/weather/aircraft/precipitation_on_aircraft_ratio") : QStringLiteral("sim/weather/rain_percent"));
+  rainPercentage.init(dataRefs,
+                      xp12 ? QStringLiteral("sim/weather/aircraft/precipitation_on_aircraft_ratio") :
+                      QStringLiteral("sim/weather/rain_percent"));
 
   // Size in local coordinates (meter)
   // points to the right side of the aircraft

@@ -91,7 +91,7 @@ public:
           lonPositionDeg, indicatedSpeedKts, trueSpeedMs, groundSpeedMs, machSpeed, verticalSpeedFpm, indicatedAltitudeFt,
           actualAltitudeMeter, aglAltitudeMeter, autopilotAltitudeFt, headingTrueDeg, headingMagDeg, numberOfEngines, onGround,
           rainPercentage, aircraftSizeX, aircraftSizeZ, boatHeadingDeg, boatFrigateDeckHeightMtr, boatCarrierDeckHeightMtr, boatVelocityMsc,
-          boatXMtr, boatYMtr, boatZMtr, engineType8;
+          boatXMtr, boatYMtr, boatZMtr, engineType8, weatherRegionChangeMode, weatherRegionTimeSource, weatherRegionWeatherSource;
 
   /* TCAS interface datarefs - all arrays of 64 elements */
   DataRef tcasNumAcf, tcasModeCcode, tcasLat, tcasLon, tcasEle, tcasVerticalSpeed, tcasVMsc, tcasPsi, tcasWeightOnWheels, tcasIcaoType,

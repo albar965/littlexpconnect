@@ -104,6 +104,23 @@ bool XpConnect::fillSimConnectData(atools::fs::sc::SimConnectData& data, bool fe
     userAircraft.carbIcePercent = static_cast<quint8>(std::max(carbIce.value(i, 0.f) * 100.f,
                                                                static_cast<float>(userAircraft.carbIcePercent)));
 
+  // Weather
+  if(xp12)
+  {
+    // How the weather is changing. 0 = Rapidly Improving, 1 = Improving, 2 = Gradually Improving, 3 = Static,
+    // 4 = Gradually Deteriorating, 5 = Deteriorating, 6 = Rapidly Deteriorating, 7 = Using Real Weather
+    userAircraft.properties.addProp(atools::util::Prop(atools::fs::sc::PROP_WEATHER_CHANGE_MODE,
+                                                       dataRefs->weatherRegionChangeMode.valueInt()));
+
+    // What time-source to use for downloading real-world weather. 0 == real-time (i.e. matches real-world right now), 1 == simulator time
+    userAircraft.properties.addProp(atools::util::Prop(atools::fs::sc::PROP_WEATHER_TIME_SRC,
+                                                       dataRefs->weatherRegionTimeSource.valueInt()));
+
+    // What system is currently controlling the weather. 0 = Preset, 1 = Real Weather, 2 = Controlpad, 3 = Plugin.
+    userAircraft.properties.addProp(atools::util::Prop(atools::fs::sc::PROP_WEATHER_SRC,
+                                                       dataRefs->weatherRegionWeatherSource.valueInt()));
+  }
+
   // Weight
   userAircraft.airplaneTotalWeightLbs = kgToLbs(dataRefs->airplaneTotalWeightKgs.valueFloat());
   userAircraft.airplaneMaxGrossWeightLbs = kgToLbs(dataRefs->airplaneMaxGrossWeightKgs.valueFloat());
