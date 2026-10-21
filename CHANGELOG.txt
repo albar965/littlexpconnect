@@ -4,6 +4,14 @@ This text is partially Markdown, hence sometimes strange formatting.
 
 ===============================================================================
 
+# Version 1.4.3.beta
+
+* Added X-Plane real weather datarefs to detect historical weather.
+* Little Navmap will now show a warning if using a Little Xpconnect version older than
+  version 1.4.3.beta.
+
+===============================================================================
+
 # Version 1.4.1.beta
 
 * Fixed wrong time zone and UTC time. albar965/littlenavmap#1125
