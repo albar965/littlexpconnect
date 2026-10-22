@@ -135,8 +135,17 @@ bool XpConnect::fillSimConnectData(atools::fs::sc::SimConnectData& data, bool fe
                                         dataRefs->ambientVisibility.valueFloat();
 
   // Pass raw time values via properties and let the client resolve to a precise value
+  // Date in days since January 1st at the user's location
   userAircraft.properties.addProp(atools::util::Prop(atools::fs::sc::PROP_LOCAL_DATE_DAYS, dataRefs->localDateDays.valueInt()));
+
+  // Local time (seconds since midnight) at the user's location
   userAircraft.properties.addProp(atools::util::Prop(atools::fs::sc::PROP_LOCAL_TIME_SEC, dataRefs->localTimeSec.valueFloat()));
+
+  if(xp12 && dataRefs->zuluDateDays.isValid())
+    // Date in days since January 1st in the zulu timezone . Since v12.4.1
+    userAircraft.properties.addProp(atools::util::Prop(atools::fs::sc::PROP_ZULU_DATE_DAYS, dataRefs->zuluDateDays.valueInt()));
+
+  // Zulu time (seconds since midnight)
   userAircraft.properties.addProp(atools::util::Prop(atools::fs::sc::PROP_ZULU_TIME_SEC, dataRefs->zuluTimeSec.valueFloat()));
 
   // Build time and date in client using timezone database since X-Plane's datarefs are lacking information for a reliable calculation

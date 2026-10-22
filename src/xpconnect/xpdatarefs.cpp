@@ -121,6 +121,8 @@ void XpDataRefs::init()
   // Date and time
   localDateDays.init(dataRefs, QStringLiteral("sim/time/local_date_days")); // 1. Jan = 0
   localTimeSec.init(dataRefs, QStringLiteral("sim/time/local_time_sec"));
+
+  zuluDateDays.init(dataRefs, QStringLiteral("sim/time/zulu_date_days")); // 1. Jan = 0 v12.4.1+
   zuluTimeSec.init(dataRefs, QStringLiteral("sim/time/zulu_time_sec"));
 
   // SimConnectAircraft

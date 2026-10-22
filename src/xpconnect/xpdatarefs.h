@@ -87,8 +87,8 @@ public:
           pitotIcePercent, structuralIcePercent, structuralIcePercent2, aoaIcePercent, aoaIcePercent2, inletIcePercent, propIcePercent,
           statIcePercent, statIcePercent2, windowIcePercent, carbIcePercent, airplaneTotalWeightKgs, airplaneMaxGrossWeightKgs,
           airplaneEmptyWeightKgs, airplanePayloadWeightKgs, fuelTotalWeightKgs, fuelFlowKgSec8, magVarDeg, ambientVisibility, trackMagDeg,
-          localDateDays, localTimeSec, zuluTimeSec, airplaneTailnum, airplaneTitle, airplaneType, transponderCode, latPositionDeg,
-          lonPositionDeg, indicatedSpeedKts, trueSpeedMs, groundSpeedMs, machSpeed, verticalSpeedFpm, indicatedAltitudeFt,
+          localDateDays, zuluDateDays, localTimeSec, zuluTimeSec, airplaneTailnum, airplaneTitle, airplaneType, transponderCode,
+          latPositionDeg, lonPositionDeg, indicatedSpeedKts, trueSpeedMs, groundSpeedMs, machSpeed, verticalSpeedFpm, indicatedAltitudeFt,
           actualAltitudeMeter, aglAltitudeMeter, autopilotAltitudeFt, headingTrueDeg, headingMagDeg, numberOfEngines, onGround,
           rainPercentage, aircraftSizeX, aircraftSizeZ, boatHeadingDeg, boatFrigateDeckHeightMtr, boatCarrierDeckHeightMtr, boatVelocityMsc,
           boatXMtr, boatYMtr, boatZMtr, engineType8, weatherRegionChangeMode, weatherRegionTimeSource, weatherRegionWeatherSource;

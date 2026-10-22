@@ -9,6 +9,8 @@ This text is partially Markdown, hence sometimes strange formatting.
 * Added X-Plane real weather datarefs to detect historical weather.
 * Little Navmap will now show a warning if using a Little Xpconnect version older than
   version 1.4.3.beta.
+* Added dataref `sim/time/zulu_date_days` to fix time calculation. Requires X-Plane
+  version 12.4.1 or later.
 
 ===============================================================================
 
